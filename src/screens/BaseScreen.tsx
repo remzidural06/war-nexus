@@ -15,12 +15,14 @@ import { ActionButton } from '../components/ActionButton';
 import { CountdownTimer } from '../components/CountdownTimer';
 import { colors } from '../theme/colors';
 import { UnitImage } from '../components/UnitImage';
-import { formatNumber, formatDuration } from '../utils/formatters';
+import { formatNumber } from '../utils/formatters';
 import { BUILDING_DEFINITIONS } from '../data/buildings';
-import { getUnitsForBuilding, UNIT_MAP } from '../data/units';
-import type { BuildingId, BuildingState, UnitDefinition, ResearchNode, MapTarget, MarchUnit, BattleReport, Birlik, BirlikSlot } from '../state/types';
+import { UNIT_MAP } from '../data/units';
+import type { BuildingId, BuildingState, UnitDefinition, MapTarget, MarchUnit, BattleReport, Birlik, BirlikSlot } from '../state/types';
 import { BattleResultModal } from '../components/BattleResultModal';
 import { DraggableHotspot } from '../components/DraggableHotspot';
+import { OverviewTab } from '../components/panels/OverviewTab';
+import { ResearchTab } from '../components/panels/ResearchTab';
 import { useBaseEditorState } from '../hooks/useBaseEditorState';
 import { styles } from './BaseScreen.styles';
 import {
@@ -78,8 +80,6 @@ export function BaseScreen() {
   const [panelTab, setPanelTab] = useState<PanelTab>('overview');
   const [selectedUnit, setSelectedUnit] = useState<UnitDefinition | null>(null);
   const [trainQty, setTrainQty] = useState(1);
-  const [selectedResearch, setSelectedResearch] = useState<ResearchNode | null>(null);
-  const [researchBranchTab, setResearchBranchTab] = useState<string>('land');
   const [hqCommitted, setHqCommitted] = useState(1);
   const [hqTarget, setHqTarget] = useState<MapTarget | null>(null);
   // Birlik state (birlikler context'ten geliyor)
@@ -131,7 +131,7 @@ export function BaseScreen() {
     setPanelTab('overview');
     setSelectedUnit(null);
     setTrainQty(1);
-    setSelectedResearch(null);
+
     Animated.spring(panelAnim, {
       toValue: 1,
       useNativeDriver: true,
@@ -380,7 +380,7 @@ export function BaseScreen() {
                   onPress={() => {
                     setPanelTab(tab);
                     setSelectedUnit(null);
-                    setSelectedResearch(null);
+                
                   }}
                 >
                   <Text style={[styles.tabBtnText, panelTab === tab && styles.tabBtnTextActive]}>
@@ -392,161 +392,19 @@ export function BaseScreen() {
           </View>
 
           <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
-            {panelTab === 'overview' &&
-              (() => {
-                const cost = getUpgradeCost(selectedBuilding.id);
-                const time = getUpgradeTime(selectedBuilding.id);
-                const otherUpgrading = buildings.find(b => b.isUpgrading && b.id !== selectedBuilding.id);
-                return (
-                  <View style={styles.overviewContent}>
-                    <View style={styles.costRow}>
-                      {cost.cash > 0 && <CostChip icon="💵" value={formatNumber(cost.cash)} />}
-                      {cost.oil > 0 && <CostChip icon="🛢️" value={formatNumber(cost.oil)} />}
-                      {cost.ore > 0 && <CostChip icon="⛏️" value={formatNumber(cost.ore)} />}
-                      <CostChip icon="⏱️" value={formatDuration(time)} />
-                      <CostChip icon="⚡" value={t('base.unlockPower', { n: String((selectedBuilding.level + 1) * 100) })} />
-                    </View>
-                    {/* Üretim bilgisi (economy binalar) */}
-                  {buildingDef.baseProdPerHour && (
-                    <View style={styles.prodInfoRow}>
-                      <Text style={styles.prodLabel}>
-                        {buildingDef.produceResource === 'cash' ? '💵' : buildingDef.produceResource === 'oil' ? '🛢️' : '⛏️'}
-                        {' '}{t('base.income')}
-                      </Text>
-                      <Text style={styles.prodCurrent}>
-                        {formatNumber(buildingDef.baseProdPerHour * selectedBuilding.level)}{t('base.incomePerHour')}
-                      </Text>
-                      {selectedBuilding.level < buildingDef.maxLevel && (
-                        <Text style={styles.prodNext}>
-                          → {formatNumber(buildingDef.baseProdPerHour * (selectedBuilding.level + 1))}/sa Lv.{selectedBuilding.level + 1}
-                        </Text>
-                      )}
-                    </View>
-                  )}
-                  {otherUpgrading && !selectedBuilding.isUpgrading && (
-                    <View style={styles.blockRow}>
-                      <Text style={styles.blockText}>
-                        🔒 {t('base.blockingMsg', { name: t(`buildings.${otherUpgrading.id}.name`) })}
-                      </Text>
-                    </View>
-                  )}
-                  {selectedBuilding.isUpgrading ? (
-                    <CountdownTimer
-                      seconds={selectedBuilding.upgradeSecondsRemaining}
-                      total={getUpgradeTime(selectedBuilding.id)}
-                      label={t('base.upgrading')}
-                      goldCost={calcGoldCost(selectedBuilding.upgradeSecondsRemaining)}
-                      onSpeedUp={() => speedUpWithGold('building', selectedBuilding.id)}
-                    />
-                  ) : (
-                    <ActionButton
-                      label={
-                        selectedBuilding.level >= buildingDef.maxLevel
-                          ? t('base.maxLevel')
-                          : t('base.upgrade')
-                      }
-                      onPress={() => upgradeBuilding(selectedBuilding.id)}
-                      disabled={!canUpgradeBuilding(selectedBuilding.id)}
-                    />
-                  )}
-                    {/* Sonraki seviyede açılacaklar */}
-                    {selectedBuilding.level < buildingDef.maxLevel && (() => {
-                      const currentLv = selectedBuilding.level;
-                      const currentUnits = getUnitsForBuilding(selectedBuilding.id, currentLv);
-
-                      // Bir sonraki anlamlı kilit seviyesini bul
-                      let milestoneUnits: typeof currentUnits = [];
-                      let milestoneLv = currentLv + 1;
-                      for (let lv = currentLv + 1; lv <= buildingDef.maxLevel; lv++) {
-                        const lvUnits = getUnitsForBuilding(selectedBuilding.id, lv);
-                        const added = lvUnits.filter(u => !currentUnits.find(c => c.id === u.id));
-                        if (added.length > 0) { milestoneUnits = added; milestoneLv = lv; break; }
-                      }
-                      const isNext = milestoneLv === currentLv + 1;
-
-                      const prodIncrease = buildingDef.baseProdPerHour ?? null;
-                      const resourceIcon = buildingDef.produceResource === 'cash' ? '💵' : buildingDef.produceResource === 'oil' ? '🛢️' : '⛏️';
-
-                      return (
-                        <View style={styles.nextLevelBox}>
-                          {/* Üretim / savunma / faiz bonusları — her seviyede */}
-                          {prodIncrease !== null && (
-                            <View style={styles.nextLevelRow}>
-                              <Text style={styles.nextLevelIcon}>{resourceIcon}</Text>
-                              <Text style={styles.nextLevelText}>+{formatNumber(prodIncrease)}/sa üretim artışı</Text>
-                            </View>
-                          )}
-                          {buildingDef.lossReductionPerLevel && (
-                            <View style={styles.nextLevelRow}>
-                              <Text style={styles.nextLevelIcon}>🛡️</Text>
-                              <Text style={styles.nextLevelText}>
-                                Savaş kayıpları %{Math.round(buildingDef.lossReductionPerLevel * 100)} azalır
-                              </Text>
-                            </View>
-                          )}
-                          {buildingDef.interestRatePerLevel && (
-                            <View style={styles.nextLevelRow}>
-                              <Text style={styles.nextLevelIcon}>📈</Text>
-                              <Text style={styles.nextLevelText}>
-                                Faiz geliri artar (her seviye +%{Math.round(buildingDef.interestRatePerLevel * 100 * 3600)}/sa)
-                              </Text>
-                            </View>
-                          )}
-                          {/* Birim kilitleri */}
-                          {milestoneUnits.length > 0 && (
-                            <>
-                              <Text style={[styles.nextLevelTitle, !isNext && styles.nextLevelTitleFar]}>
-                                Lv.{milestoneLv}'de açılacaklar:
-                              </Text>
-                              {milestoneUnits.map(u => (
-                                <View key={u.id} style={styles.nextLevelRow}>
-                                  {u.imageUri
-                                    ? <UnitImage unitId={u.id} uri={u.imageUri} icon={u.icon} style={styles.nextLevelThumb} />
-                                    : <Text style={styles.nextLevelIcon}>{u.icon}</Text>
-                                  }
-                                  <Text style={styles.nextLevelText}>{t(`units.${u.id}.name`) !== `units.${u.id}.name` ? t(`units.${u.id}.name`) : u.label}</Text>
-                                  {isNext
-                                    ? <Text style={styles.nextLevelBadge}>Yeni</Text>
-                                    : <Text style={styles.nextLevelBadgeFar}>Lv.{milestoneLv}</Text>
-                                  }
-                                </View>
-                              ))}
-                            </>
-                          )}
-                          {/* Hiçbir şey yoksa */}
-                          {prodIncrease === null && !buildingDef.lossReductionPerLevel && !buildingDef.interestRatePerLevel && milestoneUnits.length === 0 && (
-                            <View style={styles.nextLevelRow}>
-                              <Text style={styles.nextLevelIcon}>⚡</Text>
-                              <Text style={styles.nextLevelText}>Bina kapasitesi ve eğitim hızı artar</Text>
-                            </View>
-                          )}
-                        </View>
-                      );
-                    })()}
-                    {Object.entries(selectedBuilding.trainedUnits).some(([, c]) => c > 0) && (
-                      <View style={styles.trainedSection}>
-                        <Text style={styles.sectionLabel}>MEVCUT BİRİMLER</Text>
-                        {Object.entries(selectedBuilding.trainedUnits)
-                          .filter(([, c]) => c > 0)
-                          .map(([uid, cnt]) => {
-                            const unitDef = UNIT_MAP[uid];
-                            return (
-                              <View key={uid} style={styles.trainedRow}>
-                                {unitDef?.imageUri ? (
-                                  <UnitImage unitId={uid} uri={unitDef.imageUri} icon={unitDef.icon} style={styles.trainedThumb} />
-                                ) : (
-                                  <Text style={styles.trainedIcon}>{unitDef?.icon ?? '🪖'}</Text>
-                                )}
-                                <Text style={styles.trainedId}>{t(`units.${uid}.name`) !== `units.${uid}.name` ? t(`units.${uid}.name`) : (unitDef?.label ?? uid)}</Text>
-                                <Text style={styles.trainedCount}>×{cnt}</Text>
-                              </View>
-                            );
-                          })}
-                      </View>
-                    )}
-                  </View>
-                );
-              })()}
+            {panelTab === 'overview' && (
+              <OverviewTab
+                selectedBuilding={selectedBuilding}
+                buildingDef={buildingDef}
+                buildings={buildings}
+                getUpgradeCost={getUpgradeCost}
+                getUpgradeTime={getUpgradeTime}
+                canUpgradeBuilding={canUpgradeBuilding}
+                upgradeBuilding={upgradeBuilding}
+                speedUpWithGold={speedUpWithGold}
+                calcGoldCost={calcGoldCost}
+              />
+            )}
 
             {panelTab === 'units' && (
               <View>
@@ -681,98 +539,16 @@ export function BaseScreen() {
               </View>
             )}
 
-            {panelTab === 'research' && (() => {
-              const branchTabs: { key: string; label: string }[] = [
-                { key: 'land',     label: t('common.land') },
-                { key: 'air',      label: t('common.air') },
-                { key: 'naval',    label: t('common.sea') },
-                { key: 'defense',  label: t('common.defense') },
-              ];
-              const filteredResearch = availableResearch.filter(n => n.branch === researchBranchTab);
-              return (
-                <View>
-                  {/* Alt sekmeler */}
-                  <View style={styles.researchBranchRow}>
-                    {branchTabs.map(bt => (
-                      <Pressable
-                        key={bt.key}
-                        onPress={() => { setResearchBranchTab(bt.key); setSelectedResearch(null); }}
-                        style={[
-                          styles.researchBranchBtn,
-                          researchBranchTab === bt.key && styles.researchBranchBtnActive,
-                        ]}
-                      >
-                        <Text style={[
-                          styles.researchBranchLabel,
-                          researchBranchTab === bt.key && styles.researchBranchLabelActive,
-                        ]}>
-                          {bt.label}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </View>
-                  {/* Araştırma timer — devam ediyorsa göster */}
-                  {selectedBuilding.researchSecondsRemaining > 0 && (
-                    <View style={{ marginBottom: 8 }}>
-                      <CountdownTimer
-                        seconds={selectedBuilding.researchSecondsRemaining}
-                        total={selectedBuilding.researchSecondsRemaining + 10}
-                        label={t('base.researchInProgress')}
-                        goldCost={calcGoldCost(selectedBuilding.researchSecondsRemaining)}
-                        onSpeedUp={() => speedUpWithGold('research', selectedBuilding.activeResearchNodeId ?? '')}
-                      />
-                    </View>
-                  )}
-                  {/* Araştırma listesi */}
-                  {filteredResearch.length === 0 ? (
-                    <Text style={styles.emptyText}>
-                      {selectedBuilding.researchSecondsRemaining > 0
-                        ? t('base.noResearchBusy')
-                        : t('base.noResearchEmpty')}
-                    </Text>
-                  ) : (
-                    filteredResearch.map(node => {
-                      const isSel = selectedResearch?.id === node.id;
-                      return (
-                        <Pressable
-                          key={node.id}
-                          onPress={() => setSelectedResearch(isSel ? null : node)}
-                        >
-                          <View style={[styles.researchCard, isSel && styles.researchCardSelected]}>
-                            <Text style={styles.researchName}>{node.label}</Text>{/* research labels stay as-is — no i18n keys for research nodes */}
-                            <Text style={styles.researchDesc}>{node.description}</Text>
-                            <View style={styles.costRow}>
-                              {node.costCash > 0 && (
-                                <CostChip icon="💵" value={formatNumber(node.costCash)} />
-                              )}
-                              {node.costOil > 0 && (
-                                <CostChip icon="🛢️" value={formatNumber(node.costOil)} />
-                              )}
-                              {node.costOre > 0 && (
-                                <CostChip icon="⛏️" value={formatNumber(node.costOre)} />
-                              )}
-                              <CostChip icon="⏱️" value={formatDuration(node.researchSeconds)} />
-                              <CostChip icon="⚡" value={t('base.unlockPower', { n: String(node.tier * 50) })} />
-                            </View>
-                            {isSel && (
-                              <ActionButton
-                                label={t('base.researchBtn')}
-                                onPress={() => {
-                                  startResearch(selectedBuilding.id, node.id);
-                                  setSelectedResearch(null);
-                                }}
-                                disabled={!canStartResearch(selectedBuilding.id, node.id)}
-                                style={{ marginTop: 6 }}
-                              />
-                            )}
-                          </View>
-                        </Pressable>
-                      );
-                    })
-                  )}
-                </View>
-              );
-            })()}
+            {panelTab === 'research' && (
+              <ResearchTab
+                selectedBuilding={selectedBuilding}
+                availableResearch={availableResearch}
+                canStartResearch={canStartResearch}
+                startResearch={startResearch}
+                speedUpWithGold={speedUpWithGold}
+                calcGoldCost={calcGoldCost}
+              />
+            )}
             {panelTab === 'harekat' && (() => {
               const totalUnits = getTotalTrainedUnits();
               // Birlik or manual committed count

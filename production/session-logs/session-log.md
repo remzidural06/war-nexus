@@ -238,3 +238,121 @@
 - eLpatroN (admin), Chapo, malamadre, EnginPaşa, bulldog + 130 bot
 ---
 
+## Archived Session State: 20260403_20260404
+# War Nexus — Session State (2026-04-03 / 04)
+
+## Durum: Altyapı Güçlendirme — Versiyon Kontrolü + Test + Modülerlik
+
+### Özet
+3 kritik altyapı eksikliği giderildi: Git kurulumu, test kapsamı genişletme, ve BaseScreen modülerleştirme. Toplam 9 commit, 14 yeni dosya, 142 test.
+
+---
+
+### A — Versiyon Kontrolü (Git)
+- .gitignore güncellendi: dist/, metro log'ları, tmp_*, *.apk, *.aab, android bundle eklendi
+- İlk commit oluşturuldu: 495 dosya, 69,353 satır (`4631e48`)
+- Branch stratejisi kuruldu: `main` (kararlı) + `develop` (aktif geliştirme)
+- master → main rename edildi
+- Toplam 9 commit (develop branch)
+
+### B — Test Kapsamı (21 → 142 test, 6.8x artış)
+
+| Test Dosyası | Test Sayısı | Kapsam |
+|-------------|------------|--------|
+| economyMath.test.ts | 27 | Maliyet, süre, savaş, kayıp, üretim, kapasite |
+| gameHelpers.test.ts | 25 | Birim kapasitesi, altın maliyeti, kaynak değişimi |
+| combatEngine.test.ts | 22 | Branch-aware savaş, araştırma bonusu |
+| formatters.test.ts | 17 | Sayı/süre/ilerleme formatlama |
+| units.test.ts | 15 | Birim veri bütünlüğü |
+| combatMatrix.test.ts | 13 | Savaş matrisi doğrulama |
+| research.test.ts | 12 | Araştırma ağacı, önkoşullar |
+| buildings.test.ts | 11 | Bina veri bütünlüğü |
+
+### C — BaseScreen Modülerleştirme (1,970 → 468 satır, %76 azalma)
+
+**Çıkarılan modüller:**
+1. `BaseScreen.styles.ts` (607 satır) — Tüm StyleSheet tanımları
+2. `BaseScreen.constants.ts` (95 satır) — Canvas boyutları, hotspot pozisyonları, HQ helpers
+3. `DraggableHotspot.tsx` (139 satır) — Sürüklenebilir bina bileşeni
+4. `useBaseEditorState.ts` (103 satır) — Editör modu state yönetimi
+5. `OverviewTab.tsx` (196 satır) — Bina genel bakış + yükseltme UI
+6. `UnitsTab.tsx` (170 satır) — Birim eğitimi + kapasite yönetimi
+7. `ResearchTab.tsx` (120 satır) — Araştırma ağacı navigasyonu
+8. `HarekatTab.tsx` (136 satır) — Sefer/ordu durumu + birlik listesi
+9. `BirlikModal.tsx` (163 satır) — Birlik oluşturma modalı
+
+**Evrim:**
+```
+1,970 → 1,285 → 1,148 → 1,072 → 848 → 721 → 468 satır
+```
+
+### D — DesertGameContext Kısmi Ayrıştırma
+- `gameHelpers.ts` (95 satır) — Saf hesaplama fonksiyonları context'ten çıkarıldı
+  - getUnitCapForLevel, calcGoldCostForTime, calcUpgradeGoldCostForLevel
+  - calcTrainingCost, calcGoldExchangeAmount, canAffordResources, makeInitialResources
+- DesertGameContext: 2,673 → 2,631 satır (%2 azalma)
+
+### E — TypeScript Hata Düzeltmeleri
+- HarekatTab: BUILDING_BRANCHES `label` → `i18n` destructuring düzeltildi
+- BaseScreen.constants.ts: `window`/`document`/`navigator` → `globalThis` (RN uyumluluğu)
+- BaseScreen.tsx: eksik `getBuildingLabel` fonksiyonu geri eklendi
+
+### F — Doğrulama
+- Jest: 8/8 suite, 142/142 test PASS
+- TypeScript: bizim dosyalarda 0 hata (mevcut 74 hata daha önceden var)
+- Vite web build: başarılı (3.27s)
+- Import zincirleri: 50+ import doğrulandı (tüm yeni dosyalar)
+
+## Commit Geçmişi
+```
+b79690b fix: resolve TypeScript errors in extracted modules
+3c423e7 refactor: extract HarekatTab and BirlikModal from BaseScreen
+3f8bc65 refactor: extract UnitsTab from BaseScreen
+580ba87 refactor: extract OverviewTab and ResearchTab from BaseScreen
+f1bbb5a refactor: extract useBaseEditorState hook from BaseScreen
+3841ef8 refactor: extract DraggableHotspot component and gameHelpers module
+318512e refactor: extract BaseScreen styles and constants to separate files
+9b9e70e test: expand test coverage from 21 to 117 tests
+4631e48 chore: initial commit — War Nexus alpha v0.1.0
+```
+
+## Yeni Dosyalar (14 adet)
+- src/screens/BaseScreen.styles.ts
+- src/screens/BaseScreen.constants.ts
+- src/components/DraggableHotspot.tsx
+- src/components/panels/OverviewTab.tsx
+- src/components/panels/UnitsTab.tsx
+- src/components/panels/ResearchTab.tsx
+- src/components/panels/HarekatTab.tsx
+- src/components/panels/BirlikModal.tsx
+- src/hooks/useBaseEditorState.ts
+- src/state/gameHelpers.ts
+- src/__tests__/combatEngine.test.ts
+- src/__tests__/formatters.test.ts
+- src/__tests__/combatMatrix.test.ts
+- src/__tests__/units.test.ts
+- src/__tests__/buildings.test.ts
+- src/__tests__/research.test.ts
+- src/__tests__/gameHelpers.test.ts
+
+## Değiştirilen Dosyalar
+- .gitignore (dist/, log, tmp, apk, android bundle eklendi)
+- src/screens/BaseScreen.tsx (1,970 → 468 satır)
+- src/state/DesertGameContext.tsx (2,673 → 2,631 satır)
+- src/__tests__/economyMath.test.ts (+6 test eklendi)
+
+## Kalan Teknik Borçlar
+- DesertGameContext hala 2,631 satır (PvP/Combat hook çıkarılabilir)
+- AllianceScreen 2,380 satır (BaseScreen gibi parçalanmalı)
+- App.test.tsx kırık (BaseGameContext → DesertGameContext mock yolu)
+- 74 TypeScript hatası eski dosyalarda (bizim değişikliklerden değil)
+- CI/CD yok
+
+## Sıradaki Öncelikler
+1. AllianceScreen parçalama
+2. DesertGameContext PvP hook çıkarma
+3. App.test.tsx düzeltme
+4. CI/CD kurulumu
+5. develop → main merge
+---
+

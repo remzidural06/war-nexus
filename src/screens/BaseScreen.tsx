@@ -31,6 +31,10 @@ import {
 
 const _baseScene = require('../assets/base/terrain/base_scene.jpg');
 
+function getBuildingLabel(id: string): string {
+  return t(`buildings.${id}.name`);
+}
+
 // ─── Main Screen ──────────────────────────────────────────────
 type PanelTab = 'overview' | 'units' | 'research' | 'harekat' | 'market';
 

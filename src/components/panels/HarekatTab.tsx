@@ -35,12 +35,12 @@ export function HarekatTab({
   const atkPower = getTotalAttackPower(safeCommitted);
 
   const unitBreakdown = BUILDING_BRANCHES
-    .map(({ id, label, icon }) => {
+    .map(({ id, i18n, icon }) => {
       const b = buildings.find(bl => bl.id === id);
       const count = b?.trainedUnits
         ? Object.values(b.trainedUnits).reduce((a, v) => a + v, 0)
         : 0;
-      return { id, label, icon, count };
+      return { id, label: t(i18n), icon, count };
     })
     .filter(u => u.count > 0);
 

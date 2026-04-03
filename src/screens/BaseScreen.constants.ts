@@ -3,7 +3,8 @@ import type { BuildingId } from '../state/types';
 
 // ─── Canvas — ekran genişliğine uniform ölçekle ───────────────
 const _rawW = Dimensions.get('window').width;
-const _clampW = _rawW > 0 ? _rawW : (typeof window !== 'undefined' ? window.innerWidth : 380);
+// eslint-disable-next-line no-restricted-globals
+const _clampW = _rawW > 0 ? _rawW : (typeof globalThis !== 'undefined' && (globalThis as any).innerWidth ? (globalThis as any).innerWidth : 380);
 export const SCREEN_W = Math.min(_clampW, 430);
 export const _S = SCREEN_W / 380;
 export const CANVAS_W = SCREEN_W;
@@ -54,7 +55,7 @@ export const WEB_POSITIONS: HotspotPos[] = [
   { id: 'houses',       x: 152,               y: 501, w: 81,  h: 87,  rotation: 40,  labelX: 0,   labelY: 55 },
 ];
 
-export const IS_WEB = typeof document !== 'undefined' && typeof navigator !== 'undefined' && /Mozilla|Chrome|Safari/.test(navigator.userAgent);
+export const IS_WEB = typeof (globalThis as any).document !== 'undefined' && typeof (globalThis as any).navigator !== 'undefined' && /Mozilla|Chrome|Safari/.test((globalThis as any).navigator.userAgent);
 export const INITIAL_POSITIONS = IS_WEB ? WEB_POSITIONS : ANDROID_POSITIONS;
 
 // ─── HQ Attack helpers ────────────────────────────────────────

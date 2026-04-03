@@ -4,6 +4,8 @@ import {
   calcBattleOutcome,
   deductUnitsProportionally,
   calcAttackPower,
+  calcProductionPerSecond,
+  calcCapacity,
 } from '../utils/economyMath';
 import { BUILDING_DEFINITIONS } from '../data/buildings';
 
@@ -139,5 +141,40 @@ describe('calcAttackPower', () => {
     const p10 = calcAttackPower(10, 100, 10);
     const p50 = calcAttackPower(50, 100, 10);
     expect(p50).toBeGreaterThan(p10);
+  });
+});
+
+// ─── calcProductionPerSecond ────────────────────────────────
+describe('calcProductionPerSecond', () => {
+  test('level 1 returns basePerHour / 3600', () => {
+    expect(calcProductionPerSecond(3600, 1)).toBeCloseTo(1);
+  });
+
+  test('production scales linearly with level', () => {
+    const l1 = calcProductionPerSecond(120, 1);
+    const l5 = calcProductionPerSecond(120, 5);
+    expect(l5).toBeCloseTo(l1 * 5);
+  });
+
+  test('zero base returns zero', () => {
+    expect(calcProductionPerSecond(0, 10)).toBe(0);
+  });
+});
+
+// ─── calcCapacity ───────────────────────────────────────────
+describe('calcCapacity', () => {
+  test('level 1 returns base capacity', () => {
+    expect(calcCapacity(1000, 1)).toBe(1000);
+  });
+
+  test('capacity grows with level', () => {
+    const c1 = calcCapacity(1000, 1);
+    const c5 = calcCapacity(1000, 5);
+    expect(c5).toBeGreaterThan(c1);
+  });
+
+  test('level 3 applies 50% per level formula', () => {
+    // baseCapacity * (1 + (level-1) * 0.5) = 1000 * (1 + 2*0.5) = 2000
+    expect(calcCapacity(1000, 3)).toBe(2000);
   });
 });

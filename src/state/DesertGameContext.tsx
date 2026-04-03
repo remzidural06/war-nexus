@@ -43,23 +43,20 @@ import type {
   PersistedGameState,
   TrainingQueueItem,
 } from './types';
+import {
+  makeInitialResources,
+  getUnitCapForLevel,
+  calcGoldCostForTime,
+  calcUpgradeGoldCostForLevel,
+  calcTrainingCost,
+  calcGoldExchangeAmount,
+  GOLD_TO_RESOURCE_BASE,
+} from './gameHelpers';
 
 // ─── Constants ────────────────────────────────────────────────
 const STORAGE_KEY = 'war-nexus/v1';
 const SAVE_BATCH_DELAY_MS = 4000;
 const SCHEMA_VERSION = 3;
-
-// Attack power is now read directly from UNIT_MAP (see units.ts)
-
-// ─── Initial State ────────────────────────────────────────────
-function makeInitialResources(): Resource[] {
-  return [
-    { key: 'cash', label: 'Nakit', amount: 2000, capacity: 10000000, productionPerHour: 400, icon: '💵' },
-    { key: 'oil', label: 'Petrol', amount: 800, capacity: 10000000, productionPerHour: 200, icon: '🛢️' },
-    { key: 'ore', label: 'Cevher', amount: 500, capacity: 10000000, productionPerHour: 150, icon: '⛏️' },
-    { key: 'gold', label: 'Altın', amount: 150, capacity: 1000000, productionPerHour: 0, icon: '🪙' },
-  ];
-}
 
 function makeInitialBuilding(id: BuildingId): BuildingState {
   return {
@@ -1345,31 +1342,8 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     scheduleSave();
   }, [scheduleSave]);
 
-  /** Seviye bazlı sabit altın maliyeti (bina yükseltme) */
-  /** Süre bazlı altın maliyeti — tüm hızlandırmalar (bina, araştırma, eğitim) */
-  const calcGoldCost = useCallback((remainingSeconds: number): number => {
-    const minutes = remainingSeconds / 60;
-    if (minutes <= 0) return 0;
-    if (minutes <= 5) return 5;
-    if (minutes <= 15) return 10;
-    if (minutes <= 30) return 20;
-    if (minutes <= 60) return 35;
-    if (minutes <= 120) return 60;       // 2 saat
-    if (minutes <= 240) return 100;      // 4 saat
-    if (minutes <= 480) return 180;      // 8 saat
-    if (minutes <= 720) return 280;      // 12 saat
-    if (minutes <= 1440) return 450;     // 24 saat
-    if (minutes <= 2880) return 800;     // 48 saat
-    if (minutes <= 4320) return 1200;    // 72 saat
-    return Math.ceil(1200 + (minutes - 4320) / 5);  // 72sa+ → her 5dk +1 altın
-  }, []);
-
-  /** Bina yükseltme altın maliyeti — kalan süreye göre hesaplanır */
-  const calcUpgradeGoldCost = useCallback((buildingLevel: number): number => {
-    // Kalan süre bilinmiyorsa level bazlı tahmini maliyet
-    const estimatedMinutes = Math.pow(buildingLevel, 2.2) * 3;
-    return calcGoldCost(estimatedMinutes * 60);
-  }, [calcGoldCost]);
+  const calcGoldCost = useCallback(calcGoldCostForTime, []);
+  const calcUpgradeGoldCost = useCallback(calcUpgradeGoldCostForLevel, []);
 
   /** Altınla hızlandır — kademeli oran (5dk=5, 1sa=50, 8sa=350, 24sa=1000) */
   const speedUpWithGold = useCallback((type: 'building' | 'research' | 'training', id: string) => {
@@ -1428,14 +1402,11 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     saveNow();
   }, [calcGoldCost, calcUpgradeGoldCost, canAffordGold, deductGold, saveNow]);
 
-  /** Altın ile kaynak satın al — banka seviyesine göre kur hesaplanır */
-  const GOLD_TO_RESOURCE_BASE: Record<string, number> = { cash: 500, oil: 200, ore: 150 };
   const buyResourceWithGold = useCallback((resourceKey: 'cash' | 'oil' | 'ore', goldAmount: number): boolean => {
     if (goldAmount <= 0) return false;
     if (!canAffordGold(goldAmount)) return false;
     const bankLevel = buildingsRef.current.find(b => b.id === 'bank')?.level ?? 1;
-    const baseRate = GOLD_TO_RESOURCE_BASE[resourceKey] ?? 500;
-    const gained = Math.round(baseRate * goldAmount * (1 + 0.10 * bankLevel));
+    const gained = calcGoldExchangeAmount(resourceKey, goldAmount, bankLevel);
     deductGold(goldAmount);
     setResources(current =>
       current.map(r =>
@@ -1575,17 +1546,9 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     return envanterTotal + birlikTotal;
   }, []);
 
-  /** HQ seviyesine bağlı bina başına maksimum birim kapasitesi (her askeri bina ayrı limit) */
-  const UNIT_CAP_TABLE: Record<number, number> = {
-    1: 50, 2: 50, 3: 100, 4: 100, 5: 200, 6: 200,
-    7: 350, 8: 350, 9: 500, 10: 500, 11: 700, 12: 700,
-    13: 900, 14: 900, 15: 1100, 16: 1100, 17: 1300, 18: 1300,
-    19: 1500, 20: 1500,
-  };
-  /** Bina bazlı kapasite limiti döndürür */
   const getUnitCap = useCallback(() => {
     const hqLevel = buildingsRef.current.find(b => b.id === 'hq')?.level ?? 1;
-    return UNIT_CAP_TABLE[Math.min(hqLevel, 20)] ?? 50;
+    return getUnitCapForLevel(hqLevel);
   }, []);
   /** Belirli bir binadaki toplam birim sayısı (envanter + birlik içindeki) */
   const getBuildingUnitCount = useCallback((buildingId: BuildingId) => {
@@ -1599,15 +1562,10 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     return envanterCount + birlikCount;
   }, []);
 
-  const getTrainingCost = useCallback((unitId: string, qty: number) => {
-    const unit = UNIT_MAP[unitId];
-    if (!unit) return { cash: 0, oil: 0, ore: 0 };
-    return {
-      cash: unit.costCash * qty,
-      oil: unit.costOil * qty,
-      ore: unit.costOre * qty,
-    };
-  }, []);
+  const getTrainingCost = useCallback(
+    (unitId: string, qty: number) => calcTrainingCost(unitId, qty),
+    [],
+  );
 
   const getMaxTrainable = useCallback((buildingId: BuildingId, unitId: string) => {
     const unit = UNIT_MAP[unitId];

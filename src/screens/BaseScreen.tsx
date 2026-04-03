@@ -2,28 +2,23 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import {
   Animated,
   Image,
-  Modal,
   Pressable,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { useDesertGame } from '../state/DesertGameContext';
 import { t } from '../i18n';
-import { ActionButton } from '../components/ActionButton';
-import { CountdownTimer } from '../components/CountdownTimer';
-import { colors } from '../theme/colors';
-import { UnitImage } from '../components/UnitImage';
-import { formatNumber } from '../utils/formatters';
 import { BUILDING_DEFINITIONS } from '../data/buildings';
 import { UNIT_MAP } from '../data/units';
-import type { BuildingId, BuildingState, MapTarget, MarchUnit, BattleReport, Birlik, BirlikSlot } from '../state/types';
+import type { BuildingId, BuildingState, MapTarget, BattleReport, Birlik } from '../state/types';
 import { BattleResultModal } from '../components/BattleResultModal';
 import { DraggableHotspot } from '../components/DraggableHotspot';
 import { OverviewTab } from '../components/panels/OverviewTab';
 import { UnitsTab } from '../components/panels/UnitsTab';
 import { ResearchTab } from '../components/panels/ResearchTab';
+import { HarekatTab } from '../components/panels/HarekatTab';
+import { BirlikModal } from '../components/panels/BirlikModal';
 import { useBaseEditorState } from '../hooks/useBaseEditorState';
 import { styles } from './BaseScreen.styles';
 import {
@@ -82,11 +77,8 @@ export function BaseScreen() {
   const [hqCommitted, setHqCommitted] = useState(1);
   const [hqTarget, setHqTarget] = useState<MapTarget | null>(null);
   // Birlik state (birlikler context'ten geliyor)
-  const [selectedBirlikIds, setSelectedBirlikIds] = useState<Set<string>>(new Set());
   const [showBirlikForm, setShowBirlikForm] = useState(false);
   const [viewReport, setViewReport] = useState<BattleReport | null>(null);
-  const [newBirlikName, setNewBirlikName] = useState('');
-  const [newBirlikSlots, setNewBirlikSlots] = useState<Record<string, number>>({});
   const panelAnim = useRef(new Animated.Value(0)).current;
 
   // ── Editör state (hook) ──────────────────────────────────────
@@ -422,151 +414,17 @@ export function BaseScreen() {
                 calcGoldCost={calcGoldCost}
               />
             )}
-            {panelTab === 'harekat' && (() => {
-              const totalUnits = getTotalTrainedUnits();
-              // Birlik or manual committed count
-              const selectedBirlikler = birlikler.filter(b => selectedBirlikIds.has(b.id));
-              const birlikTotal = selectedBirlikler.reduce((sum, bl) => sum + bl.slots.reduce((a, s) => a + s.count, 0), 0);
-              const hasSelectedBirlik = selectedBirlikler.length > 0;
-              const safeCommitted = hasSelectedBirlik
-                ? birlikTotal
-                : 0;
-              const atkPower = getTotalAttackPower(safeCommitted);
-
-              // Mevcut eğitilmiş birimler — her birim ayrı satır
-              const unitAvail: { unitId: string; buildingId: string; label: string; icon: string; imageUri?: string; avail: number }[] = [];
-              BUILDING_BRANCHES.filter(br => br.id !== 'defenseTower').forEach(br => {
-                const b = buildings.find(bl => bl.id === br.id);
-                if (!b?.trainedUnits) return;
-                Object.entries(b.trainedUnits).forEach(([uid, cnt]) => {
-                  if (cnt <= 0) return;
-                  const def = UNIT_MAP[uid];
-                  unitAvail.push({
-                    unitId: uid,
-                    buildingId: br.id,
-                    label: def?.label ?? uid,
-                    icon: def?.icon ?? br.icon,
-                    imageUri: def?.imageUri,
-                    avail: cnt,
-                  });
-                });
-              });
-
-              const unitBreakdown = BUILDING_BRANCHES
-                .map(({ id, label, icon }) => {
-                  const b = buildings.find(bl => bl.id === id);
-                  const count = b?.trainedUnits
-                    ? Object.values(b.trainedUnits).reduce((a, v) => a + v, 0)
-                    : 0;
-                  return { label, icon, count };
-                })
-                .filter(u => u.count > 0);
-
-
-              return (
-                <View style={styles.harekatContent}>
-                  {/* Active march */}
-                  {activeMarch && (
-                    <View style={styles.hqMarchBox}>
-                      <Text style={styles.hqMarchTitle}>🗺️ Aktif Sefer</Text>
-                      <Text style={styles.hqMarchTarget}>{activeMarch.targetName}</Text>
-                      <CountdownTimer seconds={activeMarch.secondsRemaining} total={activeMarch.totalSeconds} />
-                      <Text style={styles.hqMarchSub}>{t('base.marchUnits', { count: String(activeMarch.committedUnits), power: String(activeMarch.attackPower) })}</Text>
-                    </View>
-                  )}
-
-                  {/* Army status */}
-                  <View style={styles.hqArmyBox}>
-                    <View style={styles.hqArmyRow}>
-                      <Text style={styles.hqArmyTotal}>{t('base.armyStatus', { count: String(totalUnits) })}</Text>
-                      {atkPower > 0 && <Text style={styles.hqArmyPower}>⚔️ {atkPower}</Text>}
-                    </View>
-                    {unitBreakdown.length > 0 && (
-                      <View style={styles.hqBreakdownRow}>
-                        {unitBreakdown.map(u => (
-                          <View key={u.label} style={styles.hqChip}>
-                            <Text style={styles.hqChipIcon}>{u.icon}</Text>
-                            <Text style={styles.hqChipLabel}>{t(`units.${u.id ?? u.unitId}.name`) !== `units.${u.id ?? u.unitId}.name` ? t(`units.${u.id ?? u.unitId}.name`) : u.label}</Text>
-                            <Text style={styles.hqChipCount}>{u.count}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    )}
-                    {totalUnits === 0 && (
-                      <Text style={styles.emptyText}>{t('base.noTrainedUnits')}</Text>
-                    )}
-                  </View>
-
-                  {/* ── BİRLİKLERİM ── */}
-                  <View style={styles.birlikSection}>
-                    <View style={styles.birlikHeader}>
-                      <Text style={styles.hqTargetSectionLabel}>{t('base.mySquads', { count: String(birlikler.length) })}</Text>
-                      {birlikler.length < 5 && totalUnits > 0 && (
-                        <Pressable
-                          style={styles.birlikCreateBtn}
-                          onPress={() => {
-                            setNewBirlikName(t('base.defaultSquadName', { n: String(birlikler.length + 1) }));
-                            setNewBirlikSlots({});
-                            setShowBirlikForm(true);
-                          }}
-                        >
-                          <Text style={styles.birlikCreateBtnText}>{t('base.createSquad')}</Text>
-                        </Pressable>
-                      )}
-                    </View>
-                    {birlikler.length === 0 && (
-                      <Text style={styles.emptyText}>{t('base.noSquads')}</Text>
-                    )}
-                    {birlikler.map(bl => {
-                      const blTotal = bl.slots.reduce((a, s) => a + s.count, 0);
-                      const isSel = selectedBirlikIds.has(bl.id);
-                      return (
-                        <View key={bl.id} style={[styles.birlikCard, isSel && styles.birlikCardSel]}>
-                          <View style={styles.birlikCardRow}>
-                            <View style={{ flex: 1 }}>
-                              <Text style={styles.birlikName}>{bl.name}</Text>
-                              <View style={styles.birlikSlotRow}>
-                                {bl.slots.map(s => (
-                                  <Text key={s.unitId} style={styles.birlikSlotChip}>
-                                    {s.icon}{s.count}
-                                  </Text>
-                                ))}
-                                <Text style={styles.birlikTotal}>{t('base.squadTotal', { count: String(blTotal) })}</Text>
-                              </View>
-                            </View>
-                            <Pressable
-                              style={[styles.birlikSelBtn, isSel && styles.birlikSelBtnActive]}
-                              onPress={() => setSelectedBirlikIds(prev => {
-                                const next = new Set(prev);
-                                if (isSel) next.delete(bl.id); else next.add(bl.id);
-                                return next;
-                              })}
-                            >
-                              <Text style={[styles.birlikSelBtnText, isSel && styles.birlikSelBtnTextActive]}>
-                                {isSel ? t('base.squadSelected') : t('base.squadSelect')}
-                              </Text>
-                            </Pressable>
-                            <Pressable
-                              style={styles.birlikDelBtn}
-                              onPress={() => {
-                                removeBirlik(bl.id);
-                                setSelectedBirlikIds(prev => { const next = new Set(prev); next.delete(bl.id); return next; });
-                              }}
-                            >
-                              <Text style={styles.birlikDelBtnText}>🗑️</Text>
-                            </Pressable>
-                          </View>
-                        </View>
-                      );
-                    })}
-                  </View>
-
-
-                </View>
-              );
-            })()}
-
-            {/* Takas kaldırıldı — mağaza ekranına taşındı */}
+            {panelTab === 'harekat' && (
+              <HarekatTab
+                buildings={buildings}
+                activeMarch={activeMarch}
+                birlikler={birlikler}
+                removeBirlik={removeBirlik}
+                getTotalTrainedUnits={getTotalTrainedUnits}
+                getTotalAttackPower={getTotalAttackPower}
+                onCreateBirlik={() => setShowBirlikForm(true)}
+              />
+            )}
 
             <View style={{ height: 20 }} />
           </ScrollView>
@@ -576,128 +434,13 @@ export function BaseScreen() {
         <BattleResultModal report={viewReport} onClose={() => setViewReport(null)} />
       )}
 
-      {/* ── Birlik Oluştur Modal ── */}
-      <Modal visible={showBirlikForm} transparent animationType="slide">
-        <View style={styles.birlikModalOverlay}>
-          <View style={styles.birlikModalPanel}>
-            <View style={styles.birlikModalHeader}>
-              <Text style={styles.birlikModalTitle}>{t('base.squadCreateTitle')}</Text>
-              <Pressable onPress={() => setShowBirlikForm(false)} style={styles.birlikModalClose}>
-                <Text style={styles.birlikModalCloseText}>✕</Text>
-              </Pressable>
-            </View>
-
-            <TextInput
-              style={styles.birlikNameInput}
-              value={newBirlikName}
-              onChangeText={setNewBirlikName}
-              placeholder={t('base.squadNamePlaceholder')}
-              placeholderTextColor={colors.textMuted}
-              maxLength={20}
-            />
-
-            <View style={styles.birlikModalSelectHeader}>
-              <Text style={styles.birlikModalSelectLabel}>{t('base.squadSelectHeader')}</Text>
-              <Pressable onPress={() => {
-                const all: Record<string, number> = {};
-                unitAvailForBirlik.forEach(u => { all[u.unitId] = u.avail; });
-                setNewBirlikSlots(all);
-              }}>
-                <Text style={styles.birlikModalSelectAll}>{t('base.selectAll')}</Text>
-              </Pressable>
-            </View>
-
-            <ScrollView style={styles.birlikModalList}>
-              {unitAvailForBirlik.length === 0 && (
-                <View style={styles.birlikModalNoUnits}>
-                  <Text style={styles.birlikModalNoUnitsIcon}>⚠️</Text>
-                  <Text style={styles.birlikModalNoUnitsTitle}>Birim Yok</Text>
-                  <Text style={styles.birlikModalNoUnitsDesc}>{t('base.noUnitsDesc')}</Text>
-                </View>
-              )}
-              {BUILDING_BRANCHES.filter(br => br.id !== 'defenseTower').map(br => {
-                const branchUnits = unitAvailForBirlik.filter(u => u.buildingId === br.id);
-                if (branchUnits.length === 0) return null;
-                return (
-                  <View key={br.id}>
-                    <View style={styles.birlikModalBranchHeader}>
-                      <Text style={styles.birlikModalBranchIcon}>{br.icon}</Text>
-                      <Text style={styles.birlikModalBranchLabel}>{t(br.i18n)}</Text>
-                    </View>
-                    {branchUnits.map(u => {
-                      const cur = newBirlikSlots[u.unitId] ?? 0;
-                      return (
-                        <View key={u.unitId} style={styles.birlikModalUnitRow}>
-                          <View style={styles.birlikModalUnitInfo}>
-                            <UnitImage unitId={u.unitId} uri={u.imageUri} icon={u.icon} style={styles.birlikModalUnitImg} />
-                            <View>
-                              <Text style={styles.birlikModalUnitName}>{t(`units.${u.unitId}.name`) !== `units.${u.unitId}.name` ? t(`units.${u.unitId}.name`) : u.label}</Text>
-                              <Text style={styles.birlikModalUnitAvail}>{t('base.availableLabel', { count: String(u.avail) })}</Text>
-                            </View>
-                          </View>
-                          <View style={styles.birlikModalStepper}>
-                            <Pressable style={styles.birlikModalStepBtn} onPress={() => setNewBirlikSlots(p => ({ ...p, [u.unitId]: Math.max(0, (p[u.unitId] ?? 0) - 100) }))}>
-                              <Text style={styles.birlikModalStepBtnText}>-100</Text>
-                            </Pressable>
-                            <Pressable style={styles.birlikModalStepBtn} onPress={() => setNewBirlikSlots(p => ({ ...p, [u.unitId]: Math.max(0, (p[u.unitId] ?? 0) - 10) }))}>
-                              <Text style={styles.birlikModalStepBtnText}>-10</Text>
-                            </Pressable>
-                            <Pressable style={styles.birlikModalStepBtn} onPress={() => setNewBirlikSlots(p => ({ ...p, [u.unitId]: Math.max(0, (p[u.unitId] ?? 0) - 1) }))}>
-                              <Text style={styles.birlikModalStepBtnText}>−</Text>
-                            </Pressable>
-                            <TextInput
-                              style={styles.birlikModalStepInput}
-                              value={String(cur)}
-                              onChangeText={text => {
-                                const val = parseInt(text, 10);
-                                if (text === '') setNewBirlikSlots(p => ({ ...p, [u.unitId]: 0 }));
-                                else if (!isNaN(val)) setNewBirlikSlots(p => ({ ...p, [u.unitId]: Math.min(u.avail, Math.max(0, val)) }));
-                              }}
-                              keyboardType="numeric"
-                              selectTextOnFocus
-                            />
-                            <Pressable style={styles.birlikModalStepBtn} onPress={() => setNewBirlikSlots(p => ({ ...p, [u.unitId]: Math.min(u.avail, (p[u.unitId] ?? 0) + 1) }))}>
-                              <Text style={styles.birlikModalStepBtnText}>+</Text>
-                            </Pressable>
-                            <Pressable style={styles.birlikModalStepBtn} onPress={() => setNewBirlikSlots(p => ({ ...p, [u.unitId]: Math.min(u.avail, (p[u.unitId] ?? 0) + 10) }))}>
-                              <Text style={styles.birlikModalStepBtnText}>+10</Text>
-                            </Pressable>
-                            <Pressable style={styles.birlikModalStepBtn} onPress={() => setNewBirlikSlots(p => ({ ...p, [u.unitId]: Math.min(u.avail, (p[u.unitId] ?? 0) + 100) }))}>
-                              <Text style={styles.birlikModalStepBtnText}>+100</Text>
-                            </Pressable>
-                          </View>
-                        </View>
-                      );
-                    })}
-                  </View>
-                );
-              })}
-            </ScrollView>
-
-            <View style={styles.birlikModalSummary}>
-              <Text style={styles.birlikModalSummaryText}>
-                {t('base.summaryText', { count: String(Object.values(newBirlikSlots).reduce((a, v) => a + v, 0)) })}
-              </Text>
-            </View>
-
-            <ActionButton
-              label={t('base.saveSquad', { count: String(Object.values(newBirlikSlots).reduce((a, v) => a + v, 0)) })}
-              disabled={Object.values(newBirlikSlots).reduce((a, v) => a + v, 0) === 0 || !newBirlikName.trim()}
-              onPress={() => {
-                const total = Object.values(newBirlikSlots).reduce((a, v) => a + v, 0);
-                if (total === 0 || !newBirlikName.trim()) return;
-                const slots: BirlikSlot[] = unitAvailForBirlik
-                  .filter(u => (newBirlikSlots[u.unitId] ?? 0) > 0)
-                  .map(u => ({ unitId: u.unitId, buildingId: u.buildingId, icon: u.icon, label: u.label, imageUri: u.imageUri, count: newBirlikSlots[u.unitId]! }));
-                const newBl: Birlik = { id: Date.now().toString(), name: newBirlikName.trim(), slots };
-                addBirlik(newBl);
-                setShowBirlikForm(false);
-              }}
-            />
-            <ActionButton label={t('common.cancel')} onPress={() => setShowBirlikForm(false)} variant="secondary" />
-          </View>
-        </View>
-      </Modal>
+      <BirlikModal
+        visible={showBirlikForm}
+        onClose={() => setShowBirlikForm(false)}
+        unitAvailForBirlik={unitAvailForBirlik}
+        addBirlik={addBirlik}
+        birlikCount={birlikler.length}
+      />
     </View>
   );
 }

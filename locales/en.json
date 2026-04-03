@@ -1,0 +1,1396 @@
+{
+  "nav": {
+    "base": "Base",
+    "map": "Map",
+    "alliance": "Alliance",
+    "missions": "Missions",
+    "leaderboard": "Rankings",
+    "shop": "Shop"
+  },
+  "auth": {
+    "tagline": "ONLINE MOBILE STRATEGY GAME",
+    "login": "Log In",
+    "register": "Sign Up",
+    "placeholderUsername": "Username",
+    "placeholderEmail": "Email",
+    "placeholderPassword": "Password",
+    "placeholderPasswordRepeat": "Repeat Password",
+    "googleButton": "Sign in with",
+    "divider": "or",
+    "version": "v0.1.0 — Alpha",
+    "errorUsernameRequired": "Username is required",
+    "errorEmailPasswordRequired": "Email and password are required",
+    "errorPasswordTooShort": "Password must be at least 6 characters",
+    "errorPasswordMismatch": "Passwords do not match",
+    "errorEmailInUse": "This email is already registered",
+    "errorInvalidEmail": "Invalid email address",
+    "errorWrongPassword": "Wrong email or password",
+    "errorUserNotFound": "User not found",
+    "errorWeakPassword": "Password too weak (min 6 characters)",
+    "errorGoogleFailed": "Google sign-in failed",
+    "errorGeneric": "An error occurred"
+  },
+  "profile": {
+    "stats": "Statistics",
+    "power": "Power",
+    "hq": "Headquarters",
+    "wins": "Victories",
+    "losses": "Defeats",
+    "logout": "Log Out",
+    "editName": "✏️ Change Name",
+    "editNameLocked": "🔒 Can be changed in {{days}} days",
+    "placeholderNewUsername": "New username",
+    "alertSuccessTitle": "Success",
+    "alertSuccessMsg": "Your username has been changed to \"{{name}}\".",
+    "alertLogoutTitle": "Log Out",
+    "alertLogoutMsg": "Are you sure you want to log out?",
+    "alertWaitTitle": "Wait",
+    "alertWaitMsg": "You can change your username in {{days}} days.",
+    "errorUsernameRequired": "Username is required",
+    "errorTooShort": "At least 3 characters",
+    "errorTooLong": "Maximum 20 characters",
+    "errorGeneric": "An error occurred",
+    "changeDaysLater": "Can be changed in {{days}} days",
+    "sectionAccount": "Account Info",
+    "email": "Email",
+    "provider": "Sign-in Method",
+    "memberSince": "Joined",
+    "sectionGameStats": "Game Statistics",
+    "totalUnits": "Total Units",
+    "researchDone": "Research",
+    "missionsDone": "Missions",
+    "allianceName": "Alliance",
+    "noAlliance": "None",
+    "winRate": "Win Rate",
+    "sectionLanguage": "Language",
+    "notifSettings": "Notification Settings",
+    "notifAttacks": "Attack Alerts",
+    "notifBattleResults": "Battle Results",
+    "notifAllianceWar": "Alliance War",
+    "notifMissions": "Mission Completion",
+    "battleReports": "Battle Reports",
+    "noReports": "No battle reports yet.",
+    "noLoss": "No losses"
+  },
+  "username": {
+    "title": "Choose Your Username",
+    "subtitle": "Other players will see you by this name",
+    "placeholder": "Username",
+    "start": "Start Game",
+    "errorRequired": "Username is required",
+    "errorTooShort": "Must be at least 3 characters",
+    "errorGeneric": "An error occurred"
+  },
+  "topbar": {
+    "title": "WAR NEXUS"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "ok": "OK",
+    "save": "Save",
+    "back": "Back",
+    "close": "Close",
+    "loading": "...",
+    "error": "Error",
+    "errorGeneric": "An error occurred",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "send": "Send",
+    "search": "Search",
+    "refresh": "↻ Refresh",
+    "level": "Level",
+    "power": "Power",
+    "units": "units",
+    "cash": "Cash",
+    "oil": "Oil",
+    "ore": "Ore",
+    "gold": "Gold",
+    "land": "Land",
+    "air": "Air",
+    "sea": "Naval",
+    "defense": "Defense",
+    "offlineIncome": "⏰ {{time}} offline income added",
+    "timeHoursMinutes": "{{h}}h {{m}}m",
+    "timeMinutes": "{{m}}m",
+    "goldGiftReceived": "🪙 +{{amount}} gold gift received!",
+    "allianceDonationReceived": "📦 Alliance donation received! +{{amount}}K resources",
+    "researchCompleted": "🔬 {{name}} completed!",
+    "research": "Research",
+    "buildingUpgraded": "🏗️ {{name}} Lv.{{level}} upgraded!",
+    "goldExchange": "🪙 {{gold}} gold → +{{amount}} {{resource}}"
+  },
+  "pvp": {
+    "cannotAttackAlly": "⚠️ You cannot attack your own alliance member",
+    "needOffensiveUnits": "⚠️ You need offensive units to attack",
+    "cooldownRemaining": "⏳ You can attack this player in {{h}}h {{m}}m",
+    "attackFailed": "⚠️ Attack failed to send"
+  },
+  "base": {
+    "upgrade": "Upgrade",
+    "maxLevel": "Max Level",
+    "upgrading": "Upgrading",
+    "level": "Level {{level}} / {{max}}",
+    "income": "Income:",
+    "incomePerHour": "/hr",
+    "incomeNext": "→ {{value}}/hr Lv.{{level}}",
+    "blockingMsg": "Cannot upgrade other buildings while {{name}} is upgrading.",
+    "unlockPower": "+{{n}} Power",
+    "nextLevelSection": "Unlocks at Lv.{{level}}:",
+    "nextLevelNewBadge": "New",
+    "nextLevelFarBadge": "Lv.{{level}}",
+    "prodIncrease": "+{{value}}/hr production increase",
+    "lossReduction": "Battle losses reduced by {{pct}}%",
+    "interestRate": "Interest income increases (+{{pct}}%/hr per level)",
+    "capacityIncrease": "Building capacity and training speed increase",
+    "currentUnits": "CURRENT UNITS",
+    "training": "Training in Progress",
+    "capacityFull": "Capacity Full ({{current}}/{{cap}})",
+    "noUnits": "No units available at this building level.",
+    "trained": "Available: {{count}}",
+    "trainBtn": "Train {{qty}}",
+    "capacityLabel": "{{label}} Capacity",
+    "researchInProgress": "Research in Progress",
+    "noResearchBusy": "New research will unlock after current one completes.",
+    "noResearchEmpty": "No research available in this branch.",
+    "researchBtn": "Research",
+    "tabOverview": "Upgrade",
+    "tabUnits": "Units",
+    "tabResearch": "Research",
+    "tabHarekat": "⚔️ Operations",
+    "tabMarket": "🪙 Exchange",
+    "activeMarch": "🗺️ Active March",
+    "marchUnits": "{{count}} units · Power {{power}}",
+    "armyStatus": "Army: {{count}} units",
+    "noTrainedUnits": "No trained units.",
+    "mySquads": "MY SQUADS ({{count}}/5)",
+    "createSquad": "+ Create Squad",
+    "noSquads": "No squads created yet.",
+    "squadTotal": "Total: {{count}}",
+    "squadSelect": "Select",
+    "squadSelected": "✓ Selected",
+    "coordLabel": "🎯 ENTER COORDINATES",
+    "attackBtnInMarch": "Marching...",
+    "attackBtn": "ATTACK",
+    "coordNotFound": "Coordinates not found",
+    "coordFound": "🎯 {{name}} — {{player}}",
+    "battleReports": "BATTLE REPORTS ({{count}})",
+    "noBattleReports": "No battle reports yet.",
+    "unitsLost": "☠️ -{{count}} units",
+    "noLoss": "No losses",
+    "squadCreateTitle": "🛡️ CREATE SQUAD",
+    "squadNamePlaceholder": "Squad name...",
+    "squadSelectHeader": "Select Squad",
+    "selectAll": "Select All",
+    "noUnitsIcon": "⚠️",
+    "noUnitsTitle": "No Units",
+    "noUnitsDesc": "Train units from Barracks, Airport or Shipyard.",
+    "availableLabel": "Available: {{count}}",
+    "summaryText": "Deploy: {{count}} units",
+    "saveSquad": "Save ({{count}} units)",
+    "defaultSquadName": "Squad {{n}}",
+    "editorActive": "✓ Editor",
+    "editorInactive": "✎ Edit"
+  },
+  "map": {
+    "armyStatusTitle": "Army Status",
+    "reconTitle": "Recon — Enemy Bases",
+    "battleLogTitle": "Battle Log ({{count}})",
+    "totalUnits": "Total: {{count}} units",
+    "totalPower": "⚔️ Power: {{power}}",
+    "noUnits": "No trained units yet.",
+    "winChance": "{{pct}}% chance",
+    "unitsLost": "-{{count}} units",
+    "defeat": "Defeat",
+    "attackTitle": "⚔️ ATTACK",
+    "noSquadsTitle": "No Squads",
+    "noSquadsDesc": "Create a squad in HQ before attacking.",
+    "selectSquad": "Select Squad ({{selected}}/{{total}})",
+    "selectAll": "Select All",
+    "clear": "Clear",
+    "unitsChip": "🪖 {{count}} units",
+    "powerChip": "⚔️ {{power}} power",
+    "summarySquad": "Squads: {{count}}",
+    "summaryUnits": "Deploy: {{count}} units",
+    "winChanceLabel": "Win Chance",
+    "winChanceValue": "{{pct}}%",
+    "attackBtnWithUnits": "⚔️ ATTACK ({{count}} units)",
+    "attackBtnInMarch": "March in Progress...",
+    "attackBtnNoSquad": "Select Squad",
+    "easy": "EASY",
+    "medium": "MEDIUM",
+    "hard": "HARD",
+    "elite": "ELITE"
+  },
+  "battle": {
+    "victory": "VICTORY!",
+    "defeat": "DEFEAT!",
+    "headerDefense": "🛡️ Defense",
+    "headerAttack": "⚔️ Attack",
+    "attackPower": "⚔️ Attack",
+    "defensePower": "🛡️ Defense",
+    "lootWon": "💰 Loot",
+    "lootLost": "💸 Losses",
+    "lootCash": "Cash",
+    "lootOil": "Oil",
+    "lootOre": "Ore",
+    "lootPower": "Power",
+    "attackerUnitsAttack": "⚔️ Attacking Units",
+    "attackerUnitsDefense": "🎯 Enemy Forces",
+    "defenderUnitsAttack": "🛡️ Defending Units",
+    "defenderUnitsDefense": "🛡️ Your Forces",
+    "unitsSummary": "{{total}} units · ☠️ {{losses}} lost",
+    "unitsSummaryNoLoss": "{{total}} units · ✅ No losses",
+    "noDetail": "Unit details not available",
+    "close": "CLOSE"
+  },
+  "attack": {
+    "incomingTitle": "⚠️ INCOMING ATTACK",
+    "incomingDetail": "🪖 {{units}} units · ⚔️ Attacking",
+    "incomingDefenders": "🛡️ {{count}} Defenders",
+    "incomingNoDefense": "🚨 No Defense!",
+    "outgoingTitle": "⚔️ MARCH",
+    "outgoingDetail": "🪖 {{units}} units · ⚔️ {{power}} power",
+    "outgoingReturning": "🔙 Returning",
+    "outgoingAttacking": "🎯 Attacking",
+    "outgoingCancel": "✕ Cancel"
+  },
+  "chat": {
+    "title": "Global Chat",
+    "messageCount": "{{count}} messages",
+    "empty": "No messages yet. Be the first to send one!",
+    "placeholder": "Type a message...",
+    "send": "Send",
+    "sending": "..."
+  },
+  "shop": {
+    "tabResources": "💰 Resources",
+    "tabBoosts": "🚀 Boosts",
+    "tabVip": "👑 VIP",
+    "tabGold": "🪙 Gold",
+    "goldBar": "🪙 {{amount}} Gold",
+    "sectionResources": "Resource Packs",
+    "sectionBoosts": "Boosts & Shields",
+    "sectionVip": "VIP Packs",
+    "sectionGold": "Buy Gold",
+    "goldNote": "💡 Real money purchases coming soon",
+    "popular": "MOST POPULAR",
+    "cash50k": "50K Cash",
+    "cash200k": "200K Cash",
+    "cash1m": "1M Cash",
+    "oil50k": "50K Oil",
+    "oil200k": "200K Oil",
+    "oil1m": "1M Oil",
+    "ore50k": "50K Ore",
+    "ore200k": "200K Ore",
+    "ore1m": "1M Ore",
+    "shield4h": "4 Hour Shield",
+    "shield4hDesc": "Protection from attacks for 4 hours",
+    "shield8h": "8 Hour Shield",
+    "shield8hDesc": "Protection from attacks for 8 hours",
+    "shield24h": "24 Hour Shield",
+    "shield24hDesc": "Protection from attacks for 24 hours",
+    "power5k": "+5K Power",
+    "power5kDesc": "Instant 5000 warPower",
+    "power20k": "+20K Power",
+    "power20kDesc": "Instant 20000 warPower",
+    "vipStarter": "🎖️ Starter Pack",
+    "vipStarterDesc": "100K 💵 + 100K 🛢️ + 100K ⛏️ + 4h 🛡️",
+    "vipWarrior": "⚔️ Warrior Pack",
+    "vipWarriorDesc": "500K 💵 + 500K 🛢️ + 500K ⛏️ + 10K ⚡",
+    "vipEmperor": "👑 Emperor Pack",
+    "vipEmperorDesc": "1M 💵 + 1M 🛢️ + 1M ⛏️ + 50K ⚡ + 24h 🛡️",
+    "gold100": "100 Gold",
+    "gold500": "500 Gold",
+    "gold2000": "2,000 Gold",
+    "gold5000": "5,000 Gold",
+    "gold10000": "10,000 Gold",
+    "gold25000": "25,000 Gold",
+    "insufficientGoldTitle": "Insufficient Gold",
+    "insufficientGoldMsg": "This pack requires {{cost}} gold.",
+    "purchasedTitle": "Purchased",
+    "purchasedMsg": "{{label}} has been added to your account!",
+    "shieldActiveTitle": "Shield Active",
+    "shieldActiveMsg": "{{label}} activated!",
+    "powerAddedTitle": "Power Added",
+    "powerAddedMsg": "+{{amount}} power!",
+    "vipPurchasedTitle": "VIP Pack",
+    "vipPurchasedMsg": "{{label}} purchased!",
+    "comingSoonTitle": "Coming Soon",
+    "comingSoonMsg": "Real money gold purchases will be available soon!",
+    "shieldBlockedWar": "Cannot purchase shield during alliance war!",
+    "shieldBlockedWarTitle": "Shield Unavailable",
+    "shieldAttackBlocked": "Cannot attack while shield is active. Wait for your shield to expire before attacking.",
+    "shieldAttackBlockedTitle": "Attack Blocked"
+  },
+  "leaderboard": {
+    "tabPlayers": "Player Rankings",
+    "tabAlliances": "Alliance Rankings",
+    "panelPlayers": "Global Rankings — Players",
+    "panelAlliances": "Global Rankings — Alliances",
+    "emptyPlayers": "No players yet",
+    "emptyAlliances": "No alliances yet",
+    "separator": "··· YOUR REGION ···",
+    "me": " (You)",
+    "anonymous": "Anonymous",
+    "unnamedAlliance": "Unnamed",
+    "stats": "Statistics",
+    "power": "Power",
+    "hq": "Headquarters",
+    "wins": "Victories",
+    "losses": "Defeats",
+    "attack": "⚔️ ATTACK",
+    "revenge": "🔥 REVENGE ATTACK",
+    "marchInProgress": "March in Progress...",
+    "cooldown": "⏳ {{hours}}h {{minutes}}m {{seconds}}s",
+    "cooldownShort": "⏳ {{hours}}h {{minutes}}m left",
+    "close": "Close",
+    "back": "Back",
+    "attackTitle": "⚔️ ATTACK",
+    "winsCount": "{{wins}} victories",
+    "noUnitsTitle": "No Squads",
+    "noUnitsDesc": "Create a squad in HQ before attacking.",
+    "selectSquad": "Select Squad ({{selected}}/{{total}})",
+    "selectAll": "Select All",
+    "clear": "Clear",
+    "unitsChip": "{{count}} units",
+    "powerChip": "{{power}} power",
+    "hide": "▲ Hide",
+    "detail": "▼ Detail",
+    "summarySquads": "Squads: {{count}}",
+    "summaryUnits": "Deploy: {{count}} units",
+    "winChance": "Win Chance",
+    "attackWithUnits": "⚔️ ATTACK ({{count}} units)",
+    "selectSquadBtn": "Select Squad",
+    "marchActive": "March in Progress..."
+  },
+  "alliance": {
+    "title": "ALLIANCE",
+    "loadingName": "Loading...",
+    "roles": {
+      "leader": "Leader",
+      "officer": "Officer",
+      "foreign": "Foreign Affairs",
+      "economy": "Economy Minister",
+      "interior": "Interior Minister",
+      "defense": "Defense Minister",
+      "member": "Member"
+    },
+    "tabs": {
+      "members": "Members",
+      "donate": "Donate",
+      "war": "⚔️ War",
+      "reports": "📋 Reports",
+      "chat": "Chat",
+      "settings": "Settings"
+    },
+    "createTitle": "Create Alliance",
+    "createCost": "{{cost}} 🪙",
+    "searchTitle": "Search Alliance",
+    "searchPlaceholder": "Alliance name or tag...",
+    "searchBtn": "Search",
+    "searchResults": "Search Results",
+    "rankingsTitle": "Alliance Rankings",
+    "memberStat": "{{count}}/{{max}} members · {{power}} power",
+    "joinBtn": "Join",
+    "applyBtn": "Apply",
+    "appliedBtn": "Applied ✓",
+    "createModalTitle": "Create New Alliance",
+    "nameLabel": "Alliance Name",
+    "namePlaceholder": "Steel Wolves...",
+    "tagLabel": "Tag (max 5 chars)",
+    "tagPlaceholder": "SWF",
+    "descLabel": "Description",
+    "descPlaceholder": "Brief info about your alliance...",
+    "joinTypeLabel": "Join Type",
+    "joinTypeOpen": "Open",
+    "joinTypeApproval": "Approval Required",
+    "costLabel": "Cost:",
+    "balanceLabel": "(Balance: {{gold}} 🪙)",
+    "createBtn": "Create",
+    "alertMissing": "Missing Info",
+    "alertMissingMsg": "Alliance name and tag are required.",
+    "alertTagLong": "Tag Too Long",
+    "alertTagLongMsg": "Tag can be at most 5 characters.",
+    "treasuryLabel": "Treasury:",
+    "memberCount": "{{count}}/{{max}}",
+    "warBannerWon": "⚔️ {{attacker}} won the attack on {{defender}}! +{{score}} points",
+    "warBannerLost": "🛡️ {{defender}} defended against {{attacker}}'s attack!",
+    "joinRequests": "Join Requests ({{count}})",
+    "membersTitle": "Members ({{count}})",
+    "meSuffix": " (You)",
+    "powerContribution": "Power: {{power}} · Contribution: {{contribution}}",
+    "roleBtn": "Role",
+    "kickTitle": "Kick Member",
+    "kickMsg": "Remove {{name}} from the alliance?",
+    "kickBtn": "Kick",
+    "transferTitle": "Transfer Leadership",
+    "transferMsg": "Transfer leadership to {{name}}? This action cannot be undone.",
+    "transferBtn": "Transfer",
+    "treasuryHeader": "🏦 Alliance Treasury (Lv.{{level}})",
+    "boostActive": "⚡ Boost active: {{hours}}h remaining",
+    "donateTitle": "Donate to Treasury",
+    "balance": "Balance: {{amount}}",
+    "treasuryUses": "Treasury Uses",
+    "upgradeAlliance": "🏰 Upgrade Alliance (Lv.{{level}})",
+    "upgradeCost": "Cost: {{cost}}×3",
+    "boostBtn": "⚡ 24h Production x2 Boost (200K×3)",
+    "sendToMember": "Send to Member from Treasury",
+    "amountPlaceholder": "Amount",
+    "sendBtn": "Send",
+    "activeWar": "⚔️ ACTIVE WAR",
+    "vs": "VS",
+    "timerEnded": "Ended",
+    "enemyMembers": "Enemy Members ({{count}})",
+    "attackBtn": "⚔️ Attack",
+    "allianceWar": "⚔️ ALLIANCE WAR",
+    "warDesc": "Declare war on another alliance and collect points for 24 hours. The winning alliance earns rewards for its treasury!",
+    "warReward": "🏆 Reward: 50K 💵 + 50K 🛢️ + 50K ⛏️ + 100 🪙 + 2000 ⚡\n🌟 MVP: +250 🪙",
+    "showTargets": "Show Target Alliances",
+    "declareWar": "Declare War",
+    "nonLeaderMsg": "Only the Leader or Officer can declare war.",
+    "declareConfirmTitle": "Declare War",
+    "declareConfirmMsg": "Are you sure you want to declare war on this alliance?",
+    "declareBtn": "Declare",
+    "errorDeclare": "Could not declare war. Please try again.",
+    "cooldownLabel": "⏳ {{h}}h {{m}}m {{s}}s",
+    "cooldownDesc": "Cannot attack until cooldown expires",
+    "marchInProgress": "March in progress...",
+    "noSquadsWarning": "⚠️ No squads — Create one in HQ",
+    "selectSquad": "Select Squad ({{selected}}/{{total}})",
+    "clear": "Clear",
+    "selectAll": "Select All",
+    "attackWithUnits": "⚔️ ATTACK ({{count}} units)",
+    "warResultsTitle": "War Results",
+    "warVictory": "🏆 VICTORY",
+    "warDefeat": "💀 DEFEAT",
+    "scoreLabel": "Score: {{ours}} - {{theirs}}",
+    "rewardsLabel": "Rewards (per member):",
+    "mvpLabel": "🌟 MVP: {{name}} {{bonus}}",
+    "memberContributions": "Member Contributions:",
+    "scorePoints": "{{score}} points",
+    "winLossStat": "{{wins}}W/{{losses}}L",
+    "noReports": "📋 No war reports yet",
+    "battleReports": "Battle Reports ({{count}})",
+    "attackerFallback": "Attacker",
+    "timeJustNow": "Just now",
+    "timeMinutesAgo": "{{n}}m ago",
+    "timeHoursAgo": "{{n}}h ago",
+    "chatEmpty": "No messages yet. Be the first!",
+    "chatPlaceholder": "Type a message...",
+    "chatSend": "Send",
+    "chatSending": "...",
+    "settingsTitle": "Alliance Details",
+    "settingsName": "Name:",
+    "settingsTag": "Tag:",
+    "settingsJoinType": "Join:",
+    "settingsOpen": "Open",
+    "settingsApproval": "Approval",
+    "settingsSave": "Update",
+    "settingsSaving": "...",
+    "kickSection": "Kick User",
+    "memberLabel": "Member:",
+    "selectPlaceholder": "- Select -",
+    "transferSection": "Transfer Leadership",
+    "leaveSection": "Leave Alliance",
+    "leaveBtn": "Leave Alliance",
+    "leaveTitle": "Leave",
+    "leaveMsg": "Are you sure you want to leave {{name}}?",
+    "leaveAction": "Leave",
+    "disbandSection": "Delete Alliance",
+    "disbandWarning": "Warning: This action cannot be undone. All members and treasury will be deleted.",
+    "confirm1": "Confirm 1",
+    "confirm2": "Confirm 2",
+    "disbandBtn": "DELETE",
+    "disbandTitle": "Delete Alliance",
+    "disbandMsg": "\"{{name}}\" will be permanently deleted. CANNOT BE UNDONE!"
+  },
+  "settings": {
+    "activeMissions": "Active Missions ({{done}}/{{total}})",
+    "allDone": "All missions completed!",
+    "completedMissions": "Completed",
+    "claim": "Claim",
+    "infoTitle": "War Nexus",
+    "version": "Version 1.0 — React Native 0.84",
+    "stats": "12 buildings · 12 units · 3 resources",
+    "language": "Language",
+    "selectLanguage": "Select Language",
+    "missionClaimed": "🎯 Mission reward claimed!"
+  },
+  "branches": {
+    "infantry": "Infantry",
+    "armor": "Armor",
+    "artillery": "Artillery",
+    "uav": "UAV",
+    "helicopter": "Helicopter",
+    "fixedWing": "Fighter Jet",
+    "bomber": "Bomber",
+    "naval": "Naval",
+    "airDefense": "Air Defense",
+    "specialOps": "Special Ops",
+    "corvette": "Corvette",
+    "frigate": "Frigate",
+    "destroyer": "Destroyer",
+    "submarine": "Submarine",
+    "land": "Land",
+    "air": "Air",
+    "sea": "Naval",
+    "defense": "Defense"
+  },
+  "buildings": {
+    "hq": {
+      "name": "Headquarters",
+      "desc": "The heart of your base. Its level affects all capacities."
+    },
+    "barracks": {
+      "name": "Barracks",
+      "desc": "Infantry and ground forces production center."
+    },
+    "tankFactory": {
+      "name": "Tank Factory",
+      "desc": "Armored vehicle and tank production."
+    },
+    "airport": {
+      "name": "Air Base",
+      "desc": "Fighter jet and helicopter production center."
+    },
+    "shipyard": {
+      "name": "Shipyard",
+      "desc": "Naval forces production center."
+    },
+    "oilField": {
+      "name": "Oil Field",
+      "desc": "Produces oil continuously. Each level increases production."
+    },
+    "mine": {
+      "name": "Mine",
+      "desc": "Produces iron ore continuously. Each level increases production."
+    },
+    "bank": {
+      "name": "Bank",
+      "desc": "Generates interest from current cash. Interest rate increases with level."
+    },
+    "researchLab": {
+      "name": "Research Lab",
+      "desc": "Research new technologies and units."
+    },
+    "defenseTower": {
+      "name": "Defense Tower",
+      "desc": "Reduces unit losses in battle. Each level provides 4% protection."
+    },
+    "radar": {
+      "name": "Radar Station",
+      "desc": "Reveals enemy intelligence."
+    },
+    "houses": {
+      "name": "Houses",
+      "desc": "Collects rent from residents. Each level increases hourly income."
+    }
+  },
+  "units": {
+    "rifleman": {
+      "name": "Rifleman",
+      "desc": "Modern equipped standard infantry. Fast training, low cost."
+    },
+    "machineGunner": {
+      "name": "Machine Gunner",
+      "desc": "Squad support machine gun unit."
+    },
+    "antiTankOp": {
+      "name": "Javelin Operator",
+      "desc": "FGM-148 Javelin guided anti-tank missile operator."
+    },
+    "manpadsOp": {
+      "name": "MANPADS Operator",
+      "desc": "Stinger/Igla shoulder-fired air defense operator."
+    },
+    "sniper": {
+      "name": "Sniper",
+      "desc": "Barrett M82A1 / KSVK equipped long-range marksman."
+    },
+    "combatEngineer": {
+      "name": "Combat Engineer",
+      "desc": "EMP, mine disposal and infrastructure destruction specialist."
+    },
+    "paradropper": {
+      "name": "Paratrooper",
+      "desc": "Airborne specialist. Operates behind enemy lines."
+    },
+    "frogman": {
+      "name": "Navy SEAL",
+      "desc": "Naval Special Warfare unit. Amphibious and covert operations."
+    },
+    "droneOp": {
+      "name": "FPV Drone Operator",
+      "desc": "Kamikaze FPV drone swarm. High precision target elimination."
+    },
+    "specOps": {
+      "name": "Special Forces",
+      "desc": "Elite special forces operator. Beret/Delta Force class."
+    },
+    "kirpi": {
+      "name": "BMC Kirpi MRAP",
+      "desc": "Turkish-made mine-resistant ambush protected vehicle."
+    },
+    "cobra2": {
+      "name": "Otokar Cobra II",
+      "desc": "Light armored multi-purpose tactical vehicle."
+    },
+    "kaplanIfv": {
+      "name": "FNSS Kaplan IFV",
+      "desc": "Turkish infantry fighting vehicle. 30mm cannon and Kornet missile."
+    },
+    "bradley": {
+      "name": "M2A4 Bradley IFV",
+      "desc": "US advanced infantry fighting vehicle. TOW-2 guided missile."
+    },
+    "puma": {
+      "name": "Puma IFV",
+      "desc": "German most advanced IFV. Integrated active protection system."
+    },
+    "leopard2a7": {
+      "name": "Leopard 2A7+",
+      "desc": "German main battle tank. NATO's most powerful MBT."
+    },
+    "m1a2sep3": {
+      "name": "M1A2 SEPv3 Abrams",
+      "desc": "US main battle tank. Trophy active protection integrated."
+    },
+    "t90m": {
+      "name": "T-90M Proryv-3",
+      "desc": "Russia's advanced main battle tank. Kontakt-5 reactive armor."
+    },
+    "k2panther": {
+      "name": "K2 Black Panther",
+      "desc": "South Korean super MBT. Auto-loader + active protection."
+    },
+    "altay": {
+      "name": "Altay",
+      "desc": "Turkey's national main battle tank."
+    },
+    "t14armata": {
+      "name": "T-14 Armata",
+      "desc": "Russia's unmanned turret next-gen MBT. Afganit active protection."
+    },
+    "merkava4": {
+      "name": "Merkava Mk.4 Windbreaker",
+      "desc": "Israeli MBT. Trophy active protection + crew survivability priority."
+    },
+    "firtina": {
+      "name": "T-155 Firtina SPH",
+      "desc": "Turkish self-propelled 155mm howitzer. 40km range, 6 rounds/min."
+    },
+    "himars": {
+      "name": "M142 HIMARS",
+      "desc": "Precision guided multiple rocket system. GMLRS/ATACMS compatible, 300km range."
+    },
+    "kasirga": {
+      "name": "TRG-300 Kasirga",
+      "desc": "Turkish 300mm multiple rocket system. 120km range."
+    },
+    "tb2": {
+      "name": "Bayraktar TB2",
+      "desc": "Turkish combat UAV. World's most used armed drone."
+    },
+    "mq9reaper": {
+      "name": "MQ-9B SkyGuardian",
+      "desc": "US hunter-killer UAV. Hellfire missile system + SIGINT capability."
+    },
+    "akinci": {
+      "name": "Bayraktar Akinci",
+      "desc": "Turkey's largest UCAV. Multi-weapon payload and AI targeting system."
+    },
+    "ah1z": {
+      "name": "AH-1Z Viper",
+      "desc": "USMC attack helicopter. AGM-114 Hellfire capable."
+    },
+    "tb3": {
+      "name": "Bayraktar TB3",
+      "desc": "Ship-launched folding wing combat UAV."
+    },
+    "harop": {
+      "name": "IAI Harop",
+      "desc": "Israeli loitering munition. Detects and destroys enemy radars."
+    },
+    "switchblade600": {
+      "name": "Switchblade 600",
+      "desc": "Shoulder-launched anti-tank kamikaze drone. Effective against tanks."
+    },
+    "xq58valkyrie": {
+      "name": "XQ-58A Valkyrie",
+      "desc": "US stealth UCAV. Autonomous 'loyal wingman' drone flying with F-35."
+    },
+    "uh60m": {
+      "name": "UH-60M Black Hawk",
+      "desc": "Multi-purpose transport and attack helicopter."
+    },
+    "ah64e": {
+      "name": "AH-64E Apache Guardian",
+      "desc": "World's most advanced attack helicopter. Longbow radar system."
+    },
+    "t129atak": {
+      "name": "T129 ATAK-II",
+      "desc": "Turkey's national attack helicopter. UMTAS guided missile."
+    },
+    "ka52m": {
+      "name": "Ka-52M Alligator",
+      "desc": "Russian coaxial rotor attack helicopter. Vikhr-M missile."
+    },
+    "mi28nm": {
+      "name": "Mi-28NM Havoc-M",
+      "desc": "Russia's updated attack helicopter. Night combat capable."
+    },
+    "f16v": {
+      "name": "F-16 Block 70 Viper",
+      "desc": "Updated F-16. With AESA radar and conformal fuel tanks."
+    },
+    "fa18ef": {
+      "name": "F/A-18E/F Super Hornet",
+      "desc": "USN carrier-based fighter-bomber. Carrier launch capable."
+    },
+    "rafale": {
+      "name": "Dassault Rafale F4",
+      "desc": "France's multirole fighter. Carries SCALP-EG cruise missile."
+    },
+    "typhoon": {
+      "name": "Eurofighter Typhoon",
+      "desc": "European joint multirole fighter. Excellent maneuverability."
+    },
+    "su35s": {
+      "name": "Su-35S Flanker-E",
+      "desc": "Russian 4++ gen fighter. Omnidirectional thrust vectoring engines."
+    },
+    "gripenE": {
+      "name": "JAS-39E Gripen",
+      "desc": "Swedish light multirole fighter. Low operating cost."
+    },
+    "j16": {
+      "name": "J-16",
+      "desc": "Chinese multirole strike fighter. YJ-12 supersonic anti-ship missile."
+    },
+    "f35a": {
+      "name": "F-35A Lightning II",
+      "desc": "US 5th gen stealth multirole fighter. Sensor fusion + DAS system."
+    },
+    "f22raptor": {
+      "name": "F-22 Raptor",
+      "desc": "US 5th gen stealth air superiority fighter. Supercruise capable."
+    },
+    "su57felon": {
+      "name": "Su-57 Felon",
+      "desc": "Russian 5th gen multirole fighter. Supercruise + stealth coating."
+    },
+    "j20": {
+      "name": "J-20 Chengdu",
+      "desc": "Chinese 5th gen long-range stealth fighter."
+    },
+    "kaan": {
+      "name": "KAAN (TF-X)",
+      "desc": "Turkey's national 5th gen fighter. Indigenous AESA radar system."
+    },
+    "kizilelmafighter": {
+      "name": "Bayraktar Kizilelma",
+      "desc": "Turkey's unmanned 5th gen fighter. Supersonic + stealth."
+    },
+    "b2spirit": {
+      "name": "B-2 Spirit",
+      "desc": "US stealth strategic bomber. 16-ton bomb payload."
+    },
+    "b21raider": {
+      "name": "B-21 Raider",
+      "desc": "US next-gen stealth bomber."
+    },
+    "heybeliada": {
+      "name": "TCG Heybeliada",
+      "desc": "Turkish MILGEM corvette. First national warship."
+    },
+    "milgem": {
+      "name": "TCG Istanbul F-515",
+      "desc": "MILGEM frigate variant. Harpoon missile system integrated."
+    },
+    "tf2000": {
+      "name": "TF-2000 Frigate",
+      "desc": "Turkey's regional air defense frigate."
+    },
+    "f125": {
+      "name": "F-125 Baden-Württemberg",
+      "desc": "German stabilization frigate."
+    },
+    "constellation": {
+      "name": "FFG-62 Constellation",
+      "desc": "US new FREMM-based guided missile frigate."
+    },
+    "type212a": {
+      "name": "Type 212A Submarine",
+      "desc": "German AIP fuel cell submarine. Unmatched in stealth."
+    },
+    "arleighburke": {
+      "name": "Arleigh Burke Flight III",
+      "desc": "US Aegis guided missile destroyer. 96 VLS + AMDR radar."
+    },
+    "type055": {
+      "name": "Type 055 Destroyer",
+      "desc": "Chinese super destroyer. 12,000 tons, 112 VLS cells."
+    },
+    "zumwalt": {
+      "name": "DDG-1000 Zumwalt",
+      "desc": "US stealth destroyer."
+    },
+    "qecarrier": {
+      "name": "HMS Queen Elizabeth",
+      "desc": "British aircraft carrier. Carries 40 F-35Bs."
+    },
+    "fordcarrier": {
+      "name": "USS Gerald R. Ford",
+      "desc": "World's largest warship. 90 aircraft, nuclear powered."
+    },
+    "virginiaclass": {
+      "name": "Virginia-class SSN",
+      "desc": "US nuclear submarine. Tomahawk cruise missile + Mk48 torpedo."
+    },
+    "stinger": {
+      "name": "FIM-92 Stinger",
+      "desc": "US shoulder-fired short-range air defense system."
+    },
+    "iglaS": {
+      "name": "9K338 Igla-S",
+      "desc": "Russian advanced man-portable air defense system."
+    },
+    "hisarA": {
+      "name": "HISAR-A+",
+      "desc": "Turkish low-medium altitude short-range SAM. 15km range."
+    },
+    "hisarO": {
+      "name": "HISAR-O+",
+      "desc": "Turkish medium-range air defense system. 25km range."
+    },
+    "ironDome": {
+      "name": "Iron Dome",
+      "desc": "Israeli rocket/missile interception system. 90% success rate."
+    },
+    "patriotPac3": {
+      "name": "Patriot PAC-3 MSE",
+      "desc": "US medium-long range SAM. Ballistic missile interception capable."
+    },
+    "siper": {
+      "name": "SIPER",
+      "desc": "Turkish national long-range SAM. 100+ km range."
+    },
+    "s500": {
+      "name": "S-500 Prometheus",
+      "desc": "Russian next-gen long-range SAM. 600km range."
+    },
+    "thaad": {
+      "name": "THAAD",
+      "desc": "US high altitude ballistic missile defense system."
+    }
+  },
+  "missions": {
+    "rewardClaimed": "🎯 Mission reward claimed!",
+    "m_hq_1": {
+      "title": "Strengthen Command",
+      "desc": "Upgrade the Headquarters."
+    },
+    "m_train_10": {
+      "title": "Train First Soldiers",
+      "desc": "Train 10 units."
+    },
+    "m_upgrade_3": {
+      "title": "Expand the Base",
+      "desc": "Upgrade any 3 buildings."
+    },
+    "m_houses": {
+      "title": "Develop Housing",
+      "desc": "Upgrade Houses and increase rent income."
+    },
+    "m_research_1": {
+      "title": "First Research",
+      "desc": "Complete any research."
+    },
+    "m_train_kirpi": {
+      "title": "First Armored Vehicle",
+      "desc": "Train a BMC Kirpi MRAP."
+    },
+    "m_train_tb2": {
+      "title": "First Drone",
+      "desc": "Train a Bayraktar TB2."
+    },
+    "m_first_attack": {
+      "title": "First Strike",
+      "desc": "Attack an enemy target."
+    },
+    "m_donate_1": {
+      "title": "Alliance Donation",
+      "desc": "Donate to your alliance once."
+    },
+    "m_train_heybeliada": {
+      "title": "Set Sail",
+      "desc": "Train a TCG Heybeliada."
+    },
+    "m_upgrade_5": {
+      "title": "Major Construction",
+      "desc": "Upgrade 5 buildings total."
+    },
+    "m_train_50": {
+      "title": "Build an Army",
+      "desc": "Train 50 units total."
+    },
+    "m_win_3": {
+      "title": "War Hero",
+      "desc": "Win 3 attacks."
+    },
+    "m_research_3": {
+      "title": "Path of Science",
+      "desc": "Complete 3 researches."
+    },
+    "m_train_altay": {
+      "title": "National Pride",
+      "desc": "Train an Altay tank."
+    },
+    "m_hq_5": {
+      "title": "HQ Lv.5",
+      "desc": "Upgrade HQ to Level 5."
+    },
+    "m_train_himars": {
+      "title": "Precision Strike",
+      "desc": "Train an M142 HIMARS."
+    },
+    "m_donate_5": {
+      "title": "Alliance Supporter",
+      "desc": "Donate to your alliance 5 times."
+    },
+    "m_train_akinci": {
+      "title": "Akinci Takes Flight",
+      "desc": "Train a Bayraktar Akinci UCAV."
+    },
+    "m_upgrade_oil": {
+      "title": "Oil Baron",
+      "desc": "Upgrade Oil Field 3 times."
+    },
+    "m_upgrade_10": {
+      "title": "Master Engineer",
+      "desc": "Upgrade 10 buildings total."
+    },
+    "m_train_t14": {
+      "title": "Next-Gen Armor",
+      "desc": "Train a T-14 Armata."
+    },
+    "m_train_f16": {
+      "title": "Jet Power",
+      "desc": "Train an F-16 Block 70 Viper."
+    },
+    "m_win_5": {
+      "title": "Commander",
+      "desc": "Win 5 attacks."
+    },
+    "m_research_5": {
+      "title": "Tech Expert",
+      "desc": "Complete 5 researches."
+    },
+    "m_train_100": {
+      "title": "Army Commander",
+      "desc": "Train 100 units total."
+    },
+    "m_train_milgem": {
+      "title": "National Ship",
+      "desc": "Train a TCG Istanbul F-515."
+    },
+    "m_train_irondome": {
+      "title": "Iron Dome",
+      "desc": "Train an Iron Dome air defense system."
+    },
+    "m_upgrade_bank": {
+      "title": "Banker",
+      "desc": "Upgrade Bank 3 times."
+    },
+    "m_donate_10": {
+      "title": "Alliance Pillar",
+      "desc": "Donate to your alliance 10 times."
+    },
+    "m_hq_10": {
+      "title": "HQ Lv.10",
+      "desc": "Upgrade HQ to Level 10."
+    },
+    "m_train_f35": {
+      "title": "5th Gen Power",
+      "desc": "Train an F-35A Lightning II."
+    },
+    "m_train_kaan": {
+      "title": "National Fighter",
+      "desc": "Train a KAAN (TF-X)."
+    },
+    "m_train_kizilelma": {
+      "title": "Kizilelma Takes Off",
+      "desc": "Train a Bayraktar Kizilelma."
+    },
+    "m_win_10": {
+      "title": "Conqueror",
+      "desc": "Win 10 attacks."
+    },
+    "m_research_10": {
+      "title": "Scientist",
+      "desc": "Complete 10 researches."
+    },
+    "m_train_200": {
+      "title": "Grand Army",
+      "desc": "Train 200 units total."
+    },
+    "m_upgrade_20": {
+      "title": "Construction King",
+      "desc": "Upgrade 20 buildings total."
+    },
+    "m_train_s500": {
+      "title": "Prometheus Shield",
+      "desc": "Train an S-500 Prometheus."
+    },
+    "m_train_virginia": {
+      "title": "Shadow of the Deep",
+      "desc": "Train a Virginia-class nuclear submarine."
+    },
+    "m_hq_15": {
+      "title": "HQ Lv.15",
+      "desc": "Upgrade HQ to Level 15."
+    },
+    "m_train_b21": {
+      "title": "Stealth Bomber",
+      "desc": "Train a B-21 Raider."
+    },
+    "m_train_ford": {
+      "title": "Carrier Fleet",
+      "desc": "Train a USS Gerald R. Ford."
+    },
+    "m_win_20": {
+      "title": "Warlord",
+      "desc": "Win 20 attacks."
+    },
+    "m_research_20": {
+      "title": "Science Genius",
+      "desc": "Complete 20 researches."
+    },
+    "m_train_500": {
+      "title": "Imperial Army",
+      "desc": "Train 500 units total."
+    },
+    "m_upgrade_50": {
+      "title": "Mega Construction",
+      "desc": "Upgrade 50 buildings total."
+    },
+    "m_hq_20": {
+      "title": "HQ Lv.20",
+      "desc": "Upgrade HQ to max level."
+    },
+    "m_win_50": {
+      "title": "Legendary Commander",
+      "desc": "Win 50 attacks."
+    },
+    "m_research_all": {
+      "title": "Full Technology",
+      "desc": "Complete all 28 researches."
+    }
+  },
+  "targets": {
+    "target_001": {
+      "name": "Desert Outpost",
+      "player": "CPU - Northern Army"
+    },
+    "target_002": {
+      "name": "Oil Terminal",
+      "player": "CPU - Western Front"
+    },
+    "target_003": {
+      "name": "Mining Camp",
+      "player": "CPU - Southern Forces"
+    },
+    "target_004": {
+      "name": "Sandstorm Base",
+      "player": "CPU - Eastern Alliance"
+    },
+    "target_005": {
+      "name": "Mountain Pass",
+      "player": "CPU - Central Forces"
+    },
+    "target_006": {
+      "name": "Fuel Depot",
+      "player": "CPU - Fuel Division"
+    },
+    "target_007": {
+      "name": "Steel Factory",
+      "player": "CPU - Industry Group"
+    },
+    "target_008": {
+      "name": "Harbor Defense",
+      "player": "CPU - Naval Forces"
+    },
+    "target_009": {
+      "name": "Iron Shield Outpost",
+      "player": "CPU - Fortress Garrison"
+    },
+    "target_010": {
+      "name": "Air Base Alpha",
+      "player": "CPU - Air Force"
+    },
+    "target_011": {
+      "name": "Coastal Battery",
+      "player": "CPU - Coastal Defense"
+    },
+    "target_012": {
+      "name": "Command Bunker",
+      "player": "CPU - Elite Guard"
+    },
+    "target_013": {
+      "name": "Nuclear Silo",
+      "player": "CPU - Strategic Forces"
+    },
+    "target_014": {
+      "name": "Supreme Command",
+      "player": "CPU - High Command"
+    },
+    "target_015": {
+      "name": "Last Fortress",
+      "player": "CPU - Immortal Legion"
+    }
+  },
+  "help": {
+    "pageTitle": "Help & Info",
+    "tabs": {
+      "guide": {
+        "label": "Beginner's Guide",
+        "desc": "First steps — what to do and where to start"
+      },
+      "resources": {
+        "label": "Resources & Economy",
+        "desc": "Cash, oil, ore, gold — production and usage"
+      },
+      "buildings": {
+        "label": "Buildings Table",
+        "desc": "All building levels, categories and costs"
+      },
+      "hqLevels": {
+        "label": "HQ Levels",
+        "desc": "Features unlocked at each level and upgrade costs"
+      },
+      "combat": {
+        "label": "Combat Rules",
+        "desc": "Battle mechanics, loot, losses and cross-table rules"
+      },
+      "pvp": {
+        "label": "PvP & Rankings",
+        "desc": "Ranking system, attack rules, cooldown and revenge"
+      },
+      "birlik": {
+        "label": "Squad Guide",
+        "desc": "Creating, managing and using squads in battle"
+      },
+      "takas": {
+        "label": "Bank & Exchange",
+        "desc": "Buying resources with gold and bank interest"
+      },
+      "quests": {
+        "label": "Missions & Tips",
+        "desc": "50 mission system and strategy tips"
+      },
+      "crossTable": {
+        "label": "Cross Table",
+        "desc": "Unit combat interaction matrix"
+      },
+      "allianceWar": {
+        "label": "Alliance Wars",
+        "desc": "Alliance war mechanics, rules and strategy tips"
+      },
+      "units": {
+        "label": "Units Table",
+        "desc": "Detailed info on all military units"
+      }
+    },
+    "buildingsTitle": "Buildings",
+    "catMilitary": "⚔️ Military",
+    "catEconomy": "💰 Economy",
+    "catSupport": "🔧 Support",
+    "hqLevelsTitle": "HQ Levels",
+    "hqFeature1": "Starting",
+    "hqFeature5": "Medium targets unlocked",
+    "hqFeature10": "Hard targets unlocked",
+    "hqFeature15": "Elite targets unlocked",
+    "hqFeature20": "Final targets unlocked",
+    "timeMinutes": "{{m}}m",
+    "timeHoursMinutes": "{{h}}h {{m}}m",
+    "timeDaysHours": "{{d}}d {{h}}h",
+    "crossTableTitle": "CROSS TABLE",
+    "interactionCanAttack": "Attacks Without Counter-Attack",
+    "interactionMutual": "Both Units Attack Each Other",
+    "interactionGetsAttacked": "Cannot Attack But Receives Counter-Attack",
+    "interactionNone": "Neither Unit Can Attack the Other",
+    "badgeCanAttack": "⚔️ Attacks",
+    "badgeMutual": "🔄 Mutual",
+    "badgeGetsAttacked": "🛡️ Gets Attacked",
+    "badgeNone": "— None",
+    "selectUnit": "Select a unit:",
+    "interactions": "Interactions",
+    "unitsTitle": "All Units ({{count}})",
+    "colUnit": "Unit",
+    "colAtk": "ATK",
+    "colDef": "DEF",
+    "colBranch": "Branch",
+    "colMinLv": "Min Lv",
+    "guideTitle": "Welcome, Commander!",
+    "guideIntro": "War Nexus is a military strategy game. Build your base, create your army, research technologies and defeat your rivals. Here are your first steps:",
+    "guideStep1Title": "1. Upgrade Headquarters",
+    "guideStep1Desc": "Headquarters is the foundation of all buildings and capacities. As it levels up, you can produce stronger units and store more. Always prioritize upgrading HQ.",
+    "guideStep2Title": "2. Build Resource Buildings",
+    "guideStep2Desc": "Oil Field, Mine, and Houses produce resources continuously. Bank earns interest on your cash. Upgrading these buildings is crucial in the long run.",
+    "guideStep3Title": "3. Train Your First Soldiers",
+    "guideStep3Desc": "Start producing infantry units from Barracks. Unit training requires resources and time. Each building has its own unit capacity — tied to HQ level.",
+    "guideStep4Title": "4. Research",
+    "guideStep4Desc": "Unlock new technologies and units from Research Lab. Each completed research gives +12% attack bonus.",
+    "guideStep5Title": "5. Create Squads",
+    "guideStep5Desc": "Create squads from HQ > Operations tab. You can add different unit types to a squad. You go to battle with squads.",
+    "guideStep6Title": "6. Fight!",
+    "guideStep6Desc": "View your rivals from Rankings and attack. You can attack players within ±5 of your rank. Win to earn resources and power.",
+    "guideStep7Title": "7. Track Missions",
+    "guideStep7Desc": "Complete 50 different missions from the Missions tab. Each mission rewards resources and gold. Missions guide you in the right direction.",
+    "resourcesTitle": "Resources",
+    "resourceCapacity": "Capacity: {{cap}}",
+    "resourceSource": "Source: {{source}}",
+    "resourceUsage": "Usage: {{usage}}",
+    "cashSource": "Houses (production) + Bank (interest)",
+    "cashUsage": "Building upgrades, unit training, research",
+    "oilSource": "Oil Field",
+    "oilUsage": "Building upgrades, unit training, research",
+    "oreSource": "Mine",
+    "oreUsage": "Building upgrades, unit training, research",
+    "goldSource": "Missions + Purchase",
+    "goldUsage": "Speed-ups, Bank exchange",
+    "economyTipsTitle": "Economy Tips",
+    "economyTip1": "• Upgrade Bank level — each level increases interest rate (+0.4%/hr/level)",
+    "economyTip2": "• Upgrade resource buildings — each level increases hourly production",
+    "economyTip3": "• Use Bank exchange with gold for emergency resource needs",
+    "economyTip4": "• Win battles to take 20% of your rival's resources",
+    "combatTitle": "Combat Rules",
+    "combatRule1Title": "Cross Table",
+    "combatRule1Desc": "Each unit branch has advantages/disadvantages against others. For example, infantry is weak against tanks, air defense is strong against aircraft. Check the Cross Table section for details.",
+    "combatRule2Title": "Winner & Loser",
+    "combatRule2Desc": "Both sides lose units equal to the opponent's unit count. The winner's advantage: resource and power transfer goes to the winner.",
+    "combatRule3Title": "Resource Transfer",
+    "combatRule3Desc": "After battle, 20% of the loser's resources and power are transferred to the winner.",
+    "combatRule4Title": "Protection Shield",
+    "combatRule4Desc": "A defending player who loses gets a 4-hour protection shield — they cannot be attacked during this time.",
+    "combatRule5Title": "War Power",
+    "combatRule5Desc": "warPower increases when you win and decreases when you lose. warPower cannot exceed your base power (buildings+units+research) — maximum 2x multiplier.",
+    "combatRule6Title": "Player Power",
+    "combatRule6Desc": "Total power = Building Power + Unit Power + Research Power + warPower (capped). This value is used for rankings.",
+    "tierPowerTitle": "Unit Tier Power Values",
+    "tierPower1": "• Tier 1 unit = 10 power points",
+    "tierPower2": "• Tier 2 unit = 30 power points",
+    "tierPower3": "• Tier 3 unit = 60 power points",
+    "pvpTitle": "PvP & Rankings",
+    "pvpRule1Title": "Rankings",
+    "pvpRule1Desc": "All players are ranked by Player Power. Top 100 is shown. If you're below 100, you also see your region (±10).",
+    "pvpRule2Title": "±5 Attack Range",
+    "pvpRule2Desc": "You can only attack players 5 above and 5 below your rank. Those outside the range are shown faded.",
+    "pvpRule3Title": "Cooldown (4 Hours)",
+    "pvpRule3Desc": "If you attack a player and WIN, you cannot attack the same player for 4 hours. If you lose, you can attack again immediately.",
+    "pvpRule4Title": "Revenge 🔥",
+    "pvpRule4Desc": "If you defeat an attacker in defense, you earn revenge rights against that player. Revenge attack bypasses the ±5 rule. If you win revenge too, 4-hour cooldown starts.",
+    "pvpRule5Title": "Attack Process",
+    "pvpRule5Desc": "1) Choose rival from Rankings\n2) Select squad (pre-created)\n3) Press ATTACK button\n4) March timer expires\n5) Battle auto-resolves\n6) Result report shown",
+    "pvpRule6Title": "Coordinate System",
+    "pvpRule6Desc": "Each player has a unique coordinate in X.Y.Z format. Coordinates determine map position.",
+    "squadTitle": "Squad Guide",
+    "squadRule1Title": "What is a Squad?",
+    "squadRule1Desc": "A squad is a military group you send to battle. It can consist of different unit types. You go to battle with squads — you cannot send units directly.",
+    "squadRule2Title": "Creating Squads",
+    "squadRule2Desc": "Press \"Create Squad\" from HQ > Operations tab. Name your squad and add from your available units.",
+    "squadRule3Title": "Adding Units",
+    "squadRule3Desc": "Add units with ±1, ±10, ±100 buttons or by typing a number. You cannot add more than your available count.",
+    "squadRule4Title": "Squad Capacity",
+    "squadRule4Desc": "You can create up to 5 squads at once. Each squad can have any number of units (limited by your inventory).",
+    "squadRule5Title": "Using in Battle",
+    "squadRule5Desc": "When attacking from Rankings, choose which squads to send. You can select multiple squads. All selected squads' units are combined to calculate attack power.",
+    "squadRule6Title": "After Battle",
+    "squadRule6Desc": "If you win, units stay in the squad. If you lose, the squad and all its units are destroyed.",
+    "bankTitle": "Bank & Exchange",
+    "bankInterestTitle": "Bank Interest",
+    "bankInterestDesc": "Bank earns hourly interest on your current cash. Each level increases interest rate by +0.4%/hr. For example, Lv.10 Bank = 4%/hr interest.",
+    "bankExchangeTitle": "Gold Exchange",
+    "bankExchangeDesc": "You can buy resources by spending gold from the Bank building's \"Exchange\" tab.",
+    "bankRatesTitle": "Base Rates (Lv.1)",
+    "bankRate1": "• 1 🪙 = 500 💵",
+    "bankRate2": "• 1 🪙 = 200 🛢️",
+    "bankRate3": "• 1 🪙 = 150 ⛏️",
+    "bankBonusTitle": "Rate Bonus",
+    "bankBonusDesc": "Rates improve as Bank level increases (+10% per level). At Lv.10, 100% bonus — meaning 1 gold = 1,000 cash!",
+    "bankSpeedTitle": "Gold Speed-Up",
+    "bankSpeedDesc": "You can instantly complete building upgrades, research and unit training by spending gold. Cost varies by time/level.",
+    "questsTitle": "Missions",
+    "questSystemTitle": "50 Mission System",
+    "questSystemDesc": "There are 50 different missions in the game. First 10 are open from the start, each completed mission unlocks the next. Missions include objectives like building upgrades, unit training, research, and winning battles.",
+    "questRewardsTitle": "Rewards",
+    "questRewardsDesc": "Each mission gives cash, oil and ore rewards. Some milestone missions also give gold (50 gold total).",
+    "strategyTitle": "Strategy Tips",
+    "earlyGameTitle": "Early Game (HQ 1-5)",
+    "earlyTip1": "• Upgrade HQ as fast as possible",
+    "earlyTip2": "• Invest in resource buildings — increases long-term income",
+    "earlyTip3": "• Produce Tier 1 units and complete missions",
+    "earlyTip4": "• Spend gold carefully — it's the most valuable resource",
+    "midGameTitle": "Mid Game (HQ 6-12)",
+    "midTip1": "• Research bonuses make a big difference — advance in every branch",
+    "midTip2": "• Switch to Tier 2 units — best power/cost ratio",
+    "midTip3": "• Create multiple squads — try different compositions",
+    "midTip4": "• Upgrade Defense Tower — reduces losses by 4%/level",
+    "lateGameTitle": "Late Game (HQ 13-20)",
+    "lateTip1": "• Produce Tier 3 units — strongest but most expensive",
+    "lateTip2": "• Learn the cross table — right unit combination wins battles",
+    "lateTip3": "• Climb PvP rankings — each battle earns warPower",
+    "lateTip4": "• Use Bank exchange — get emergency resources with gold",
+    "generalTipsTitle": "General Tips",
+    "generalTip1": "• Only 1 building can be upgraded at a time — plan the order well",
+    "generalTip2": "• Diverse unit composition is stronger than a single-type army",
+    "generalTip3": "• Check your rival's power and win chance before attacking",
+    "generalTip4": "• You can attack again immediately after losing a battle",
+    "generalTip5": "• Use your revenge rights — surprise attack the rival who beat you",
+    "allianceWarTitle": "⚔️ Alliance War Rules",
+    "awRule1Title": "Declaring War",
+    "awRule1Desc": "The alliance leader or officer can declare war on a rival alliance from the alliance menu. Wars last 24 hours.",
+    "awRule2Title": "Scoring System",
+    "awRule2Desc": "During the war, members of both alliances attack each other. Each victory earns points for your alliance. The alliance with the higher total score at the end wins.",
+    "awRule3Title": "Participation",
+    "awRule3Desc": "All alliance members are automatically enlisted in the war. You can attack enemy alliance members.",
+    "awRule4Title": "Shield Ban",
+    "awRule4Desc": "Protection shields cannot be purchased during an alliance war. Existing shields remain valid.",
+    "awRule5Title": "Rewards",
+    "awRule5Desc": "All members of the winning alliance receive resource and gold rewards. The losing alliance also receives a participation reward.",
+    "awRule6Title": "Cooldown",
+    "awRule6Desc": "After an alliance war ends, no new war can be declared for 24 hours.",
+    "awStrategyTitle": "💡 Strategy Tips",
+    "awTip1": "• Make sure all members finish unit production before war starts",
+    "awTip2": "• Direct strong members against weak opponents — easy points",
+    "awTip3": "• Prepare multiple squads — you'll need reserves after losses",
+    "awTip4": "• Upgrade Defense Tower — reduces losses",
+    "awTip5": "• Coordinate attacks — apply pressure on multiple fronts simultaneously",
+    "awTip6": "• Push to close the score gap in the final hours — rivals may get complacent"
+  },
+  "dm": {
+    "title": "Messages",
+    "empty": "No messages yet",
+    "noConversations": "No conversations yet",
+    "placeholder": "Type a message...",
+    "send": "Send",
+    "sending": "...",
+    "sendMessage": "Send Message",
+    "unread": "unread",
+    "online": "Online",
+    "offline": "Offline",
+    "deleteConversation": "Delete Conversation",
+    "deleteConfirmTitle": "Delete Conversation",
+    "deleteConfirmMsg": "This conversation will be permanently deleted. Are you sure?",
+    "blocked": "Blocked",
+    "timeJustNow": "Just now",
+    "timeMinutesAgo": "{{n}}m ago",
+    "timeHoursAgo": "{{n}}h ago",
+    "timeDaysAgo": "{{n}}d ago",
+    "newMessage": "New Message",
+    "searchPlaceholder": "Search player...",
+    "noResults": "Player not found",
+    "spamWarning": "You are sending messages too fast. Please wait.",
+    "messageTooLong": "Message too long (max 200 characters)"
+  }
+}

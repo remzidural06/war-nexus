@@ -1,0 +1,295 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git branch*)",
+      "Bash(git rev-parse*)",
+      "Bash(ls *)",
+      "Bash(dir *)",
+      "Bash(npx tsc*)",
+      "Bash(adb reverse:*)",
+      "Bash(curl -s http://localhost:8081/status)",
+      "Read(//mnt/c/Users/User/**)",
+      "Read(//c/Users/User/Downloads/**)",
+      "Bash(cmd.exe /c \"c:\\\\Users\\\\User\\\\Downloads\\\\python-3.13.12-amd64.exe /passive InstallAllUsers=1 PrependPath=1 Include_test=0\")",
+      "Bash(cmd.exe /c \"python --version\")",
+      "Bash(cmd.exe /c \"where python & python --version\")",
+      "Bash(cmd.exe /c \"py --version\")",
+      "Read(//mnt/c/Program Files/**)",
+      "Bash(cmd.exe /c \"python --version && pip --version\")",
+      "Bash(powershell.exe -Command \"Get-Command python -ErrorAction SilentlyContinue | Select-Object Source; python --version\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem ''C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Programs\\\\'' -ErrorAction SilentlyContinue | Select Name\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem ''C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\'' | Select Name\")",
+      "Bash(PYTHON=\"C:/Users/User/AppData/Local/Programs/Python/Python313/python.exe\")",
+      "Bash(\"$PYTHON\" --version)",
+      "Bash(\"$PYTHON\" -m pip --version)",
+      "Bash(powershell.exe -Command \"Test-Path ''C:\\\\Program Files\\\\7-Zip\\\\7z.exe''\")",
+      "Bash(powershell.exe -Command \"Test-Path ''C:\\\\ComfyUI''\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem ''C:\\\\ComfyUI'' | Select Name\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem ''C:\\\\ComfyUI\\\\ComfyUI_windows_portable'' | Select Name\")",
+      "Bash(powershell.exe -Command \"where.exe aria2c 2>nul; Test-Path ''C:\\\\Program Files\\\\aria2\\\\aria2c.exe''; Get-Command aria2c -ErrorAction SilentlyContinue | Select Source\")",
+      "Bash(powershell.exe -Command \":*)",
+      "Bash(npx jest:*)",
+      "Bash(powershell.exe -Command \"Start-Process ''C:\\\\ComfyUI\\\\ComfyUI_windows_portable\\\\run_nvidia_gpu.bat'' -WorkingDirectory ''C:\\\\ComfyUI\\\\ComfyUI_windows_portable''\")",
+      "Bash(powershell.exe -Command \"Get-Content ''C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User-WarStrike-mobiloyun\\\\0b01fa1b-d411-412d-9972-47e687eaad5b\\\\tasks\\\\b0mlclsvl.output'' -Encoding UTF8\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem ''C:\\\\Users\\\\User\\\\WarStrike\\\\mobiloyun\\\\src\\\\assets\\\\base\\\\terrain'' -ErrorAction SilentlyContinue | Select Name, @{N=''KB'';E={[math]::Round\\($_.Length/1KB\\)}}\")",
+      "Bash(powershell.exe -Command \"Get-Content ''C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User-WarStrike-mobiloyun\\\\0b01fa1b-d411-412d-9972-47e687eaad5b\\\\tasks\\\\bhj6e03y1.output''\")",
+      "Bash(powershell.exe -Command \"Get-Content ''C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User-WarStrike-mobiloyun\\\\0b01fa1b-d411-412d-9972-47e687eaad5b\\\\tasks\\\\b88multrj.output'' -Encoding UTF8\")",
+      "Bash(curl -s \"https://en.wikipedia.org/api/rest_v1/page/summary/Lockheed_Martin_F-35_Lightning_II\")",
+      "Bash(python3:*)",
+      "WebFetch(domain:en.wikipedia.org)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Lockheed_Martin_F-35_Lightning_II)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Lockheed_Martin_F-22_Raptor)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Sukhoi_Su-57)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Bayraktar_Kızılelma)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/TAI_TF-X)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Chengdu_J-20)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Dassault_Rafale)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Eurofighter_Typhoon)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Sukhoi_Su-35)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Saab_JAS_39_Gripen)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Shenyang_J-16)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/General_Dynamics_F-16_Fighting_Falcon)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/McDonnell_Douglas_F/A-18_Hornet)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Northrop_Grumman_B-2_Spirit)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Northrop_Grumman_B-21_Raider)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Bayraktar_TB2)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Bayraktar_TB3)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/General_Atomics_MQ-9_Reaper)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/IAI_Harop)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/AeroVironment_Switchblade)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Kratos_XQ-58_Valkyrie)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Boeing_AH-64_Apache)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/TAI/AgustaWestland_T129)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Kamov_Ka-52)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Mil_Mi-28)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Sikorsky_UH-60_Black_Hawk)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/T-14_Armata)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/T-90)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Leopard_2)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/M1_Abrams)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/K2_Black_Panther_%28tank%29)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Altay_%28tank%29)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Merkava)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Bradley_Fighting_Vehicle)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Infantry_Fighting_Vehicle_Puma)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/BMC_Kirpi)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Otokar_Cobra)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/M142_HIMARS)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/T-155_Fırtına)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/T-122_Sakarya)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/FNSS_Kaplan)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/TCG_Heybeliada)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/MILGEM_project)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/TF-2000)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Type_125_frigate)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Arleigh_Burke-class_destroyer)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Zumwalt-class_destroyer)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Type_055_destroyer)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Queen_Elizabeth-class_aircraft_carrier)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Gerald_R._Ford-class_aircraft_carrier)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Constellation-class_frigate)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Type_212_submarine)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Virginia-class_submarine)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Iron_Dome)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Terminal_High_Altitude_Area_Defense)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/MIM-104_Patriot)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/S-500_missile_system)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/HİSAR_%28missile%29)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/FIM-92_Stinger)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/9K338_Igla-S)",
+      "Bash(curl -s -H 'User-Agent: Mozilla/5.0' https://en.wikipedia.org/api/rest_v1/page/summary/Roketsan_Siper)",
+      "WebSearch",
+      "WebFetch(domain:commons.wikimedia.org)",
+      "WebFetch(domain:upload.wikimedia.org)",
+      "WebFetch(domain:wsrv.nl)",
+      "WebFetch(domain:pixabay.com)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{content_type} %{url_effective}\" \"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Navy_PASKAL_rifleman_with_HK416-SD_Maritime_Assault_Rifle_5.56mm_during_57th_NDP.JPG/320px-Navy_PASKAL_rifleman_with_HK416-SD_Maritime_Assault_Rifle_5.56mm_during_57th_NDP.JPG\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{content_type}\" -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36\" \"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Navy_PASKAL_rifleman_with_HK416-SD_Maritime_Assault_Rifle_5.56mm_during_57th_NDP.JPG/320px-Navy_PASKAL_rifleman_with_HK416-SD_Maritime_Assault_Rifle_5.56mm_during_57th_NDP.JPG\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{content_type}\" -A \"Mozilla/5.0\" \"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Soldier_M249_Iraq.JPG/320px-Soldier_M249_Iraq.JPG\")",
+      "Bash(curl -s -A \"WarnexusGameBot/1.0\" \"https://commons.wikimedia.org/w/api.php?action=query&titles=File:Soldier_M249_Iraq.JPG%7CFile:Australian_soldier_firing_an_EF88_assault_rifle_in_2018.jpg&prop=imageinfo&iiprop=url&format=json\")",
+      "WebFetch(domain:www.dvidshub.net)",
+      "WebFetch(domain:www.wikidata.org)",
+      "WebFetch(domain:www.jetphotos.com)",
+      "WebFetch(domain:handwiki.org)",
+      "WebFetch(domain:www.military.africa)",
+      "WebFetch(domain:d1ldvf68ux039x.cloudfront.net)",
+      "WebFetch(domain:www.airforce-technology.com)",
+      "Read(//c/Users/User/.claude/projects/c--Users-User-WarStrike-mobiloyun/0b01fa1b-d411-412d-9972-47e687eaad5b/subagents/**)",
+      "Bash(npx react-native:*)",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(./gradlew.bat app:installDebug -PreactNativeDevServerPort=8081)",
+      "Bash(adb shell:*)",
+      "Bash(curl -sI -L \"https://upload.wikimedia.org/wikipedia/commons/b/b0/M2A2_Bradley_at_Ft_Irwin.jpg\")",
+      "Bash(curl -s \"https://commons.wikimedia.org/w/api.php?action=query&list=categorymembers&cmtitle=Category:M2A4_Bradley&cmtype=file&cmlimit=10&format=json\")",
+      "Bash(curl -s \"https://commons.wikimedia.org/w/api.php?action=query&titles=File:M2A4_Bradley_Fighting_Vehicle.jpg&prop=imageinfo&iiprop=url&format=json\")",
+      "Bash(curl -sI \"https://upload.wikimedia.org/wikipedia/commons/f/f3/M2A4_Bradley_Fighting_Vehicle.jpg\")",
+      "Bash(curl -sI \"https://wsrv.nl/?url=upload.wikimedia.org/wikipedia/commons/f/f3/M2A4_Bradley_Fighting_Vehicle.jpg&w=120&h=80&fit=cover&q=70\")",
+      "Bash(curl -sI \"https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/f/f3/M2A4_Bradley_Fighting_Vehicle.jpg&w=120&h=80&fit=cover&q=70\")",
+      "Bash(curl -sI \"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/M2A4_Bradley_Fighting_Vehicle.jpg/240px-M2A4_Bradley_Fighting_Vehicle.jpg\")",
+      "Bash(curl -sL \"https://upload.wikimedia.org/wikipedia/commons/f/f3/M2A4_Bradley_Fighting_Vehicle.jpg\" -o src/assets/base/units/bradley.jpg)",
+      "Bash(curl -sI \"https://wsrv.nl/?url=commons.wikimedia.org/wiki/Special:FilePath/Harimau_Medium_Tank_Web_1_resize.jpg&w=120&h=80&fit=cover&q=70\")",
+      "Bash(curl -sI \"https://wsrv.nl/?url=commons.wikimedia.org/wiki/Special:FilePath/M2A4_Bradley_Fighting_Vehicle.jpg&w=120&h=80&fit=cover&q=70\")",
+      "Bash(curl -sI \"https://wsrv.nl/?url=commons.wikimedia.org/wiki/Special:FilePath/Voorzijde_van_een_Stinger_lanceerbuis_met_richt-afvuurapparatuur_\\(2086-065-004\\).jpg&w=120&h=80&fit=cover&q=70\")",
+      "Bash(curl -s \"https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=paratrooper+airborne&srnamespace=6&srlimit=5&format=json\")",
+      "Read(//c/Users/User/WarStrike/mobiloyun/**)",
+      "Read(//c/Users/data/**)",
+      "Read(//tmp/**)",
+      "Bash(curl -sI \"https://commons.wikimedia.org/wiki/Special:FilePath/Combat_engineers_conduct_night_tactical_breach_exercise_at_African_Lion_25_\\(8993494\\).jpg\")",
+      "Bash(curl -sI -L \"https://commons.wikimedia.org/wiki/Special:FilePath/Combat_engineers_conduct_night_tactical_breach_exercise_at_African_Lion_25_\\(8993494\\).jpg\")",
+      "Bash(find /c/Users/User/WarStrike/mobiloyun -name *.test.ts -o -name *.test.tsx)",
+      "Bash(find /c/Users/User/WarStrike/mobiloyun/src/assets -type f \\\\\\(-name *.mp3 -o -name *.wav -o -name *.m4a \\\\\\))",
+      "Bash(npm install:*)",
+      "Bash(./gradlew.bat app:assembleDebug)",
+      "Bash(./gradlew.bat signingReport)",
+      "Bash(./gradlew.bat assembleRelease)",
+      "Bash(./gradlew.bat assembleRelease --stacktrace)",
+      "Bash(find c:/Users/User/WarStrike/mobiloyun/node_modules/react-native/sdks -name hermesc*)",
+      "Bash(adb logcat:*)",
+      "Bash(./gradlew.bat clean:*)",
+      "Bash(node -e \":*)",
+      "Bash(gh auth:*)",
+      "Bash(where gh:*)",
+      "Bash(find c:/Users/User/WarStrike/mobiloyun/node_modules -path */hermes* -name *.exe)",
+      "Bash(./gradlew.bat assembleDebug)",
+      "WebFetch(domain:borank-prog.github.io)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npx vite:*)",
+      "Bash(npx firebase:*)",
+      "Bash(curl -s \"https://firestore.googleapis.com/v1/projects/war-nexus-dae64/databases/\\(default\\)/documents/players?pageSize=20\")",
+      "Bash(curl -s \"https://firestore.googleapis.com/v1/projects/war-nexus-dae64/databases/\\(default\\)/documents/players\")",
+      "Bash(node -e \"require\\(''react-native-web''\\); console.log\\(''rnw ok''\\)\")",
+      "Bash(node -e \"require\\(''react-dom''\\); console.log\\(''react-dom ok''\\)\")",
+      "Bash(node -e \"require\\(''vite''\\); console.log\\(''vite ok''\\)\")",
+      "Bash(npx gh-pages:*)",
+      "Bash(git config:*)",
+      "Bash(grep -o \"_baseScene[^;]*\" c:/Users/User/WarStrike/mobiloyun/dist/assets/index-*.js)",
+      "Bash(grep -o \"base_scene[^\"\"]*\" c:/Users/User/WarStrike/mobiloyun/dist/assets/index-*.js)",
+      "Bash(find /c/Users/User/WarStrike/mobiloyun -name *.html -o -name index.web.js -o -name .babelrc)",
+      "Read(//c/Users/User/WarStrikemobiloyun/src/screens/**)",
+      "Bash(find /c/Users/User/WarStrike/mobiloyun/src/web -name *.ts -o -name *.tsx)",
+      "Bash(xargs ls:*)",
+      "Bash(npm list:*)",
+      "Bash(curl -s \"https://firestore.googleapis.com/v1/projects/war-nexus-dae64/databases/\\(default\\)/documents/playerBases?pageSize=5\")",
+      "Bash(curl -s \"https://firestore.googleapis.com/v1/projects/war-nexus-dae64/databases/\\(default\\)/documents/players?pageSize=5\")",
+      "Bash(adb devices:*)",
+      "Bash($ANDROID_HOME/emulator/emulator -list-avds)",
+      "Bash(adb wait-for-device:*)",
+      "Bash(./gradlew installDebug)",
+      "Bash(adb uninstall:*)",
+      "Bash(adb install:*)",
+      "Bash(keytool -list -v -keystore android/app/debug.keystore -alias androiddebugkey -storepass android)",
+      "Bash(npm run:*)",
+      "Bash(emulator -list-avds)",
+      "Read(//c/Users/User/WarStrike/mobiloyun/$LOCALAPPDATA/Android/Sdk/emulator/**)",
+      "Bash(\"$LOCALAPPDATA/Android/Sdk/emulator/emulator\" -list-avds)",
+      "Bash(netsh advfirewall:*)",
+      "Bash(find /c/Users/User/WarStrike/mobiloyun -type f -name *pvp* -o -name *battle* -o -name *defense*)",
+      "Bash(powershell -Command \"Set-MpPreference -DisableRealtimeMonitoring $true -MAPSReporting Disabled -SubmitSamplesConsent NeverSend -DisableBehaviorMonitoring $true -DisableIOAVProtection $true -DisableScriptScanning $true\")",
+      "Bash(powershell -Command \"Set-MpPreference -DisableRealtimeMonitoring 1\")",
+      "Bash(powershell -Command \"Get-MpPreference | Select-Object DisableRealtimeMonitoring, DisableBehaviorMonitoring, DisableIOAVProtection, DisableScriptScanning, MAPSReporting, SubmitSamplesConsent\")"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push --force*)",
+      "Bash(git push -f *)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean -f*)",
+      "Bash(sudo *)",
+      "Bash(chmod 777*)",
+      "Bash(*>.env*)",
+      "Bash(cat *.env*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/session-start.sh",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/detect-gaps.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/validate-commit.sh",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/validate-push.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/validate-assets.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/pre-compact.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/session-stop.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/log-agent.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash .claude/statusline.sh"
+  }
+}

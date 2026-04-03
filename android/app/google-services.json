@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "669522610182",
+    "project_id": "war-nexus-dae64",
+    "storage_bucket": "war-nexus-dae64.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:669522610182:android:605ac497185755ae06db87",
+        "android_client_info": {
+          "package_name": "com.warnexus"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "669522610182-8nki1776gdvb8dalpkrfap7o143f1kq0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.warnexus",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "669522610182-m7ko777js6o13km3tg34rtv28greo8od.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.warnexus",
+            "certificate_hash": "374f956beaf9cb2966636166bb86a00860b97397"
+          }
+        },
+        {
+          "client_id": "669522610182-lavj7r2sn8cmp3bpebfqki5ecdgp424m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsbnlSngXf_qTvkj-JoicIaj32cUE_Yhg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "669522610182-lavj7r2sn8cmp3bpebfqki5ecdgp424m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Admin tam erişim
+    function isAdmin() {
+      return request.auth != null && request.auth.uid == 'fDXCXZYZr1PapwTjAlsM3RZoKRn1';
+    }
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Oyuncu profili — herkes okuyabilir, authenticated yazabilir
+    // (ittifak kabul/atma, sıralama güncelleme, savaş sonrası güç güncelleme gerektirir)
+    match /players/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Oyuncu üssü — sadece kendi verisini yazabilir, herkes okuyabilir (PvP savunma için)
+    match /playerBases/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Seferler — authenticated yazma (saldırı başlatma + sonuçlandırma)
+    match /marches/{marchId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Savaş raporları — authenticated okuma/yazma
+    match /battleReports/{reportId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Sıralama — authenticated okuma, yazma sadece kendi profili
+    match /leaderboard/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // İttifak sistemi
+    match /alliances/{allianceId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+
+      match /members/{memberId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated();
+      }
+
+      match /messages/{messageId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated();
+        // Mesaj düzenleme/silme sadece gönderen veya admin
+        allow update, delete: if isAuthenticated() && (
+          resource.data.senderUid == request.auth.uid || isAdmin()
+        );
+      }
+
+      match /joinRequests/{requestId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated();
+      }
+
+      match /warBattleLogs/{logId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated();
+      }
+
+      match /donationRequests/{reqId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated();
+      }
+    }
+
+    // Genel sohbet — authenticated okuma/yazma, silme sadece gönderen veya admin
+    match /globalChat/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (
+        resource.data.senderUid == request.auth.uid || isAdmin()
+      );
+    }
+
+    // Özel mesajlar — sadece katılımcılar okuyabilir/yazabilir
+    match /directMessages/{conversationId} {
+      allow read: if isAuthenticated() && request.auth.uid in resource.data.participants;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && request.auth.uid in resource.data.participants;
+      allow delete: if isAuthenticated() && request.auth.uid in resource.data.participants;
+
+      match /messages/{messageId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated();
+        allow delete: if isAuthenticated() && (
+          resource.data.senderUid == request.auth.uid || isAdmin()
+        );
+      }
+    }
+
+    // Ban listesi — sadece admin
+    match /bannedUsers/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Diğer koleksiyonlar — sadece admin
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

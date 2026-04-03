@@ -1,0 +1,1396 @@
+{
+  "nav": {
+    "base": "Üs",
+    "map": "Harita",
+    "alliance": "İttifak",
+    "missions": "Görevler",
+    "leaderboard": "Sıralama",
+    "shop": "Mağaza"
+  },
+  "auth": {
+    "tagline": "ONLINE MOBILE STRATEJI OYUNU",
+    "login": "Giriş Yap",
+    "register": "Kayıt Ol",
+    "placeholderUsername": "Kullanıcı Adı",
+    "placeholderEmail": "Email",
+    "placeholderPassword": "Şifre",
+    "placeholderPasswordRepeat": "Şifre Tekrar",
+    "googleButton": "ile Giriş Yap",
+    "divider": "veya",
+    "version": "v0.1.0 — Alpha",
+    "errorUsernameRequired": "Kullanıcı adı gerekli",
+    "errorEmailPasswordRequired": "Email ve şifre gerekli",
+    "errorPasswordTooShort": "Şifre en az 6 karakter olmalı",
+    "errorPasswordMismatch": "Şifreler eşleşmiyor",
+    "errorEmailInUse": "Bu email zaten kayıtlı",
+    "errorInvalidEmail": "Geçersiz email",
+    "errorWrongPassword": "Yanlış email veya şifre",
+    "errorUserNotFound": "Kullanıcı bulunamadı",
+    "errorWeakPassword": "Şifre çok zayıf (min 6 karakter)",
+    "errorGoogleFailed": "Google giriş başarısız",
+    "errorGeneric": "Bir hata oluştu"
+  },
+  "profile": {
+    "stats": "İstatistikler",
+    "power": "Güç",
+    "hq": "Karargah",
+    "wins": "Galibiyet",
+    "losses": "Mağlubiyet",
+    "logout": "Çıkış Yap",
+    "editName": "✏️ İsim Değiştir",
+    "editNameLocked": "🔒 {{days}} gün sonra değiştirilebilir",
+    "placeholderNewUsername": "Yeni kullanıcı adı",
+    "alertSuccessTitle": "Başarılı",
+    "alertSuccessMsg": "Kullanıcı adın \"{{name}}\" olarak değiştirildi.",
+    "alertLogoutTitle": "Çıkış Yap",
+    "alertLogoutMsg": "Hesabından çıkmak istediğine emin misin?",
+    "alertWaitTitle": "Bekle",
+    "alertWaitMsg": "Kullanıcı adını {{days}} gün sonra değiştirebilirsin.",
+    "errorUsernameRequired": "Kullanıcı adı gerekli",
+    "errorTooShort": "En az 3 karakter",
+    "errorTooLong": "En fazla 20 karakter",
+    "errorGeneric": "Hata oluştu",
+    "changeDaysLater": "{{days}} gün sonra değiştirilebilir",
+    "sectionAccount": "Hesap Bilgileri",
+    "email": "Email",
+    "provider": "Giriş Yöntemi",
+    "memberSince": "Kayıt",
+    "sectionGameStats": "Oyun İstatistikleri",
+    "totalUnits": "Toplam Birim",
+    "researchDone": "Araştırma",
+    "missionsDone": "Görev",
+    "allianceName": "İttifak",
+    "noAlliance": "Yok",
+    "winRate": "Kazanma Oranı",
+    "sectionLanguage": "Dil Ayarı",
+    "notifSettings": "Bildirim Ayarları",
+    "notifAttacks": "Saldırı Bildirimleri",
+    "notifBattleResults": "Savaş Sonuçları",
+    "notifAllianceWar": "İttifak Savaşı",
+    "notifMissions": "Görev Tamamlama",
+    "battleReports": "Savaş Raporları",
+    "noReports": "Henüz savaş raporu yok.",
+    "noLoss": "Kayıp yok"
+  },
+  "username": {
+    "title": "Kullanıcı Adını Seç",
+    "subtitle": "Diğer oyuncular seni bu isimle görecek",
+    "placeholder": "Kullanıcı Adı",
+    "start": "Oyuna Başla",
+    "errorRequired": "Kullanıcı adı gerekli",
+    "errorTooShort": "En az 3 karakter olmalı",
+    "errorGeneric": "Bir hata oluştu"
+  },
+  "topbar": {
+    "title": "WAR NEXUS"
+  },
+  "common": {
+    "cancel": "İptal",
+    "ok": "Tamam",
+    "save": "Kaydet",
+    "back": "Geri",
+    "close": "Kapat",
+    "loading": "...",
+    "error": "Hata",
+    "errorGeneric": "Bir hata oluştu",
+    "confirm": "Onayla",
+    "delete": "Sil",
+    "send": "Gönder",
+    "search": "Ara",
+    "refresh": "↻ Yenile",
+    "level": "Seviye",
+    "power": "Güç",
+    "units": "birim",
+    "cash": "Nakit",
+    "oil": "Petrol",
+    "ore": "Cevher",
+    "gold": "Altın",
+    "land": "Kara",
+    "air": "Hava",
+    "sea": "Deniz",
+    "defense": "Savunma",
+    "offlineIncome": "⏰ {{time}} süre geliri eklendi",
+    "timeHoursMinutes": "{{h}}h {{m}}m",
+    "timeMinutes": "{{m}}m",
+    "goldGiftReceived": "🪙 +{{amount}} altın hediyesi alındı!",
+    "allianceDonationReceived": "📦 İttifak bağışı alındı! +{{amount}}K kaynak",
+    "researchCompleted": "🔬 {{name}} tamamlandı!",
+    "research": "Araştırma",
+    "buildingUpgraded": "🏗️ {{name}} Lv.{{level}} yükseltildi!",
+    "goldExchange": "🪙 {{gold}} altın → +{{amount}} {{resource}}"
+  },
+  "pvp": {
+    "cannotAttackAlly": "⚠️ Kendi ittifak üyene saldıramazsın",
+    "needOffensiveUnits": "⚠️ Saldırı için savunma dışı birim gerekli",
+    "cooldownRemaining": "⏳ Bu oyuncuya {{h}}s {{m}}dk sonra saldırabilirsin",
+    "attackFailed": "⚠️ Saldırı gönderilemedi"
+  },
+  "base": {
+    "upgrade": "Yükselt",
+    "maxLevel": "Maks. Seviye",
+    "upgrading": "Yükseltiliyor",
+    "level": "Seviye {{level}} / {{max}}",
+    "income": "Gelir:",
+    "incomePerHour": "/sa",
+    "incomeNext": "→ {{value}}/sa Lv.{{level}}",
+    "blockingMsg": "{{name}} yükseltilirken başka bina yükseltilemez.",
+    "unlockPower": "+{{n}} Güç",
+    "nextLevelSection": "Lv.{{level}}'de açılacaklar:",
+    "nextLevelNewBadge": "Yeni",
+    "nextLevelFarBadge": "Lv.{{level}}",
+    "prodIncrease": "+{{value}}/sa üretim artışı",
+    "lossReduction": "Savaş kayıpları %{{pct}} azalır",
+    "interestRate": "Faiz geliri artar (her seviye +%{{pct}}/sa)",
+    "capacityIncrease": "Bina kapasitesi ve eğitim hızı artar",
+    "currentUnits": "MEVCUT BİRİMLER",
+    "training": "Eğitim Devam Ediyor",
+    "capacityFull": "Kapasite Dolu ({{current}}/{{cap}})",
+    "noUnits": "Bu bina seviyesinde henüz birim yok.",
+    "trained": "Mevcut: {{count}}",
+    "trainBtn": "{{qty}} Eğit",
+    "capacityLabel": "{{label}} Kapasitesi",
+    "researchInProgress": "Araştırma Devam Ediyor",
+    "noResearchBusy": "Araştırma tamamlanınca yeni araştırmalar açılacak.",
+    "noResearchEmpty": "Bu dalda yapılacak araştırma yok.",
+    "researchBtn": "Araştır",
+    "tabOverview": "Yükselt",
+    "tabUnits": "Birimler",
+    "tabResearch": "Araştırma",
+    "tabHarekat": "⚔️ Harekât",
+    "tabMarket": "🪙 Takas",
+    "activeMarch": "🗺️ Aktif Sefer",
+    "marchUnits": "{{count}} birim · Güç {{power}}",
+    "armyStatus": "Ordu: {{count}} birim",
+    "noTrainedUnits": "Eğitilmiş birim yok.",
+    "mySquads": "BİRLİKLERİM ({{count}}/5)",
+    "createSquad": "+ Birlik Oluştur",
+    "noSquads": "Henüz birlik kurulmadı.",
+    "squadTotal": "Toplam: {{count}}",
+    "squadSelect": "Seç",
+    "squadSelected": "✓ Seçili",
+    "coordLabel": "🎯 KOORDİNAT GİR",
+    "attackBtnInMarch": "Seferde...",
+    "attackBtn": "SALDIR",
+    "coordNotFound": "Koordinat bulunamadı",
+    "coordFound": "🎯 {{name}} — {{player}}",
+    "battleReports": "SAVAŞ RAPORLARI ({{count}})",
+    "noBattleReports": "Henüz savaş raporu yok.",
+    "unitsLost": "☠️ -{{count}} birim",
+    "noLoss": "Kayıp yok",
+    "squadCreateTitle": "🛡️ BİRLİK OLUŞTUR",
+    "squadNamePlaceholder": "Birlik adı...",
+    "squadSelectHeader": "Birlik Seç",
+    "selectAll": "Tümünü Seç",
+    "noUnitsIcon": "⚠️",
+    "noUnitsTitle": "Birim Yok",
+    "noUnitsDesc": "Kışla, Havaalanı veya Tersane'den birim eğit.",
+    "availableLabel": "Mevcut: {{count}}",
+    "summaryText": "Sevk: {{count}} birim",
+    "saveSquad": "Kaydet ({{count}} birim)",
+    "defaultSquadName": "Birlik {{n}}",
+    "editorActive": "✓ Editör",
+    "editorInactive": "✎ Düzenle"
+  },
+  "map": {
+    "armyStatusTitle": "Ordu Durumu",
+    "reconTitle": "Keşif — Düşman Üsleri",
+    "battleLogTitle": "Savaş Günlüğü ({{count}})",
+    "totalUnits": "Toplam: {{count}} birim",
+    "totalPower": "⚔️ Güç: {{power}}",
+    "noUnits": "Henüz eğitilmiş birim yok.",
+    "winChance": "%{{pct}} şans",
+    "unitsLost": "-{{count}} birim",
+    "defeat": "Yenilgi",
+    "attackTitle": "⚔️ SALDIRI",
+    "noSquadsTitle": "Birlik Yok",
+    "noSquadsDesc": "Saldırı için önce Komuta Merkezi'nde birlik oluşturmalısın.",
+    "selectSquad": "Birlik Seç ({{selected}}/{{total}})",
+    "selectAll": "Tümünü Seç",
+    "clear": "Temizle",
+    "unitsChip": "🪖 {{count}} birim",
+    "powerChip": "⚔️ {{power}} güç",
+    "summarySquad": "Birlik: {{count}}",
+    "summaryUnits": "Sevk: {{count}} birim",
+    "winChanceLabel": "Kazanma Şansı",
+    "winChanceValue": "%{{pct}}",
+    "attackBtnWithUnits": "⚔️ SALDIR ({{count}} birim)",
+    "attackBtnInMarch": "Sefer Devam Ediyor...",
+    "attackBtnNoSquad": "Birlik Seç",
+    "easy": "KOLAY",
+    "medium": "ORTA",
+    "hard": "ZOR",
+    "elite": "ELİT"
+  },
+  "battle": {
+    "victory": "ZAFER!",
+    "defeat": "YENİLGİ!",
+    "headerDefense": "🛡️ Savunma",
+    "headerAttack": "⚔️ Saldırı",
+    "attackPower": "⚔️ Saldırı",
+    "defensePower": "🛡️ Savunma",
+    "lootWon": "💰 Ganimet",
+    "lootLost": "💸 Kayıp",
+    "lootCash": "Nakit",
+    "lootOil": "Petrol",
+    "lootOre": "Maden",
+    "lootPower": "Güç",
+    "attackerUnitsAttack": "⚔️ Saldıran Birimler",
+    "attackerUnitsDefense": "🎯 Düşman Birlikleri",
+    "defenderUnitsAttack": "🛡️ Savunan Birimler",
+    "defenderUnitsDefense": "🛡️ Senin Birliklerin",
+    "unitsSummary": "{{total}} birim · ☠️ {{losses}} kayıp",
+    "unitsSummaryNoLoss": "{{total}} birim · ✅ Kayıpsız",
+    "noDetail": "Birim detayı mevcut değil",
+    "close": "KAPAT"
+  },
+  "attack": {
+    "incomingTitle": "⚠️ SALDIRI",
+    "incomingDetail": "🪖 {{units}} birim · ⚔️ Saldırıda",
+    "incomingDefenders": "🛡️ {{count}} Savunucu",
+    "incomingNoDefense": "🚨 Savunma Yok!",
+    "outgoingTitle": "⚔️ SEFER",
+    "outgoingDetail": "🪖 {{units}} birim · ⚔️ {{power}} güç",
+    "outgoingReturning": "🔙 Dönüyor",
+    "outgoingAttacking": "🎯 Saldırıda",
+    "outgoingCancel": "✕ İptal"
+  },
+  "chat": {
+    "title": "Genel Sohbet",
+    "messageCount": "{{count}} mesaj",
+    "empty": "Henüz mesaj yok. İlk mesajı sen gönder!",
+    "placeholder": "Mesaj yaz...",
+    "send": "Gönder",
+    "sending": "..."
+  },
+  "shop": {
+    "tabResources": "💰 Kaynak",
+    "tabBoosts": "🚀 Boost",
+    "tabVip": "👑 VIP",
+    "tabGold": "🪙 Altın",
+    "goldBar": "🪙 {{amount}} Altın",
+    "sectionResources": "Kaynak Paketleri",
+    "sectionBoosts": "Hızlandırma & Kalkan",
+    "sectionVip": "VIP Paketleri",
+    "sectionGold": "Altın Satın Al",
+    "goldNote": "💡 Gerçek para ile ödeme yakında aktif olacak",
+    "popular": "EN POPÜLER",
+    "cash50k": "50K Nakit",
+    "cash200k": "200K Nakit",
+    "cash1m": "1M Nakit",
+    "oil50k": "50K Petrol",
+    "oil200k": "200K Petrol",
+    "oil1m": "1M Petrol",
+    "ore50k": "50K Cevher",
+    "ore200k": "200K Cevher",
+    "ore1m": "1M Cevher",
+    "shield4h": "4 Saat Kalkan",
+    "shield4hDesc": "Saldırılardan 4 saat korunma",
+    "shield8h": "8 Saat Kalkan",
+    "shield8hDesc": "Saldırılardan 8 saat korunma",
+    "shield24h": "24 Saat Kalkan",
+    "shield24hDesc": "Saldırılardan 24 saat korunma",
+    "power5k": "+5K Güç",
+    "power5kDesc": "Anında 5000 warPower",
+    "power20k": "+20K Güç",
+    "power20kDesc": "Anında 20000 warPower",
+    "vipStarter": "🎖️ Başlangıç Paketi",
+    "vipStarterDesc": "100K 💵 + 100K 🛢️ + 100K ⛏️ + 4s 🛡️",
+    "vipWarrior": "⚔️ Savaşçı Paketi",
+    "vipWarriorDesc": "500K 💵 + 500K 🛢️ + 500K ⛏️ + 10K ⚡",
+    "vipEmperor": "👑 İmparator Paketi",
+    "vipEmperorDesc": "1M 💵 + 1M 🛢️ + 1M ⛏️ + 50K ⚡ + 24s 🛡️",
+    "gold100": "100 Altın",
+    "gold500": "500 Altın",
+    "gold2000": "2,000 Altın",
+    "gold5000": "5,000 Altın",
+    "gold10000": "10,000 Altın",
+    "gold25000": "25,000 Altın",
+    "insufficientGoldTitle": "Yetersiz Altın",
+    "insufficientGoldMsg": "Bu paket için {{cost}} altın gerekli.",
+    "purchasedTitle": "Satın Alındı",
+    "purchasedMsg": "{{label}} hesabına eklendi!",
+    "shieldActiveTitle": "Kalkan Aktif",
+    "shieldActiveMsg": "{{label}} aktif edildi!",
+    "powerAddedTitle": "Güç Eklendi",
+    "powerAddedMsg": "+{{amount}} güç!",
+    "vipPurchasedTitle": "VIP Paket",
+    "vipPurchasedMsg": "{{label}} satın alındı!",
+    "comingSoonTitle": "Yakında",
+    "comingSoonMsg": "Gerçek para ile altın satın alma özelliği yakında eklenecek!",
+    "shieldBlockedWar": "İttifak savaşı sırasında kalkan satın alınamaz!",
+    "shieldBlockedWarTitle": "Kalkan Kullanılamaz",
+    "shieldAttackBlocked": "Kalkan aktifken saldırı yapılamaz. Saldırmak için kalkanın süresinin dolmasını bekle.",
+    "shieldAttackBlockedTitle": "Saldırı Engellendi"
+  },
+  "leaderboard": {
+    "tabPlayers": "Oyuncu Sıralaması",
+    "tabAlliances": "İttifak Sıralaması",
+    "panelPlayers": "Global Sıralama — Oyuncular",
+    "panelAlliances": "Global Sıralama — İttifaklar",
+    "emptyPlayers": "Henüz oyuncu yok",
+    "emptyAlliances": "Henüz ittifak yok",
+    "separator": "··· SENİN BÖLGENİN ···",
+    "me": " (Sen)",
+    "anonymous": "Anonim",
+    "unnamedAlliance": "İsimsiz",
+    "stats": "İstatistikler",
+    "power": "Güç",
+    "hq": "Karargah",
+    "wins": "Galibiyet",
+    "losses": "Mağlubiyet",
+    "attack": "⚔️ SALDIR",
+    "revenge": "🔥 İNTİKAM SALDIRISI",
+    "marchInProgress": "Sefer Devam Ediyor...",
+    "cooldown": "⏳ {{hours}}s {{minutes}}dk {{seconds}}sn",
+    "cooldownShort": "⏳ {{hours}}s {{minutes}}dk sonra",
+    "close": "Kapat",
+    "back": "Geri",
+    "attackTitle": "⚔️ SALDIRI",
+    "winsCount": "{{wins}} galibiyet",
+    "noUnitsTitle": "Birlik Yok",
+    "noUnitsDesc": "Saldırı için önce Komuta Merkezi'nde birlik oluşturmalısın.",
+    "selectSquad": "Birlik Seç ({{selected}}/{{total}})",
+    "selectAll": "Tümünü Seç",
+    "clear": "Temizle",
+    "unitsChip": "{{count}} birim",
+    "powerChip": "{{power}} güç",
+    "hide": "▲ Gizle",
+    "detail": "▼ Detay",
+    "summarySquads": "Birlik: {{count}}",
+    "summaryUnits": "Sevk: {{count}} birim",
+    "winChance": "Kazanma Şansı",
+    "attackWithUnits": "⚔️ SALDIR ({{count}} birim)",
+    "selectSquadBtn": "Birlik Seç",
+    "marchActive": "Sefer Devam Ediyor..."
+  },
+  "alliance": {
+    "title": "İTTİFAK",
+    "loadingName": "Yükleniyor...",
+    "roles": {
+      "leader": "Lider",
+      "officer": "Yönetici",
+      "foreign": "Dış İşleri Bakanı",
+      "economy": "Ekonomi Bakanı",
+      "interior": "İç İşleri Bakanı",
+      "defense": "Savunma Bakanı",
+      "member": "Üye"
+    },
+    "tabs": {
+      "members": "Üyeler",
+      "donate": "Bağış",
+      "war": "⚔️ Savaş",
+      "reports": "📋 Raporlar",
+      "chat": "Chat",
+      "settings": "Ayarlar"
+    },
+    "createTitle": "İttifak Kur",
+    "createCost": "{{cost}} 🪙",
+    "searchTitle": "İttifak Ara",
+    "searchPlaceholder": "İttifak adı veya etiket...",
+    "searchBtn": "Ara",
+    "searchResults": "Arama Sonuçları",
+    "rankingsTitle": "İttifak Sıralaması",
+    "memberStat": "{{count}}/{{max}} üye · {{power}} güç",
+    "joinBtn": "Katıl",
+    "applyBtn": "Başvur",
+    "appliedBtn": "Başvuruldu ✓",
+    "createModalTitle": "Yeni İttifak Kur",
+    "nameLabel": "İttifak Adı",
+    "namePlaceholder": "Steel Wolves...",
+    "tagLabel": "Etiket (max 5 harf)",
+    "tagPlaceholder": "SWF",
+    "descLabel": "Açıklama",
+    "descPlaceholder": "İttifak hakkında kısa bilgi...",
+    "joinTypeLabel": "Katılım Türü",
+    "joinTypeOpen": "Açık",
+    "joinTypeApproval": "Onaylı",
+    "costLabel": "Maliyet:",
+    "balanceLabel": "(Bakiye: {{gold}} 🪙)",
+    "createBtn": "Kur",
+    "alertMissing": "Eksik bilgi",
+    "alertMissingMsg": "İttifak adı ve etiket zorunludur.",
+    "alertTagLong": "Etiket çok uzun",
+    "alertTagLongMsg": "Etiket en fazla 5 karakter olabilir.",
+    "treasuryLabel": "Kasa:",
+    "memberCount": "{{count}}/{{max}}",
+    "warBannerWon": "⚔️ {{attacker}}, {{defender}} saldırısını kazandı! +{{score}} puan",
+    "warBannerLost": "🛡️ {{defender}}, {{attacker}} saldırısını savundu!",
+    "joinRequests": "Katılım İstekleri ({{count}})",
+    "membersTitle": "Üyeler ({{count}})",
+    "meSuffix": " (Sen)",
+    "powerContribution": "Güç: {{power}} · Katkı: {{contribution}}",
+    "roleBtn": "Görev",
+    "kickTitle": "Üyeyi At",
+    "kickMsg": "{{name}} ittifaktan atılsın mı?",
+    "kickBtn": "At",
+    "transferTitle": "Liderliği Devret",
+    "transferMsg": "Liderliği {{name}} adlı üyeye devretmek istiyor musun? Bu işlem geri alınamaz.",
+    "transferBtn": "Devret",
+    "treasuryHeader": "🏦 İttifak Kasası (Lv.{{level}})",
+    "boostActive": "⚡ Boost aktif: {{hours}}s kaldı",
+    "donateTitle": "Kasaya Bağış Yap",
+    "balance": "Bakiye: {{amount}}",
+    "treasuryUses": "Kasa Kullanımları",
+    "upgradeAlliance": "🏰 İttifak Yükselt (Lv.{{level}})",
+    "upgradeCost": "Maliyet: {{cost}}×3",
+    "boostBtn": "⚡ 24s Üretim x2 Boost (200K×3)",
+    "sendToMember": "Kasadan Üyeye Gönder",
+    "amountPlaceholder": "Miktar",
+    "sendBtn": "Gönder",
+    "activeWar": "⚔️ AKTİF SAVAŞ",
+    "vs": "VS",
+    "timerEnded": "Sona erdi",
+    "enemyMembers": "Düşman Üyeleri ({{count}})",
+    "attackBtn": "⚔️ Saldır",
+    "allianceWar": "⚔️ İTTİFAK SAVAŞI",
+    "warDesc": "Başka bir ittifaka savaş ilan ederek 24 saat boyunca puan topla. Kazanan ittifak kasasına ödül kazanır!",
+    "warReward": "🏆 Ödül: 50K 💵 + 50K 🛢️ + 50K ⛏️ + 100 🪙 + 2000 ⚡\n🌟 MVP: +250 🪙",
+    "showTargets": "Hedef İttifakları Göster",
+    "declareWar": "Savaş İlan Et",
+    "nonLeaderMsg": "Savaş ilanı sadece Lider veya Yardımcı tarafından yapılabilir.",
+    "declareConfirmTitle": "Savaş İlan Et",
+    "declareConfirmMsg": "Bu ittifağa savaş ilan etmek istediğine emin misin?",
+    "declareBtn": "İlan Et",
+    "errorDeclare": "Savaş ilan edilemedi. Tekrar dene.",
+    "cooldownLabel": "⏳ {{h}}s {{m}}dk {{s}}sn",
+    "cooldownDesc": "Cooldown süresi dolmadan saldıramazsın",
+    "marchInProgress": "Sefer devam ediyor...",
+    "noSquadsWarning": "⚠️ Birlik yok — Komuta Merkezi'nde oluştur",
+    "selectSquad": "Birlik Seç ({{selected}}/{{total}})",
+    "clear": "Temizle",
+    "selectAll": "Tümünü Seç",
+    "attackWithUnits": "⚔️ SALDIR ({{count}} birim)",
+    "warResultsTitle": "Savaş Sonuçları",
+    "warVictory": "🏆 ZAFER",
+    "warDefeat": "💀 YENİLGİ",
+    "scoreLabel": "Skor: {{ours}} - {{theirs}}",
+    "rewardsLabel": "Ödüller (her üyeye):",
+    "mvpLabel": "🌟 MVP: {{name}} {{bonus}}",
+    "memberContributions": "Üye Katkıları:",
+    "scorePoints": "{{score}} puan",
+    "winLossStat": "{{wins}}W/{{losses}}L",
+    "noReports": "📋 Henüz savaş raporu yok",
+    "battleReports": "Savaş Raporları ({{count}})",
+    "attackerFallback": "Saldıran",
+    "timeJustNow": "Az önce",
+    "timeMinutesAgo": "{{n}}dk önce",
+    "timeHoursAgo": "{{n}}s önce",
+    "chatEmpty": "Henüz mesaj yok. İlk mesajı sen gönder!",
+    "chatPlaceholder": "Mesaj yaz...",
+    "chatSend": "Gönder",
+    "chatSending": "...",
+    "settingsTitle": "İttifak Detayları",
+    "settingsName": "İsim:",
+    "settingsTag": "Kısaltma:",
+    "settingsJoinType": "Giriş:",
+    "settingsOpen": "Açık",
+    "settingsApproval": "Başvurulu",
+    "settingsSave": "Değiştir",
+    "settingsSaving": "...",
+    "kickSection": "Kullanıcıyı Kickle",
+    "memberLabel": "Üye:",
+    "selectPlaceholder": "- Seç -",
+    "transferSection": "Liderliği Devret",
+    "leaveSection": "İttifaktan Ayrıl",
+    "leaveBtn": "İttifaktan Ayrıl",
+    "leaveTitle": "Ayrıl",
+    "leaveMsg": "{{name}} ittifakından ayrılmak istediğine emin misin?",
+    "leaveAction": "Ayrıl",
+    "disbandSection": "İttifakı Sil",
+    "disbandWarning": "Dikkat: Bu işlem geri alınamaz. Tüm üyeler ve kasa silinir.",
+    "confirm1": "Onay 1",
+    "confirm2": "Onay 2",
+    "disbandBtn": "SİL",
+    "disbandTitle": "İttifakı Sil",
+    "disbandMsg": "\"{{name}}\" ittifakı kalıcı olarak silinecek. GERİ ALINAMAZ!"
+  },
+  "settings": {
+    "activeMissions": "Aktif Görevler ({{done}}/{{total}})",
+    "allDone": "Tüm görevler tamamlandı!",
+    "completedMissions": "Tamamlananlar",
+    "claim": "Al",
+    "infoTitle": "War Nexus",
+    "version": "Versiyon 1.0 — React Native 0.84",
+    "stats": "12 bina · 12 birim · 3 kaynak",
+    "language": "Dil",
+    "selectLanguage": "Dil Seçin",
+    "missionClaimed": "🎯 Görev ödülü alındı!"
+  },
+  "branches": {
+    "infantry": "Piyade",
+    "armor": "Zırhlı",
+    "artillery": "Topçu",
+    "uav": "İHA",
+    "helicopter": "Helikopter",
+    "fixedWing": "Savaş Uçağı",
+    "bomber": "Bombacı",
+    "naval": "Deniz",
+    "airDefense": "Hava Savunma",
+    "specialOps": "Özel Kuvvetler",
+    "corvette": "Korvet",
+    "frigate": "Fırkateyn",
+    "destroyer": "Destroyer",
+    "submarine": "Denizaltı",
+    "land": "Kara",
+    "air": "Hava",
+    "sea": "Deniz",
+    "defense": "Savunma"
+  },
+  "buildings": {
+    "hq": {
+      "name": "Komuta Merkezi",
+      "desc": "Üssün kalbi. Seviyesi tüm kapasiteleri etkiler."
+    },
+    "barracks": {
+      "name": "Kışla",
+      "desc": "Piyade ve kara kuvvetleri üretim merkezi."
+    },
+    "tankFactory": {
+      "name": "Tank Fabrikası",
+      "desc": "Zırhlı araç ve tank üretimi."
+    },
+    "airport": {
+      "name": "Hava Üssü",
+      "desc": "Savaş uçakları ve helikopter üretim merkezi."
+    },
+    "shipyard": {
+      "name": "Gemi Tersanesi",
+      "desc": "Deniz kuvvetleri üretim merkezi."
+    },
+    "oilField": {
+      "name": "Petrol Sahası",
+      "desc": "Sürekli petrol üretimi sağlar. Her seviye üretimi artırır."
+    },
+    "mine": {
+      "name": "Maden Ocağı",
+      "desc": "Demir cevheri üretimi sağlar. Her seviye üretimi artırır."
+    },
+    "bank": {
+      "name": "Banka",
+      "desc": "Mevcut nakitten faiz üretir. Seviye yükseldikçe faiz oranı artar."
+    },
+    "researchLab": {
+      "name": "Araştırma Merkezi",
+      "desc": "Yeni teknoloji ve birim araştırmaları yapılır."
+    },
+    "defenseTower": {
+      "name": "Savunma Kulesi",
+      "desc": "Savaşlarda birim kayıplarını azaltır. Her seviye %4 koruma sağlar."
+    },
+    "radar": {
+      "name": "Radar İstasyonu",
+      "desc": "Düşman bilgilerini ortaya çıkarır."
+    },
+    "houses": {
+      "name": "Evler",
+      "desc": "Sakinlerden kira geliri sağlar. Her seviye saatlik geliri artırır."
+    }
+  },
+  "units": {
+    "rifleman": {
+      "name": "Piyade Tüfekçisi",
+      "desc": "Modern donanımlı standart piyade. Hızlı eğitim, düşük maliyet."
+    },
+    "machineGunner": {
+      "name": "Makineli Tüfekçi",
+      "desc": "Takım desteği makineli tüfek birimi."
+    },
+    "antiTankOp": {
+      "name": "Javelin Operatörü",
+      "desc": "FGM-148 Javelin güdümlü anti-tank füze operatörü."
+    },
+    "manpadsOp": {
+      "name": "MANPADS Operatörü",
+      "desc": "Stinger/Igla omuz tipi hava savunma operatörü."
+    },
+    "sniper": {
+      "name": "Keskin Nişancı",
+      "desc": "Barrett M82A1 / KSVK donanımlı uzun menzilli nişancı."
+    },
+    "combatEngineer": {
+      "name": "Muharebe Mühendisi",
+      "desc": "EMP, mayın imha ve altyapı tahribi uzmanı."
+    },
+    "paradropper": {
+      "name": "Para Komando",
+      "desc": "Hava indirme uzmanı. Düşman hatları gerisine operasyon yapar."
+    },
+    "frogman": {
+      "name": "SAT Komandosu",
+      "desc": "Deniz Sualtı Taarruz Timi. Amfibi ve gizli operasyonlar."
+    },
+    "droneOp": {
+      "name": "FPV Drone Operatörü",
+      "desc": "Kamikaze FPV drone sürüsü. Yüksek hassasiyetli hedef imhası."
+    },
+    "specOps": {
+      "name": "Özel Kuvvetler",
+      "desc": "Bordo Bereliler / Delta Force tarzı elit özel kuvvet operatörü."
+    },
+    "kirpi": {
+      "name": "BMC Kirpi MRAP",
+      "desc": "Türk yapımı mayına dayanıklı pusu korumalı araç."
+    },
+    "cobra2": {
+      "name": "Otokar Cobra II",
+      "desc": "Hafif zırhlı çok amaçlı taktik araç."
+    },
+    "kaplanIfv": {
+      "name": "FNSS Kaplan IFV",
+      "desc": "Türk yapımı piyade muharebe aracı. 30mm top ve Kornet füzesi."
+    },
+    "bradley": {
+      "name": "M2A4 Bradley IFV",
+      "desc": "ABD yapımı gelişmiş piyade muharebe aracı. TOW-2 güdümlü füze."
+    },
+    "puma": {
+      "name": "Puma IFV",
+      "desc": "Alman yapımı en gelişmiş IFV. Aktif koruma sistemi entegre."
+    },
+    "leopard2a7": {
+      "name": "Leopard 2A7+",
+      "desc": "Alman ana muharebe tankı. NATO'nun en güçlü MBT'si."
+    },
+    "m1a2sep3": {
+      "name": "M1A2 SEPv3 Abrams",
+      "desc": "ABD ana muharebe tankı. Trophy aktif koruma sistemi entegre."
+    },
+    "t90m": {
+      "name": "T-90M Proryv-3",
+      "desc": "Rusya'nın gelişmiş ana muharebe tankı. Kontakt-5 reaktif zırh."
+    },
+    "k2panther": {
+      "name": "K2 Black Panther",
+      "desc": "Güney Kore süper MBT'si. Otomatik yükleme + aktif koruma sistemi."
+    },
+    "altay": {
+      "name": "Altay",
+      "desc": "Türkiye'nin milli ana muharebe tankı."
+    },
+    "t14armata": {
+      "name": "T-14 Armata",
+      "desc": "Rusya'nın insansız kuleli yeni nesil MBT'si. Afganit aktif koruma."
+    },
+    "merkava4": {
+      "name": "Merkava Mk.4 Windbreaker",
+      "desc": "İsrail MBT'si. Trophy aktif koruma + mürettebat hayatta kalma önceliği."
+    },
+    "firtina": {
+      "name": "T-155 Fırtına SPH",
+      "desc": "Türk yapımı kendinden yürür 155mm obüs. 40 km menzil, 6 atış/dk."
+    },
+    "himars": {
+      "name": "M142 HIMARS",
+      "desc": "Hassas güdümlü çoklu roket sistemi. GMLRS/ATACMS uyumlu, 300 km menzil."
+    },
+    "kasirga": {
+      "name": "TRG-300 Kasırga",
+      "desc": "Türk yapımı 300mm çoklu roket sistemi. 120 km menzil."
+    },
+    "tb2": {
+      "name": "Bayraktar TB2",
+      "desc": "Türk yapımı taarruz İHA'sı. Dünyada en çok kullanılan silahlı drone."
+    },
+    "mq9reaper": {
+      "name": "MQ-9B SkyGuardian",
+      "desc": "ABD'nin avcı-katil İHA'sı. Hellfire füze sistemi + SIGINT kapasitesi."
+    },
+    "akinci": {
+      "name": "Bayraktar Akıncı",
+      "desc": "Türkiye'nin en büyük UCAV'ı. Çoklu silah yükü ve AI hedefleme sistemi."
+    },
+    "ah1z": {
+      "name": "AH-1Z Viper",
+      "desc": "ABD Deniz Piyadeleri'nin taarruz helikopteri. AGM-114 Hellfire kapasiteli."
+    },
+    "tb3": {
+      "name": "Bayraktar TB3",
+      "desc": "Gemiden kalkan katlanabilir kanat taarruz İHA'sı."
+    },
+    "harop": {
+      "name": "IAI Harop",
+      "desc": "İsrail yapımı gezgin mühimmat. Düşman radarını tespit edip imha eder."
+    },
+    "switchblade600": {
+      "name": "Switchblade 600",
+      "desc": "Omuzdan fırlatılan anti-tank kamikaze drone. Tanklara karşı etkili."
+    },
+    "xq58valkyrie": {
+      "name": "XQ-58A Valkyrie",
+      "desc": "ABD stealth UCAV. F-35 ile birlikte uçan otonom drone."
+    },
+    "uh60m": {
+      "name": "UH-60M Black Hawk",
+      "desc": "Çok amaçlı nakliye ve taarruz helikopteri."
+    },
+    "ah64e": {
+      "name": "AH-64E Apache Guardian",
+      "desc": "Dünyanın en gelişmiş taarruz helikopteri. Longbow radar sistemi."
+    },
+    "t129atak": {
+      "name": "T129 ATAK-II",
+      "desc": "Türkiye'nin milli taarruz helikopteri. UMTAS güdümlü füzesi."
+    },
+    "ka52m": {
+      "name": "Ka-52M Alligator",
+      "desc": "Rusya'nın eş dönüşlü rotorlu taarruz helikopteri. Vikhr-M füzesi."
+    },
+    "mi28nm": {
+      "name": "Mi-28NM Havoc-M",
+      "desc": "Rusya'nın güncellenmiş taarruz helikopteri. Gece muharebe kapasiteli."
+    },
+    "f16v": {
+      "name": "F-16 Block 70 Viper",
+      "desc": "Güncellenmiş F-16. AESA radar ve conformal yakıt tankı ile."
+    },
+    "fa18ef": {
+      "name": "F/A-18E/F Super Hornet",
+      "desc": "USN'nin deniz avcı-bombardıman uçağı. Gemiden kalkış kapasiteli."
+    },
+    "rafale": {
+      "name": "Dassault Rafale F4",
+      "desc": "Fransa'nın çok rollü avcı uçağı. SCALP-EG seyir füzesi taşır."
+    },
+    "typhoon": {
+      "name": "Eurofighter Typhoon",
+      "desc": "Avrupa ortak üretimi çok rollü avcı. Mükemmel manevra kabiliyeti."
+    },
+    "su35s": {
+      "name": "Su-35S Flanker-E",
+      "desc": "Rusya 4++ nesil avcı uçağı. Tam yönlü itme vektörlü motorlar."
+    },
+    "gripenE": {
+      "name": "JAS-39E Gripen",
+      "desc": "İsveç yapımı hafif çok rollü avcı uçağı. Düşük işletim maliyeti."
+    },
+    "j16": {
+      "name": "J-16",
+      "desc": "Çin çok rollü muhrip uçağı. YJ-12 süpersonik anti-gemi füzesi."
+    },
+    "f35a": {
+      "name": "F-35A Lightning II",
+      "desc": "ABD 5. nesil stealth çok rollü avcı. Sensör füzyon + DAS sistemi."
+    },
+    "f22raptor": {
+      "name": "F-22 Raptor",
+      "desc": "ABD 5. nesil stealth hava üstünlük uçağı. Süpersonik seyir."
+    },
+    "su57felon": {
+      "name": "Su-57 Felon",
+      "desc": "Rusya 5. nesil çok rollü avcı. Süpersonik seyir + stealth kaplama."
+    },
+    "j20": {
+      "name": "J-20 Chengdu",
+      "desc": "Çin 5. nesil uzun menzilli stealth avcı uçağı."
+    },
+    "kaan": {
+      "name": "KAAN (TF-X)",
+      "desc": "Türkiye'nin milli 5. nesil savaş uçağı. Yerli AESA radar sistemi."
+    },
+    "kizilelmafighter": {
+      "name": "Bayraktar Kızılelma",
+      "desc": "Türkiye'nin insansız 5. nesil savaş uçağı. Ses üstü sürat + stealth."
+    },
+    "b2spirit": {
+      "name": "B-2 Spirit",
+      "desc": "ABD stealth stratejik bombardıman uçağı. 16 ton bomba yükü."
+    },
+    "b21raider": {
+      "name": "B-21 Raider",
+      "desc": "ABD'nin yeni nesil stealth bombardıman uçağı."
+    },
+    "heybeliada": {
+      "name": "TCG Heybeliada",
+      "desc": "Türk MILGEM korveti. İlk milli savaş gemisi."
+    },
+    "milgem": {
+      "name": "TCG İstanbul F-515",
+      "desc": "MILGEM fırkateyn varyantı. Harpoon füze sistemi entegre."
+    },
+    "tf2000": {
+      "name": "TF-2000 Fırkateyn",
+      "desc": "Türkiye'nin bölgesel hava savunma fırkateyni."
+    },
+    "f125": {
+      "name": "F-125 Baden-Württemberg",
+      "desc": "Alman stabilizasyon fırkateyni."
+    },
+    "constellation": {
+      "name": "FFG-62 Constellation",
+      "desc": "ABD'nin yeni FREMM bazlı güdümlü füze fırkateyni."
+    },
+    "type212a": {
+      "name": "Type 212A Denizaltı",
+      "desc": "Alman AIP yakıt hücreli denizaltı. Sessizliğiyle eşsiz."
+    },
+    "arleighburke": {
+      "name": "Arleigh Burke Flight III",
+      "desc": "ABD Aegis güdümlü füze destroyeri. 96 VLS + AMDR radar."
+    },
+    "type055": {
+      "name": "Type 055 Destroyer",
+      "desc": "Çin süper destroyeri. 12.000 ton, 112 VLS hücresi."
+    },
+    "zumwalt": {
+      "name": "DDG-1000 Zumwalt",
+      "desc": "ABD stealth destroyer."
+    },
+    "qecarrier": {
+      "name": "HMS Queen Elizabeth",
+      "desc": "İngiltere uçak gemisi. 40 F-35B taşır."
+    },
+    "fordcarrier": {
+      "name": "USS Gerald R. Ford",
+      "desc": "Dünyanın en büyük savaş gemisi. 90 uçak, nükleer tahrikli."
+    },
+    "virginiaclass": {
+      "name": "Virginia-class SSN",
+      "desc": "ABD nükleer denizaltısı. Tomahawk seyir füzesi + Mk48 torpido."
+    },
+    "stinger": {
+      "name": "FIM-92 Stinger",
+      "desc": "ABD omuz tipi kısa menzilli hava savunma sistemi."
+    },
+    "iglaS": {
+      "name": "9K338 Igla-S",
+      "desc": "Rus gelişmiş taşınabilir hava savunma sistemi."
+    },
+    "hisarA": {
+      "name": "HİSAR-A+",
+      "desc": "Türk alçak-orta irtifa kısa menzilli HAS. 15 km menzil."
+    },
+    "hisarO": {
+      "name": "HİSAR-O+",
+      "desc": "Türk orta menzilli hava savunma sistemi. 25 km menzil."
+    },
+    "ironDome": {
+      "name": "Iron Dome",
+      "desc": "İsrail roket/füze önleme sistemi. %90 başarı oranı."
+    },
+    "patriotPac3": {
+      "name": "Patriot PAC-3 MSE",
+      "desc": "ABD orta-uzun menzilli HAS. Balistik füze önleme kapasiteli."
+    },
+    "siper": {
+      "name": "SİPER",
+      "desc": "Türkiye milli uzun menzilli HAS. 100+ km menzil."
+    },
+    "s500": {
+      "name": "S-500 Prometheus",
+      "desc": "Rusya yeni nesil uzun menzilli HAS. 600 km menzil."
+    },
+    "thaad": {
+      "name": "THAAD",
+      "desc": "ABD yüksek irtifa balistik füze savunma sistemi."
+    }
+  },
+  "missions": {
+    "rewardClaimed": "🎯 Görev ödülü alındı!",
+    "m_hq_1": {
+      "title": "Komutayı Güçlendir",
+      "desc": "Komuta Merkezi'ni yükselt."
+    },
+    "m_train_10": {
+      "title": "İlk Askerleri Eğit",
+      "desc": "10 birim eğit."
+    },
+    "m_upgrade_3": {
+      "title": "Üssü Genişlet",
+      "desc": "Herhangi 3 bina yükseltmesi yap."
+    },
+    "m_houses": {
+      "title": "Konut Geliştir",
+      "desc": "Evleri yükselt ve kira gelirini artır."
+    },
+    "m_research_1": {
+      "title": "İlk Araştırma",
+      "desc": "Herhangi bir araştırma tamamla."
+    },
+    "m_train_kirpi": {
+      "title": "İlk Zırhlı Araç",
+      "desc": "BMC Kirpi MRAP eğit."
+    },
+    "m_train_tb2": {
+      "title": "İlk Drone",
+      "desc": "Bayraktar TB2 eğit."
+    },
+    "m_first_attack": {
+      "title": "İlk Saldırı",
+      "desc": "Bir düşman hedefine saldır."
+    },
+    "m_donate_1": {
+      "title": "İttifak Bağışı",
+      "desc": "İttifakına 1 kez bağış yap."
+    },
+    "m_train_heybeliada": {
+      "title": "Denize Açıl",
+      "desc": "TCG Heybeliada eğit."
+    },
+    "m_upgrade_5": {
+      "title": "Büyük İnşaat",
+      "desc": "Toplamda 5 bina yükseltmesi yap."
+    },
+    "m_train_50": {
+      "title": "Ordu Kur",
+      "desc": "Toplamda 50 birim eğit."
+    },
+    "m_win_3": {
+      "title": "Savaş Kahramanı",
+      "desc": "3 saldırıyı zaferle tamamla."
+    },
+    "m_research_3": {
+      "title": "Bilim Yolu",
+      "desc": "3 araştırma tamamla."
+    },
+    "m_train_altay": {
+      "title": "Milli Gurur",
+      "desc": "Altay tankı eğit."
+    },
+    "m_hq_5": {
+      "title": "Komuta Lv.5",
+      "desc": "Komuta Merkezi'ni Lv.5'e yükselt."
+    },
+    "m_train_himars": {
+      "title": "Hassas Atış",
+      "desc": "M142 HIMARS eğit."
+    },
+    "m_donate_5": {
+      "title": "İttifak Destekçisi",
+      "desc": "İttifakına 5 kez bağış yap."
+    },
+    "m_train_akinci": {
+      "title": "Akıncı Kalkıyor",
+      "desc": "Bayraktar Akıncı UCAV eğit."
+    },
+    "m_upgrade_oil": {
+      "title": "Petrol Baronu",
+      "desc": "Petrol Sahası'nı 3 kez yükselt."
+    },
+    "m_upgrade_10": {
+      "title": "Usta Mühendis",
+      "desc": "Toplamda 10 bina yükseltmesi yap."
+    },
+    "m_train_t14": {
+      "title": "Yeni Nesil Zırh",
+      "desc": "T-14 Armata eğit."
+    },
+    "m_train_f16": {
+      "title": "Jet Gücü",
+      "desc": "F-16 Block 70 Viper eğit."
+    },
+    "m_win_5": {
+      "title": "Kumandan",
+      "desc": "5 saldırıyı zaferle tamamla."
+    },
+    "m_research_5": {
+      "title": "Teknoloji Uzmanı",
+      "desc": "5 araştırma tamamla."
+    },
+    "m_train_100": {
+      "title": "Ordu Komutanı",
+      "desc": "Toplamda 100 birim eğit."
+    },
+    "m_train_milgem": {
+      "title": "Milli Gemi",
+      "desc": "TCG İstanbul F-515 eğit."
+    },
+    "m_train_irondome": {
+      "title": "Demir Kubbe",
+      "desc": "Iron Dome hava savunma sistemi eğit."
+    },
+    "m_upgrade_bank": {
+      "title": "Bankacı",
+      "desc": "Banka'yı 3 kez yükselt."
+    },
+    "m_donate_10": {
+      "title": "İttifak Sütunu",
+      "desc": "İttifakına 10 kez bağış yap."
+    },
+    "m_hq_10": {
+      "title": "Komuta Lv.10",
+      "desc": "Komuta Merkezi'ni Lv.10'a yükselt."
+    },
+    "m_train_f35": {
+      "title": "5. Nesil Güç",
+      "desc": "F-35A Lightning II eğit."
+    },
+    "m_train_kaan": {
+      "title": "Milli Muhrip",
+      "desc": "KAAN (TF-X) eğit."
+    },
+    "m_train_kizilelma": {
+      "title": "Kızılelma Havalanıyor",
+      "desc": "Bayraktar Kızılelma eğit."
+    },
+    "m_win_10": {
+      "title": "Fatih",
+      "desc": "10 saldırıyı zaferle tamamla."
+    },
+    "m_research_10": {
+      "title": "Bilim İnsanı",
+      "desc": "10 araştırma tamamla."
+    },
+    "m_train_200": {
+      "title": "Büyük Ordu",
+      "desc": "Toplamda 200 birim eğit."
+    },
+    "m_upgrade_20": {
+      "title": "İnşaat Kralı",
+      "desc": "Toplamda 20 bina yükseltmesi yap."
+    },
+    "m_train_s500": {
+      "title": "Prometheus Kalkanı",
+      "desc": "S-500 Prometheus eğit."
+    },
+    "m_train_virginia": {
+      "title": "Denizin Gölgesi",
+      "desc": "Virginia-class nükleer denizaltı eğit."
+    },
+    "m_hq_15": {
+      "title": "Komuta Lv.15",
+      "desc": "Komuta Merkezi'ni Lv.15'e yükselt."
+    },
+    "m_train_b21": {
+      "title": "Stealth Bombardıman",
+      "desc": "B-21 Raider eğit."
+    },
+    "m_train_ford": {
+      "title": "Uçak Gemisi Filosu",
+      "desc": "USS Gerald R. Ford eğit."
+    },
+    "m_win_20": {
+      "title": "Savaş Lordu",
+      "desc": "20 saldırıyı zaferle tamamla."
+    },
+    "m_research_20": {
+      "title": "Bilim Dahi",
+      "desc": "20 araştırma tamamla."
+    },
+    "m_train_500": {
+      "title": "İmparatorluk Ordusu",
+      "desc": "Toplamda 500 birim eğit."
+    },
+    "m_upgrade_50": {
+      "title": "Mega İnşaat",
+      "desc": "Toplamda 50 bina yükseltmesi yap."
+    },
+    "m_hq_20": {
+      "title": "Komuta Lv.20",
+      "desc": "Komuta Merkezi'ni max seviyeye yükselt."
+    },
+    "m_win_50": {
+      "title": "Efsane Komutan",
+      "desc": "50 saldırıyı zaferle tamamla."
+    },
+    "m_research_all": {
+      "title": "Tam Teknoloji",
+      "desc": "Tüm 28 araştırmayı tamamla."
+    }
+  },
+  "targets": {
+    "target_001": {
+      "name": "Çöl Karakolu",
+      "player": "CPU - Kuzey Ordusu"
+    },
+    "target_002": {
+      "name": "Petrol Terminali",
+      "player": "CPU - Batı Cephesi"
+    },
+    "target_003": {
+      "name": "Maden Kampı",
+      "player": "CPU - Güney Kuvvetleri"
+    },
+    "target_004": {
+      "name": "Kum Fırtınası Üssü",
+      "player": "CPU - Doğu Birliği"
+    },
+    "target_005": {
+      "name": "Dağ Geçidi",
+      "player": "CPU - Merkez Güçleri"
+    },
+    "target_006": {
+      "name": "Yakıt Deposu",
+      "player": "CPU - Yakıt Birimi"
+    },
+    "target_007": {
+      "name": "Çelik Fabrikası",
+      "player": "CPU - Endüstri Grubu"
+    },
+    "target_008": {
+      "name": "Liman Savunması",
+      "player": "CPU - Deniz Kuvvetleri"
+    },
+    "target_009": {
+      "name": "Demir Kalkan Mevzii",
+      "player": "CPU - Kale Garnizonu"
+    },
+    "target_010": {
+      "name": "Hava Üssü Alpha",
+      "player": "CPU - Hava Kuvvetleri"
+    },
+    "target_011": {
+      "name": "Kıyı Bataryası",
+      "player": "CPU - Sahil Savunma"
+    },
+    "target_012": {
+      "name": "Komuta Bunkerı",
+      "player": "CPU - Elit Muhafız"
+    },
+    "target_013": {
+      "name": "Nükleer Silo",
+      "player": "CPU - Stratejik Kuvvetler"
+    },
+    "target_014": {
+      "name": "Başkomutanlık",
+      "player": "CPU - Yüksek Komuta"
+    },
+    "target_015": {
+      "name": "Son Kale",
+      "player": "CPU - Ölümsüz Lejyon"
+    }
+  },
+  "help": {
+    "pageTitle": "Yardım & Bilgi",
+    "tabs": {
+      "guide": {
+        "label": "Başlangıç Rehberi",
+        "desc": "Oyuna ilk adım — ne yapmalısın, nereden başlamalısın?"
+      },
+      "resources": {
+        "label": "Kaynaklar & Ekonomi",
+        "desc": "Nakit, petrol, cevher, altın — üretim ve kullanım"
+      },
+      "buildings": {
+        "label": "Binalar Tablosu",
+        "desc": "Tüm binaların seviyeleri, kategorileri ve maliyetleri"
+      },
+      "hqLevels": {
+        "label": "Komuta Merkezi Seviyeleri",
+        "desc": "Her seviyede açılan özellikler ve yükseltme maliyetleri"
+      },
+      "combat": {
+        "label": "Savaş Kuralları",
+        "desc": "Savaş mekaniği, kazanç, kayıp ve çapraz tablo kuralları"
+      },
+      "pvp": {
+        "label": "PvP & Sıralama",
+        "desc": "Sıralama sistemi, saldırı kuralları, cooldown ve intikam"
+      },
+      "birlik": {
+        "label": "Birlik Rehberi",
+        "desc": "Birlik oluşturma, yönetme ve savaşta kullanma"
+      },
+      "takas": {
+        "label": "Banka & Takas",
+        "desc": "Altınla kaynak satın alma ve banka faizi"
+      },
+      "quests": {
+        "label": "Görevler & İpuçları",
+        "desc": "50 görev sistemi ve strateji ipuçları"
+      },
+      "crossTable": {
+        "label": "Çapraz Tablo",
+        "desc": "Birimler arası savaş etkileşim matrisi"
+      },
+      "allianceWar": {
+        "label": "İttifak Savaşları",
+        "desc": "İttifak savaş mekaniği, kurallar ve strateji ipuçları"
+      },
+      "units": {
+        "label": "Birimler Tablosu",
+        "desc": "Tüm askeri birimlerin detaylı bilgileri"
+      }
+    },
+    "buildingsTitle": "Binalar",
+    "catMilitary": "⚔️ Askeri",
+    "catEconomy": "💰 Ekonomi",
+    "catSupport": "🔧 Destek",
+    "hqLevelsTitle": "Komuta Merkezi Seviyeleri",
+    "hqFeature1": "Başlangıç",
+    "hqFeature5": "Orta hedefler açılır",
+    "hqFeature10": "Zor hedefler açılır",
+    "hqFeature15": "Elit hedefler açılır",
+    "hqFeature20": "Son hedefler açılır",
+    "timeMinutes": "{{m}}dk",
+    "timeHoursMinutes": "{{h}}s {{m}}dk",
+    "timeDaysHours": "{{d}}g {{h}}s",
+    "crossTableTitle": "ÇAPRAZ TABLO",
+    "interactionCanAttack": "Karşı Saldırı Olmadan Saldırır",
+    "interactionMutual": "İki Birim de Birbirine Saldırır",
+    "interactionGetsAttacked": "Saldıramaz Fakat Karşı Saldırı Alır",
+    "interactionNone": "İki Birim de Birbirine Saldıramaz",
+    "badgeCanAttack": "⚔️ Saldırır",
+    "badgeMutual": "🔄 Karşılıklı",
+    "badgeGetsAttacked": "🛡️ Saldırı Alır",
+    "badgeNone": "— Yok",
+    "selectUnit": "Bir birim seç:",
+    "interactions": "Etkileşimler",
+    "unitsTitle": "Tüm Birimler ({{count}})",
+    "colUnit": "Birim",
+    "colAtk": "ATK",
+    "colDef": "DEF",
+    "colBranch": "Dal",
+    "colMinLv": "Min Lv",
+    "guideTitle": "Oyuna Hoş Geldin, Komutan!",
+    "guideIntro": "War Nexus bir askeri strateji oyunudur. Üssünü kur, ordunu oluştur, araştırma yap ve rakiplerini yen. İşte ilk adımların:",
+    "guideStep1Title": "1. Komuta Merkezi'ni Yükselt",
+    "guideStep1Desc": "Komuta Merkezi tüm binaların ve kapasitelerin temelidir. Seviyesi yükseldikçe daha güçlü birimler üretebilir, daha fazla birim depolayabilirsin. Önceliğin her zaman Komuta Merkezi olsun.",
+    "guideStep2Title": "2. Kaynak Binalarını Kur",
+    "guideStep2Desc": "Petrol Sahası, Maden Ocağı ve Evler sürekli kaynak üretir. Banka ise mevcut nakitinden faiz kazandırır. Bu binaları yükseltmek uzun vadede çok önemli.",
+    "guideStep3Title": "3. Kışla'dan İlk Askerlerini Eğit",
+    "guideStep3Desc": "Kışla'dan piyade birimleri üretmeye başla. Birim eğitimi kaynak ve zaman gerektirir. Her binanın kendi birim kapasitesi vardır — Komuta Merkezi seviyesine bağlıdır.",
+    "guideStep4Title": "4. Araştırma Yap",
+    "guideStep4Desc": "Araştırma Merkezi'nden yeni teknolojiler ve birimler aç. Her tamamlanan araştırma saldırı gücüne +%12 bonus verir.",
+    "guideStep5Title": "5. Birlik Oluştur",
+    "guideStep5Desc": "Komuta Merkezi > Harekât sekmesinden birlik kur. Birliğe farklı birim türlerinden ekleyebilirsin. Savaşa birlik ile gidilir.",
+    "guideStep6Title": "6. Savaş!",
+    "guideStep6Desc": "Sıralama ekranından rakiplerini gör ve saldır. Sıralamanın ±5 aralığındaki oyunculara saldırabilirsin. Kazandığında kaynak ve güç kazanırsın.",
+    "guideStep7Title": "7. Görevleri Takip Et",
+    "guideStep7Desc": "Görevler sekmesinden 50 farklı görevi tamamla. Her görev kaynak ve altın ödülü verir. Görevler seni doğru yönlendirir.",
+    "resourcesTitle": "Kaynaklar",
+    "resourceCapacity": "Kapasite: {{cap}}",
+    "resourceSource": "Kaynak: {{source}}",
+    "resourceUsage": "Kullanım: {{usage}}",
+    "cashSource": "Evler (üretim) + Banka (faiz)",
+    "cashUsage": "Bina yükseltme, birim eğitimi, araştırma",
+    "oilSource": "Petrol Sahası",
+    "oilUsage": "Bina yükseltme, birim eğitimi, araştırma",
+    "oreSource": "Maden Ocağı",
+    "oreUsage": "Bina yükseltme, birim eğitimi, araştırma",
+    "goldSource": "Görevler + Satın alma",
+    "goldUsage": "Hızlandırma, Banka takası",
+    "economyTipsTitle": "Ekonomi İpuçları",
+    "economyTip1": "• Banka seviyesini yükselt — her seviye faiz oranını artırır (+%0.4/sa/seviye)",
+    "economyTip2": "• Kaynak binaları yükselt — her seviye saatlik üretimi artırır",
+    "economyTip3": "• Altınla Banka'dan takas yaparak acil kaynak ihtiyacını karşıla",
+    "economyTip4": "• Savaş kazanarak rakibinin kaynaklarının %20'sini al",
+    "combatTitle": "Savaş Kuralları",
+    "combatRule1Title": "Çapraz Tablo",
+    "combatRule1Desc": "Her birim dalının diğer dallara karşı avantajı/dezavantajı vardır. Örneğin piyade tanklara karşı zayıf, hava savunma uçaklara karşı güçlüdür. Çapraz Tablo bölümünden detayları incele.",
+    "combatRule2Title": "Kazanan & Kaybeden",
+    "combatRule2Desc": "Her iki taraf da karşı tarafın birim sayısı kadar birim kaybeder. Kazanan farkı: kaynak ve güç transferi kazanana gider.",
+    "combatRule3Title": "Kaynak Transferi",
+    "combatRule3Desc": "Savaş sonrası kaybeden tarafın kaynaklarının ve gücünün %20'si kazanana aktarılır.",
+    "combatRule4Title": "Koruma Kalkanı",
+    "combatRule4Desc": "Savunmada kaybeden oyuncu 4 saat koruma kalkanı alır — bu sürede saldırıya uğramaz.",
+    "combatRule5Title": "Savaş Gücü (warPower)",
+    "combatRule5Desc": "Savaş kazandıkça warPower artar, kaybettikçe azalır. warPower temel gücünü (bina+birim+araştırma) aşamaz — maximum 2x çarpan.",
+    "combatRule6Title": "Player Power",
+    "combatRule6Desc": "Toplam güç = Bina Gücü + Birim Gücü + Araştırma Gücü + warPower (tavanlı). Sıralamada bu değer kullanılır.",
+    "tierPowerTitle": "Birim Tier Güç Değerleri",
+    "tierPower1": "• Tier 1 birim = 10 güç puan",
+    "tierPower2": "• Tier 2 birim = 30 güç puan",
+    "tierPower3": "• Tier 3 birim = 60 güç puan",
+    "pvpTitle": "PvP & Sıralama",
+    "pvpRule1Title": "Sıralama",
+    "pvpRule1Desc": "Tüm oyuncular Player Power'a göre sıralanır. Top 100 gösterilir. 100'ün altındaysan kendi bölgeni (±10) de görürsün.",
+    "pvpRule2Title": "±5 Saldırı Aralığı",
+    "pvpRule2Desc": "Sadece sıralamanın 5 üstündeki ve 5 altındaki oyunculara saldırabilirsin. Aralık dışındakiler soluk gösterilir.",
+    "pvpRule3Title": "Cooldown (4 Saat)",
+    "pvpRule3Desc": "Bir oyuncuya saldırıp KAZANIRSAN, aynı oyuncuya 4 saat boyunca tekrar saldıramazsın. Kaybedersen hemen tekrar saldırabilirsin.",
+    "pvpRule4Title": "İntikam 🔥",
+    "pvpRule4Desc": "Sana saldıran birini savunmada yenersen, o oyuncuya intikam hakkı kazanırsın. İntikam saldırısı ±5 kuralını bypass eder. İntikamı da kazanırsan 4 saat cooldown başlar.",
+    "pvpRule5Title": "Saldırı Süreci",
+    "pvpRule5Desc": "1) Sıralamadan rakip seç\n2) Birlik seç (önceden oluşturulmuş)\n3) SALDIR butonuna bas\n4) Sefer süresi dolar\n5) Savaş otomatik çözülür\n6) Sonuç raporu gösterilir",
+    "pvpRule6Title": "Koordinat Sistemi",
+    "pvpRule6Desc": "Her oyuncunun X.Y.Z formatında benzersiz bir koordinatı vardır. Koordinat harita üzerindeki konumunu belirler.",
+    "squadTitle": "Birlik Rehberi",
+    "squadRule1Title": "Birlik Nedir?",
+    "squadRule1Desc": "Birlik, savaşa göndereceğin askeri bir gruptur. Farklı birim türlerinden oluşabilir. Savaşa birlik ile gidilir — doğrudan birim gönderemezsin.",
+    "squadRule2Title": "Birlik Oluşturma",
+    "squadRule2Desc": "Komuta Merkezi > Harekât sekmesinden \"Birlik Oluştur\" butonuna bas. Birliğine isim ver ve mevcut birimlerinden ekle.",
+    "squadRule3Title": "Birim Ekleme",
+    "squadRule3Desc": "±1, ±10, ±100 butonlarıyla veya elle sayı yazarak birim ekle. Her birimdeki mevcut sayıdan fazlasını ekleyemezsin.",
+    "squadRule4Title": "Birlik Kapasitesi",
+    "squadRule4Desc": "Aynı anda 5 birlik oluşturabilirsin. Her birlikte istediğin kadar birim olabilir (mevcut envanterinle sınırlı).",
+    "squadRule5Title": "Savaşta Kullanım",
+    "squadRule5Desc": "Sıralama ekranından saldırırken hangi birlikleri göndereceğini seç. Birden fazla birlik seçebilirsin. Tüm seçili birliklerin birimleri toplanarak saldırı gücü hesaplanır.",
+    "squadRule6Title": "Savaş Sonrası",
+    "squadRule6Desc": "Kazanırsan birimler birlikte kalır. Kaybedersen birlik ve içindeki birimler yok olur.",
+    "bankTitle": "Banka & Takas",
+    "bankInterestTitle": "Banka Faizi",
+    "bankInterestDesc": "Banka mevcut nakitinden saatlik faiz kazandırır. Her seviye faiz oranını +%0.4/sa artırır. Örneğin Lv.10 Banka = %4/sa faiz.",
+    "bankExchangeTitle": "Altın ile Takas",
+    "bankExchangeDesc": "Banka binasındaki \"Takas\" sekmesinden altın harcayarak kaynak satın alabilirsin.",
+    "bankRatesTitle": "Baz Kurlar (Lv.1)",
+    "bankRate1": "• 1 🪙 = 500 💵",
+    "bankRate2": "• 1 🪙 = 200 🛢️",
+    "bankRate3": "• 1 🪙 = 150 ⛏️",
+    "bankBonusTitle": "Kur Bonusu",
+    "bankBonusDesc": "Banka seviyesi arttıkça kur iyileşir (+%10 her seviye). Lv.10'da %100 bonus — yani 1 altın = 1,000 nakit!",
+    "bankSpeedTitle": "Altın Hızlandırma",
+    "bankSpeedDesc": "Bina yükseltme, araştırma ve birim eğitimini altın harcayarak anında tamamlayabilirsin. Maliyet süreye/seviyeye göre değişir.",
+    "questsTitle": "Görevler",
+    "questSystemTitle": "50 Görev Sistemi",
+    "questSystemDesc": "Oyunda 50 farklı görev vardır. İlk 10 görev baştan açıktır, her tamamlanan görev bir sonrakini açar. Görevler bina yükseltme, birim eğitme, araştırma yapma, savaş kazanma gibi hedefler içerir.",
+    "questRewardsTitle": "Ödüller",
+    "questRewardsDesc": "Her görev nakit, petrol ve cevher ödülü verir. Bazı milestone görevleri altın da verir (toplam 50 altın).",
+    "strategyTitle": "Strateji İpuçları",
+    "earlyGameTitle": "Erken Oyun (HQ 1-5)",
+    "earlyTip1": "• Komuta Merkezi'ni mümkün olduğunca hızlı yükselt",
+    "earlyTip2": "• Kaynak binalarına yatırım yap — uzun vadede karını artırır",
+    "earlyTip3": "• Tier 1 birimleri üret ve görevleri tamamla",
+    "earlyTip4": "• Altınını dikkatli harca — en değerli kaynak",
+    "midGameTitle": "Orta Oyun (HQ 6-12)",
+    "midTip1": "• Araştırma bonusları büyük fark yaratır — her dalda ilerle",
+    "midTip2": "• Tier 2 birimlerine geç — güç/maliyet oranı en verimli",
+    "midTip3": "• Birden fazla birlik oluştur — farklı kompozisyonlar dene",
+    "midTip4": "• Savunma Kulesi'ni yükselt — kayıpları %4/seviye azaltır",
+    "lateGameTitle": "Geç Oyun (HQ 13-20)",
+    "lateTip1": "• Tier 3 birimler üret — en güçlü ama en pahalı",
+    "lateTip2": "• Çapraz tabloyu öğren — doğru birim kombinasyonu savaşı kazandırır",
+    "lateTip3": "• PvP sıralamada yüksel — her savaş warPower kazandırır",
+    "lateTip4": "• Banka takasını kullan — altınla acil kaynak ihtiyacını karşıla",
+    "generalTipsTitle": "Genel İpuçları",
+    "generalTip1": "• Aynı anda sadece 1 bina yükseltilebilir — sırayı iyi planla",
+    "generalTip2": "• Çeşitli birim kompozisyonu tek tip ordundan güçlüdür",
+    "generalTip3": "• Saldırmadan önce rakibinin gücünü ve kazanma şansını kontrol et",
+    "generalTip4": "• Kaybettiğin savaşlardan sonra hemen tekrar saldırabilirsin",
+    "generalTip5": "• İntikam hakkını kullan — seni yenen rakibe sürpriz saldırı yap",
+    "allianceWarTitle": "⚔️ İttifak Savaşı Kuralları",
+    "awRule1Title": "Savaş Başlatma",
+    "awRule1Desc": "İttifak lideri veya yardımcısı, ittifak menüsünden rakip ittifaka savaş ilan edebilir. Savaş 24 saat sürer.",
+    "awRule2Title": "Skor Sistemi",
+    "awRule2Desc": "Savaş süresince her iki tarafın üyeleri birbirine saldırır. Her kazanılan savaş ittifaka puan kazandırır. Savaş sonunda toplam skoru yüksek olan ittifak kazanır.",
+    "awRule3Title": "Katılım",
+    "awRule3Desc": "İttifaktaki tüm üyeler otomatik olarak savaşa dahildir. Karşı ittifak üyelerine saldırabilirsin.",
+    "awRule4Title": "Kalkan Yasağı",
+    "awRule4Desc": "İttifak savaşı süresince koruma kalkanı satın alınamaz. Mevcut kalkanlar geçerliliğini korur.",
+    "awRule5Title": "Ödüller",
+    "awRule5Desc": "Kazanan ittifakın tüm üyeleri kaynak ve altın ödülü alır. Kaybeden ittifak da katılım ödülü alır.",
+    "awRule6Title": "Cooldown",
+    "awRule6Desc": "Bir ittifak savaşı bittikten sonra 24 saat boyunca yeni savaş ilan edilemez.",
+    "awStrategyTitle": "💡 Strateji İpuçları",
+    "awTip1": "• Savaş başlamadan önce tüm üyelerin birim üretimini tamamlayın",
+    "awTip2": "• Güçlü üyeleri zayıf rakiplere yönlendirin — kolay puan",
+    "awTip3": "• Birden fazla birlik hazırlayın — kayıplardan sonra yedek lazım",
+    "awTip4": "• Savunma Kulesi'ni yükseltin — kayıpları azaltır",
+    "awTip5": "• Koordineli saldırı yapın — aynı anda birden fazla cephede baskı kurun",
+    "awTip6": "• Son saatlerde skor farkını kapatmaya çalışın — rakip rehavete kapılabilir"
+  },
+  "dm": {
+    "title": "Mesajlar",
+    "empty": "Henüz mesaj yok",
+    "noConversations": "Henüz kimseyle mesajlaşmadın",
+    "placeholder": "Mesaj yaz...",
+    "send": "Gönder",
+    "sending": "...",
+    "sendMessage": "Mesaj Gönder",
+    "unread": "okunmamış",
+    "online": "Çevrimiçi",
+    "offline": "Çevrimdışı",
+    "deleteConversation": "Konuşmayı Sil",
+    "deleteConfirmTitle": "Konuşmayı Sil",
+    "deleteConfirmMsg": "Bu konuşma kalıcı olarak silinecek. Emin misin?",
+    "blocked": "Engellendi",
+    "timeJustNow": "Az önce",
+    "timeMinutesAgo": "{{n}}dk önce",
+    "timeHoursAgo": "{{n}}s önce",
+    "timeDaysAgo": "{{n}}g önce",
+    "newMessage": "Yeni Mesaj",
+    "searchPlaceholder": "Oyuncu ara...",
+    "noResults": "Oyuncu bulunamadı",
+    "spamWarning": "Çok hızlı mesaj gönderiyorsun. Biraz bekle.",
+    "messageTooLong": "Mesaj çok uzun (max 200 karakter)"
+  }
+}

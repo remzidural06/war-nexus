@@ -1,0 +1,1970 @@
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import {
+  Animated,
+  Clipboard,
+  Dimensions,
+  Image,
+  Modal,
+  PanResponder,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { useDesertGame } from '../state/DesertGameContext';
+import { t } from '../i18n';
+import { ActionButton } from '../components/ActionButton';
+import { CountdownTimer } from '../components/CountdownTimer';
+import { colors } from '../theme/colors';
+import { UnitImage } from '../components/UnitImage';
+import { formatNumber, formatDuration } from '../utils/formatters';
+import { BUILDING_DEFINITIONS } from '../data/buildings';
+import { getUnitsForBuilding, UNIT_MAP } from '../data/units';
+import type { BuildingId, BuildingState, UnitDefinition, ResearchNode, MapTarget, MarchUnit, BattleReport, Birlik, BirlikSlot } from '../state/types';
+import { BattleResultModal } from '../components/BattleResultModal';
+
+// UnitImage imported from ../components/UnitImage
+
+const _baseScene = require('../assets/base/terrain/base_scene.jpg');
+
+// ─── Canvas — ekran genişliğine uniform ölçekle ───────────────
+const _rawW = Dimensions.get('window').width;
+const _clampW = _rawW > 0 ? _rawW : (typeof window !== 'undefined' ? window.innerWidth : 380);
+const SCREEN_W = Math.min(_clampW, 430);
+const _S = SCREEN_W / 380;
+const CANVAS_W = SCREEN_W;
+const CANVAS_H = Math.round(680 * _S);
+const HOTSPOT = Math.round(64 * _S);
+
+interface HotspotPos {
+  id: BuildingId;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  rotation: number;
+  labelX?: number;
+  labelY?: number;
+}
+
+function getBuildingLabel(id: string): string {
+  return t(`buildings.${id}.name`);
+}
+
+const _p = (x: number, y: number, w: number, h: number, rotation: number, id: HotspotPos['id']): HotspotPos => ({
+  id, rotation,
+  x: Math.round(x * _S), y: Math.round(y * _S),
+  w: Math.round(w * _S), h: Math.round(h * _S),
+});
+
+// ─── Android konumları ────────────────────────────────────────
+const ANDROID_POSITIONS: HotspotPos[] = [
+  { id: 'hq',           x: 112,               y: 78,  w: 188, h: 113, rotation: 345, labelX: 0,   labelY: 60 },
+  { id: 'barracks',     x: 298,               y: 114, w: 134, h: 107, rotation: 30,  labelX: -10, labelY: 60 },
+  { id: 'tankFactory',  x: 226,               y: 221, w: 96,  h: 130, rotation: 35,  labelX: 0,   labelY: 80 },
+  { id: 'airport',      x: 332,               y: 285, w: 86,  h: 210, rotation: 40,  labelX: 0,   labelY: 115 },
+  { id: 'shipyard',     x: 286,               y: 452, w: 123, h: 86,  rotation: 35,  labelX: 0,   labelY: 60 },
+  { id: 'oilField',     x: 104,               y: 584, w: 123, h: 91,  rotation: 30,  labelX: -5,  labelY: 60 },
+  { id: 'mine',         x: 61,                y: 253, w: 123, h: 145, rotation: 0,   labelX: 0,   labelY: 65 },
+  { id: 'bank',         x: 91,                y: 422, w: 42,  h: 102, rotation: 0,   labelX: 0,   labelY: 40 },
+  { id: 'researchLab',  x: 161,               y: 384, w: 80,  h: 80,  rotation: 0,   labelX: 0,   labelY: 75 },
+  { id: 'defenseTower', x: 351.92857142857144, y: 686, w: 134, h: 139, rotation: 45, labelX: -15, labelY: 90 },
+  { id: 'radar',        x: 218,               y: 538, w: 68,  h: 53,  rotation: 40,  labelX: -5,  labelY: 35 },
+  { id: 'houses',       x: 143,               y: 482, w: 81,  h: 87,  rotation: 40,  labelX: 0,   labelY: 55 },
+];
+
+// ─── Web konumları ───────────────────────────────────────────
+const WEB_POSITIONS: HotspotPos[] = [
+  { id: 'hq',           x: 114,               y: 82,  w: 188, h: 113, rotation: 345, labelX: 0,   labelY: 60 },
+  { id: 'barracks',     x: 304,               y: 117, w: 134, h: 107, rotation: 30,  labelX: -10, labelY: 60 },
+  { id: 'tankFactory',  x: 226,               y: 225, w: 96,  h: 130, rotation: 35,  labelX: 0,   labelY: 80 },
+  { id: 'airport',      x: 347,               y: 308, w: 86,  h: 210, rotation: 40,  labelX: 0,   labelY: 115 },
+  { id: 'shipyard',     x: 286,               y: 452, w: 123, h: 86,  rotation: 35,  labelX: 0,   labelY: 60 },
+  { id: 'oilField',     x: 110,               y: 610, w: 123, h: 91,  rotation: 30,  labelX: -5,  labelY: 60 },
+  { id: 'mine',         x: 67,                y: 259, w: 123, h: 145, rotation: 0,   labelX: 0,   labelY: 65 },
+  { id: 'bank',         x: 93,                y: 423, w: 42,  h: 102, rotation: 0,   labelX: 0,   labelY: 40 },
+  { id: 'researchLab',  x: 166,               y: 389, w: 80,  h: 80,  rotation: 0,   labelX: 0,   labelY: 75 },
+  { id: 'defenseTower', x: 370.92857142857144, y: 703, w: 134, h: 139, rotation: 45, labelX: -15, labelY: 90 },
+  { id: 'radar',        x: 226,               y: 560, w: 68,  h: 53,  rotation: 40,  labelX: -5,  labelY: 35 },
+  { id: 'houses',       x: 152,               y: 501, w: 81,  h: 87,  rotation: 40,  labelX: 0,   labelY: 55 },
+];
+
+const IS_WEB = typeof document !== 'undefined' && typeof navigator !== 'undefined' && /Mozilla|Chrome|Safari/.test(navigator.userAgent);
+const INITIAL_POSITIONS = IS_WEB ? WEB_POSITIONS : ANDROID_POSITIONS;
+
+// ─── Draggable Hotspot ────────────────────────────────────────
+interface DraggableHotspotProps {
+  hs: HotspotPos;
+  editMode: boolean;
+  isEditTarget: boolean;
+  selected: boolean;
+  building: BuildingState | undefined;
+  onSelect: (id: BuildingId) => void;
+  onDragEnd: (id: BuildingId, dx: number, dy: number) => void;
+  onGamePress: (id: BuildingId) => void;
+}
+
+function DraggableHotspot({
+  hs,
+  editMode,
+  isEditTarget,
+  selected,
+  building,
+  onSelect,
+  onDragEnd,
+  onGamePress,
+}: DraggableHotspotProps) {
+  // Refs so PanResponder (created once) always sees latest values
+  const editModeRef = useRef(editMode);
+  const onSelectRef = useRef(onSelect);
+  const onDragEndRef = useRef(onDragEnd);
+  const onGamePressRef = useRef(onGamePress);
+  const hsRef = useRef(hs);
+
+  useEffect(() => { editModeRef.current = editMode; }, [editMode]);
+  useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
+  useEffect(() => { onDragEndRef.current = onDragEnd; }, [onDragEnd]);
+  useEffect(() => { onGamePressRef.current = onGamePress; }, [onGamePress]);
+  useEffect(() => { hsRef.current = hs; }, [hs]);
+
+  const pan = useRef(new Animated.ValueXY()).current;
+  const hasMoved = useRef(false);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => editModeRef.current,
+      onMoveShouldSetPanResponder: (_, g) =>
+        editModeRef.current && (Math.abs(g.dx) > 3 || Math.abs(g.dy) > 3),
+      onPanResponderGrant: () => {
+        hasMoved.current = false;
+        pan.setValue({ x: 0, y: 0 });
+        onSelectRef.current(hsRef.current.id);
+      },
+      onPanResponderMove: (_, g) => {
+        hasMoved.current = true;
+        pan.setValue({ x: g.dx, y: g.dy });
+      },
+      onPanResponderRelease: (_, g) => {
+        if (hasMoved.current) {
+          onDragEndRef.current(hsRef.current.id, Math.round(g.dx), Math.round(g.dy));
+        }
+        pan.setValue({ x: 0, y: 0 });
+      },
+    })
+  ).current;
+
+  const busy =
+    building &&
+    (building.isUpgrading ||
+      building.researchSecondsRemaining > 0 ||
+      building.trainingQueue.length > 0);
+
+  const labelBounce = useRef(new Animated.Value(1)).current;
+  const handlePress = useCallback(() => {
+    Animated.sequence([
+      Animated.timing(labelBounce, { toValue: 1.3, duration: 100, useNativeDriver: true }),
+      Animated.spring(labelBounce, { toValue: 1, friction: 3, tension: 200, useNativeDriver: true }),
+    ]).start();
+    onGamePressRef.current(hs.id);
+  }, [hs.id, labelBounce]);
+
+  return (
+    <Animated.View
+      {...panResponder.panHandlers}
+      style={[
+        styles.hotspot,
+        {
+          left: hs.x - hs.w / 2,
+          top: hs.y - hs.h / 2,
+          width: hs.w,
+          height: hs.h,
+          transform: [
+            { rotate: `${hs.rotation}deg` },
+            { translateX: pan.x },
+            { translateY: pan.y },
+          ],
+        },
+        editMode && styles.hotspotEdit,
+        isEditTarget && styles.hotspotEditTarget,
+      ]}
+    >
+      {/* Tap handler only active in game mode */}
+      {!editMode && (
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={handlePress}
+        />
+      )}
+
+      {isEditTarget && <View style={styles.glowRing} />}
+
+      {busy && <View style={styles.busyDot} />}
+
+      {/* TEMP: bina etiketleri geçici olarak gizlendi */}
+      {false && <Animated.View
+        style={[
+          styles.hotspotLabelBox,
+          { marginLeft: -90 + (hs.labelX ?? 0), bottom: -20 + (hs.labelY ?? 0) },
+          { transform: [{ rotate: `${-hs.rotation}deg` }, { scale: labelBounce }] },
+        ]}
+      >
+        <Pressable onPress={!editMode ? handlePress : undefined}>
+          <Text
+            numberOfLines={1}
+            style={[
+              styles.hotspotLabel,
+              editMode && styles.hotspotLabelEdit,
+              selected && styles.hotspotLabelSelected,
+            ]}
+          >
+            {getBuildingLabel(hs.id)}
+          </Text>
+        </Pressable>
+      </Animated.View>}
+    </Animated.View>
+  );
+}
+
+// ─── Birlik types ────────────────────────────────────────────
+// types.ts'den import ediliyor: Birlik, BirlikSlot
+
+// ─── HQ Attack helpers ────────────────────────────────────────
+const BUILDING_BRANCHES = [
+  { id: 'barracks',     i18n: 'branches.infantry',   icon: '🪖' },
+  { id: 'tankFactory',  i18n: 'branches.armor',      icon: '🛡️' },
+  { id: 'airport',      i18n: 'branches.air',        icon: '✈️' },
+  { id: 'shipyard',     i18n: 'branches.naval',      icon: '⚓' },
+  { id: 'defenseTower', i18n: 'branches.airDefense',  icon: '🎯' },
+] as const;
+
+const DIFFICULTY_COLORS_HQ = { easy: '#4caf50', medium: '#ff9800', hard: '#f44336', elite: '#9c27b0' };
+const DIFFICULTY_LABELS_HQ_KEYS = { easy: 'map.easy', medium: 'map.medium', hard: 'map.hard', elite: 'map.elite' };
+
+function hqWinChance(atk: number, def: number) { return atk <= 0 ? 0 : Math.round(atk / (atk + def) * 100); }
+function hqWinColor(pct: number) { return pct >= 70 ? '#4caf50' : pct >= 40 ? '#ff9800' : '#f44336'; }
+
+// ─── Main Screen ──────────────────────────────────────────────
+type PanelTab = 'overview' | 'units' | 'research' | 'harekat' | 'market';
+const PANEL_H = 320;
+
+export function BaseScreen() {
+  const {
+    buildings,
+    getUpgradeCost,
+    getUpgradeTime,
+    canUpgradeBuilding,
+    upgradeBuilding,
+    canStartResearch,
+    startResearch,
+    getAvailableResearch,
+    getUnlockedUnitsForBuilding,
+    getTrainedCount,
+    canStartTraining,
+    startTraining,
+    getTrainingCost,
+    getMaxTrainable,
+    getUnitCap,
+    getBuildingUnitCount,
+    targets,
+    activeMarch,
+    battleReports,
+    getTotalTrainedUnits,
+    getTotalAttackPower,
+    canAttack,
+    attackTarget,
+    adjustTrainedUnits,
+    birlikler,
+    addBirlik,
+    removeBirlik,
+    speedUpWithGold,
+    calcGoldCost,
+    calcUpgradeGoldCost,
+    buyResourceWithGold,
+    gold,
+    getResource,
+  } = useDesertGame();
+
+  // ── Oyun paneli state ───────────────────────────────────────
+  const [selectedId, setSelectedId] = useState<BuildingId | null>(null);
+  const [panelTab, setPanelTab] = useState<PanelTab>('overview');
+  const [selectedUnit, setSelectedUnit] = useState<UnitDefinition | null>(null);
+  const [trainQty, setTrainQty] = useState(1);
+  const [selectedResearch, setSelectedResearch] = useState<ResearchNode | null>(null);
+  const [researchBranchTab, setResearchBranchTab] = useState<string>('land');
+  const [hqCommitted, setHqCommitted] = useState(1);
+  const [hqTarget, setHqTarget] = useState<MapTarget | null>(null);
+  // Birlik state (birlikler context'ten geliyor)
+  const [selectedBirlikIds, setSelectedBirlikIds] = useState<Set<string>>(new Set());
+  const [showBirlikForm, setShowBirlikForm] = useState(false);
+  const [viewReport, setViewReport] = useState<BattleReport | null>(null);
+  const [newBirlikName, setNewBirlikName] = useState('');
+  const [newBirlikSlots, setNewBirlikSlots] = useState<Record<string, number>>({});
+  const panelAnim = useRef(new Animated.Value(0)).current;
+
+  // ── Editör state ─────────────────────────────────────────────
+  const [editMode, setEditMode] = useState(false);
+  const [positions, setPositions] = useState<HotspotPos[]>(INITIAL_POSITIONS);
+  const [editTarget, setEditTarget] = useState<BuildingId | null>(null);
+  const [copyMsg, setCopyMsg] = useState('');
+
+  // ── Oyun paneli ───────────────────────────────────────────────
+  const selectedBuilding = useMemo(
+    () => buildings.find(b => b.id === selectedId) ?? null,
+    [buildings, selectedId],
+  );
+  const buildingDef = selectedId ? BUILDING_DEFINITIONS[selectedId] : null;
+
+  // Birlik oluşturma için mevcut saldırı birimleri (defenseTower hariç)
+  const unitAvailForBirlik = useMemo(() => {
+    const result: { unitId: string; buildingId: string; label: string; icon: string; imageUri?: string; avail: number }[] = [];
+    BUILDING_BRANCHES.filter(br => br.id !== 'defenseTower').forEach(br => {
+      const b = buildings.find(bl => bl.id === br.id);
+      if (!b?.trainedUnits) return;
+      Object.entries(b.trainedUnits).forEach(([uid, cnt]) => {
+        if (cnt <= 0) return;
+        const def = UNIT_MAP[uid];
+        result.push({
+          unitId: uid,
+          buildingId: br.id,
+          label: def?.label ?? uid,
+          icon: def?.icon ?? br.icon,
+          imageUri: def?.imageUri,
+          avail: cnt,
+        });
+      });
+    });
+    return result;
+  }, [buildings]);
+
+  const openPanel = useCallback((id: BuildingId) => {
+    setSelectedId(id);
+    setPanelTab('overview');
+    setSelectedUnit(null);
+    setTrainQty(1);
+    setSelectedResearch(null);
+    Animated.spring(panelAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 80,
+      friction: 10,
+    }).start();
+  }, [panelAnim]);
+
+  const closePanel = useCallback(() => {
+    Animated.timing(panelAnim, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => {
+      setSelectedId(null);
+    });
+  }, [panelAnim]);
+
+  const panelTranslateY = panelAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [PANEL_H + 20, 0],
+  });
+
+  const unlockedUnits = useMemo(
+    () => (selectedId ? getUnlockedUnitsForBuilding(selectedId) : []),
+    [selectedId, getUnlockedUnitsForBuilding],
+  );
+  const availableResearch = useMemo(
+    () => (selectedId ? getAvailableResearch(selectedId) : []),
+    [selectedId, getAvailableResearch],
+  );
+  const trainCost = useMemo(
+    () => (selectedUnit ? getTrainingCost(selectedUnit.id, trainQty) : null),
+    [selectedUnit, trainQty, getTrainingCost],
+  );
+  const hasMilUnits = buildingDef?.researchBranch !== undefined;
+
+  // ── Editör fonksiyonları ─────────────────────────────────────
+  const handleDragEnd = useCallback((id: BuildingId, dx: number, dy: number) => {
+    setPositions(prev =>
+      prev.map(p =>
+        p.id === id
+          ? {
+              ...p,
+              x: Math.max(HOTSPOT / 2, Math.min(CANVAS_W - HOTSPOT / 2, p.x + dx)),
+              y: Math.max(HOTSPOT / 2, Math.min(CANVAS_H - HOTSPOT / 2, p.y + dy)),
+            }
+          : p,
+      ),
+    );
+  }, []);
+
+  const updatePos = useCallback((id: BuildingId, dx: number, dy: number) => {
+    setPositions(prev =>
+      prev.map(p =>
+        p.id === id
+          ? {
+              ...p,
+              x: Math.max(HOTSPOT / 2, Math.min(CANVAS_W - HOTSPOT / 2, p.x + dx)),
+              y: Math.max(HOTSPOT / 2, Math.min(CANVAS_H - HOTSPOT / 2, p.y + dy)),
+            }
+          : p,
+      ),
+    );
+  }, []);
+
+  const updateSize = useCallback((id: BuildingId, dw: number, dh: number) => {
+    setPositions(prev =>
+      prev.map(p =>
+        p.id === id
+          ? {
+              ...p,
+              w: Math.max(20, p.w + dw),
+              h: Math.max(20, p.h + dh),
+            }
+          : p,
+      ),
+    );
+  }, []);
+
+  const updateRot = useCallback((id: BuildingId, delta: number) => {
+    setPositions(prev =>
+      prev.map(p =>
+        p.id === id ? { ...p, rotation: (p.rotation + delta + 360) % 360 } : p,
+      ),
+    );
+  }, []);
+
+  const updateLabelOffset = useCallback((id: BuildingId, dx: number, dy: number) => {
+    setPositions(prev =>
+      prev.map(p =>
+        p.id === id ? { ...p, labelX: (p.labelX ?? 0) + dx, labelY: (p.labelY ?? 0) + dy } : p,
+      ),
+    );
+  }, []);
+
+  const exportPositions = useCallback(() => {
+    const lines = positions
+      .map(p => {
+        const lx = p.labelX ?? 0;
+        const ly = p.labelY ?? 0;
+        const labelPart = (lx !== 0 || ly !== 0) ? `, labelX: ${lx}, labelY: ${ly}` : '';
+        return `  { id: '${p.id}', x: ${p.x}, y: ${p.y}, w: ${p.w}, h: ${p.h}, rotation: ${p.rotation}${labelPart} },`;
+      })
+      .join('\n');
+    const output = `const INITIAL_POSITIONS: HotspotPos[] = [\n${lines}\n];`;
+    console.log(output);
+    Clipboard.setString(output);
+    setCopyMsg('Kopyalandı!');
+    setTimeout(() => setCopyMsg(''), 2000);
+  }, [positions]);
+
+  const editPos = positions.find(p => p.id === editTarget);
+
+  return (
+    <View style={styles.root}>
+      {/* ── Editör toggle butonu ────────────────────────────── */}
+      <Pressable
+        style={[styles.editToggle, editMode && styles.editToggleActive]}
+        onPress={() => {
+          setEditMode(e => !e);
+          setEditTarget(null);
+          if (selectedId) closePanel();
+        }}
+      >
+        <Text style={styles.editToggleText}>{editMode ? '✓ Editör' : t('base.editorInactive')}</Text>
+      </Pressable>
+
+      {/* ── Terrain canvas ──────────────────────────────────── */}
+      <ScrollView
+        style={styles.canvasScroll}
+        contentContainerStyle={{ width: CANVAS_W, height: CANVAS_H }}
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
+        scrollEnabled={editMode}
+      >
+        <View style={styles.terrain}>
+          <Image
+            source={typeof _baseScene === 'string' ? { uri: _baseScene } : _baseScene}
+            style={styles.terrainBg}
+            resizeMode="cover"
+          />
+
+          {positions.map(hs => {
+            const b = buildings.find(bd => bd.id === hs.id);
+            return (
+              <DraggableHotspot
+                key={hs.id}
+                hs={hs}
+                editMode={editMode}
+                isEditTarget={hs.id === editTarget}
+                selected={hs.id === selectedId}
+                building={b}
+                onSelect={id => setEditTarget(id)}
+                onDragEnd={handleDragEnd}
+                onGamePress={id => (id === selectedId ? closePanel() : openPanel(id))}
+              />
+            );
+          })}
+        </View>
+      </ScrollView>
+
+      {/* ── Editör paneli ────────────────────────────────────── */}
+      {editMode && (
+        <View style={styles.editorPanel}>
+          {/* Bina seçici */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.buildingPicker}
+          >
+            {positions.map(p => (
+              <Pressable
+                key={p.id}
+                style={[styles.pickerItem, editTarget === p.id && styles.pickerItemActive]}
+                onPress={() => setEditTarget(p.id)}
+              >
+                <Text style={[styles.pickerText, editTarget === p.id && styles.pickerTextActive]}>
+                  {getBuildingLabel(p.id)}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+
+          {editPos ? (
+            <>
+              {/* Boyut bilgisi */}
+              <View style={styles.coordRow}>
+                <Text style={styles.coordLabel}>
+                  En: <Text style={styles.coordVal}>{editPos.w}</Text>
+                </Text>
+                <Text style={styles.coordLabel}>
+                  Boy: <Text style={styles.coordVal}>{editPos.h}</Text>
+                </Text>
+                <Text style={styles.coordLabel}>
+                  Açı: <Text style={styles.coordVal}>{editPos.rotation}°</Text>
+                </Text>
+                <Text style={styles.coordLabel}>
+                  Yazı: <Text style={styles.coordVal}>{editPos.labelX ?? 0},{editPos.labelY ?? 0}</Text>
+                </Text>
+              </View>
+
+              {/* Genişlik */}
+              <View style={styles.controlRow}>
+                <Text style={styles.axisLabel}>↔ En</Text>
+                {[-10, -5, 5, 10].map(d => (
+                  <Pressable
+                    key={d}
+                    style={styles.ctrlBtn}
+                    onPress={() => updateSize(editPos.id, d, 0)}
+                  >
+                    <Text style={styles.ctrlBtnText}>{d > 0 ? `+${d}` : d}</Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* Yükseklik */}
+              <View style={styles.controlRow}>
+                <Text style={styles.axisLabel}>↕ Boy</Text>
+                {[-10, -5, 5, 10].map(d => (
+                  <Pressable
+                    key={d}
+                    style={styles.ctrlBtn}
+                    onPress={() => updateSize(editPos.id, 0, d)}
+                  >
+                    <Text style={styles.ctrlBtnText}>{d > 0 ? `+${d}` : d}</Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* Açı */}
+              <View style={styles.controlRow}>
+                <Text style={styles.axisLabel}>↺ Açı ↻</Text>
+                {[-45, -15, -5, 5, 15, 45].map(d => (
+                  <Pressable
+                    key={d}
+                    style={styles.ctrlBtn}
+                    onPress={() => updateRot(editPos.id, d)}
+                  >
+                    <Text style={styles.ctrlBtnText}>{d > 0 ? `+${d}°` : `${d}°`}</Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* Yazı X */}
+              <View style={styles.controlRow}>
+                <Text style={styles.axisLabel}>✎ Yazı ↔</Text>
+                {[-20, -5, 5, 20].map(d => (
+                  <Pressable
+                    key={d}
+                    style={styles.ctrlBtn}
+                    onPress={() => updateLabelOffset(editPos.id, d, 0)}
+                  >
+                    <Text style={styles.ctrlBtnText}>{d > 0 ? `+${d}` : d}</Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* Yazı Y */}
+              <View style={styles.controlRow}>
+                <Text style={styles.axisLabel}>✎ Yazı ↕</Text>
+                {[-20, -5, 5, 20].map(d => (
+                  <Pressable
+                    key={d}
+                    style={styles.ctrlBtn}
+                    onPress={() => updateLabelOffset(editPos.id, 0, d)}
+                  >
+                    <Text style={styles.ctrlBtnText}>{d > 0 ? `+${d}` : d}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </>
+          ) : (
+            <Text style={styles.editorHint}>Bir binaya dokun veya yukarıdan seç</Text>
+          )}
+
+          <Pressable style={styles.exportBtn} onPress={exportPositions}>
+            <Text style={styles.exportBtnText}>
+              {copyMsg || '📋 Konumları Kopyala (Clipboard)'}
+            </Text>
+          </Pressable>
+        </View>
+      )}
+
+      {/* ── Oyun slide-up paneli ─────────────────────────────── */}
+      {!editMode && selectedId && selectedBuilding && buildingDef && (
+        <Animated.View
+          style={[styles.panel, { transform: [{ translateY: panelTranslateY }] }]}
+        >
+          <View style={styles.panelHandle}>
+            <View style={styles.handleBar} />
+          </View>
+          <Pressable onPress={closePanel} style={styles.closeBtn}>
+            <Text style={styles.closeBtnText}>✕</Text>
+          </Pressable>
+
+          <View style={styles.panelHeader}>
+            <View style={[styles.panelTitleBlock, { paddingRight: 40 }]}>
+              <Text style={styles.panelName}>{t(`buildings.${selectedId}.name`)}</Text>
+              <Text style={styles.panelLevel}>
+                {t('base.level', { level: String(selectedBuilding.level), max: String(buildingDef.maxLevel) })}
+              </Text>
+            </View>
+          </View>
+          {/* Timer'lar tab içine taşındı */}
+
+          <View style={styles.tabRow}>
+            {(
+              [
+                'overview',
+                ...(hasMilUnits ? ['units'] : []),
+                ...(selectedId === 'researchLab' ? ['research'] : []),
+                ...(selectedId === 'hq' ? ['harekat'] : []),
+                // Takas kaldırıldı — mağaza ekranına taşındı
+              ] as PanelTab[]
+            ).map(tab => {
+              const labels: Record<PanelTab, string> = {
+                overview: t('base.tabOverview'),
+                units: t('base.tabUnits'),
+                research: t('base.tabResearch'),
+                harekat: t('base.tabHarekat'),
+                market: t('base.tabMarket'),
+              };
+              return (
+                <Pressable
+                  key={tab}
+                  style={[styles.tabBtn, panelTab === tab && styles.tabBtnActive]}
+                  onPress={() => {
+                    setPanelTab(tab);
+                    setSelectedUnit(null);
+                    setSelectedResearch(null);
+                  }}
+                >
+                  <Text style={[styles.tabBtnText, panelTab === tab && styles.tabBtnTextActive]}>
+                    {labels[tab]}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+            {panelTab === 'overview' &&
+              (() => {
+                const cost = getUpgradeCost(selectedBuilding.id);
+                const time = getUpgradeTime(selectedBuilding.id);
+                const otherUpgrading = buildings.find(b => b.isUpgrading && b.id !== selectedBuilding.id);
+                return (
+                  <View style={styles.overviewContent}>
+                    <View style={styles.costRow}>
+                      {cost.cash > 0 && <CostChip icon="💵" value={formatNumber(cost.cash)} />}
+                      {cost.oil > 0 && <CostChip icon="🛢️" value={formatNumber(cost.oil)} />}
+                      {cost.ore > 0 && <CostChip icon="⛏️" value={formatNumber(cost.ore)} />}
+                      <CostChip icon="⏱️" value={formatDuration(time)} />
+                      <CostChip icon="⚡" value={t('base.unlockPower', { n: String((selectedBuilding.level + 1) * 100) })} />
+                    </View>
+                    {/* Üretim bilgisi (economy binalar) */}
+                  {buildingDef.baseProdPerHour && (
+                    <View style={styles.prodInfoRow}>
+                      <Text style={styles.prodLabel}>
+                        {buildingDef.produceResource === 'cash' ? '💵' : buildingDef.produceResource === 'oil' ? '🛢️' : '⛏️'}
+                        {' '}{t('base.income')}
+                      </Text>
+                      <Text style={styles.prodCurrent}>
+                        {formatNumber(buildingDef.baseProdPerHour * selectedBuilding.level)}{t('base.incomePerHour')}
+                      </Text>
+                      {selectedBuilding.level < buildingDef.maxLevel && (
+                        <Text style={styles.prodNext}>
+                          → {formatNumber(buildingDef.baseProdPerHour * (selectedBuilding.level + 1))}/sa Lv.{selectedBuilding.level + 1}
+                        </Text>
+                      )}
+                    </View>
+                  )}
+                  {otherUpgrading && !selectedBuilding.isUpgrading && (
+                    <View style={styles.blockRow}>
+                      <Text style={styles.blockText}>
+                        🔒 {t('base.blockingMsg', { name: t(`buildings.${otherUpgrading.id}.name`) })}
+                      </Text>
+                    </View>
+                  )}
+                  {selectedBuilding.isUpgrading ? (
+                    <CountdownTimer
+                      seconds={selectedBuilding.upgradeSecondsRemaining}
+                      total={getUpgradeTime(selectedBuilding.id)}
+                      label={t('base.upgrading')}
+                      goldCost={calcGoldCost(selectedBuilding.upgradeSecondsRemaining)}
+                      onSpeedUp={() => speedUpWithGold('building', selectedBuilding.id)}
+                    />
+                  ) : (
+                    <ActionButton
+                      label={
+                        selectedBuilding.level >= buildingDef.maxLevel
+                          ? t('base.maxLevel')
+                          : t('base.upgrade')
+                      }
+                      onPress={() => upgradeBuilding(selectedBuilding.id)}
+                      disabled={!canUpgradeBuilding(selectedBuilding.id)}
+                    />
+                  )}
+                    {/* Sonraki seviyede açılacaklar */}
+                    {selectedBuilding.level < buildingDef.maxLevel && (() => {
+                      const currentLv = selectedBuilding.level;
+                      const currentUnits = getUnitsForBuilding(selectedBuilding.id, currentLv);
+
+                      // Bir sonraki anlamlı kilit seviyesini bul
+                      let milestoneUnits: typeof currentUnits = [];
+                      let milestoneLv = currentLv + 1;
+                      for (let lv = currentLv + 1; lv <= buildingDef.maxLevel; lv++) {
+                        const lvUnits = getUnitsForBuilding(selectedBuilding.id, lv);
+                        const added = lvUnits.filter(u => !currentUnits.find(c => c.id === u.id));
+                        if (added.length > 0) { milestoneUnits = added; milestoneLv = lv; break; }
+                      }
+                      const isNext = milestoneLv === currentLv + 1;
+
+                      const prodIncrease = buildingDef.baseProdPerHour ?? null;
+                      const resourceIcon = buildingDef.produceResource === 'cash' ? '💵' : buildingDef.produceResource === 'oil' ? '🛢️' : '⛏️';
+
+                      return (
+                        <View style={styles.nextLevelBox}>
+                          {/* Üretim / savunma / faiz bonusları — her seviyede */}
+                          {prodIncrease !== null && (
+                            <View style={styles.nextLevelRow}>
+                              <Text style={styles.nextLevelIcon}>{resourceIcon}</Text>
+                              <Text style={styles.nextLevelText}>+{formatNumber(prodIncrease)}/sa üretim artışı</Text>
+                            </View>
+                          )}
+                          {buildingDef.lossReductionPerLevel && (
+                            <View style={styles.nextLevelRow}>
+                              <Text style={styles.nextLevelIcon}>🛡️</Text>
+                              <Text style={styles.nextLevelText}>
+                                Savaş kayıpları %{Math.round(buildingDef.lossReductionPerLevel * 100)} azalır
+                              </Text>
+                            </View>
+                          )}
+                          {buildingDef.interestRatePerLevel && (
+                            <View style={styles.nextLevelRow}>
+                              <Text style={styles.nextLevelIcon}>📈</Text>
+                              <Text style={styles.nextLevelText}>
+                                Faiz geliri artar (her seviye +%{Math.round(buildingDef.interestRatePerLevel * 100 * 3600)}/sa)
+                              </Text>
+                            </View>
+                          )}
+                          {/* Birim kilitleri */}
+                          {milestoneUnits.length > 0 && (
+                            <>
+                              <Text style={[styles.nextLevelTitle, !isNext && styles.nextLevelTitleFar]}>
+                                Lv.{milestoneLv}'de açılacaklar:
+                              </Text>
+                              {milestoneUnits.map(u => (
+                                <View key={u.id} style={styles.nextLevelRow}>
+                                  {u.imageUri
+                                    ? <UnitImage unitId={u.id} uri={u.imageUri} icon={u.icon} style={styles.nextLevelThumb} />
+                                    : <Text style={styles.nextLevelIcon}>{u.icon}</Text>
+                                  }
+                                  <Text style={styles.nextLevelText}>{t(`units.${u.id}.name`) !== `units.${u.id}.name` ? t(`units.${u.id}.name`) : u.label}</Text>
+                                  {isNext
+                                    ? <Text style={styles.nextLevelBadge}>Yeni</Text>
+                                    : <Text style={styles.nextLevelBadgeFar}>Lv.{milestoneLv}</Text>
+                                  }
+                                </View>
+                              ))}
+                            </>
+                          )}
+                          {/* Hiçbir şey yoksa */}
+                          {prodIncrease === null && !buildingDef.lossReductionPerLevel && !buildingDef.interestRatePerLevel && milestoneUnits.length === 0 && (
+                            <View style={styles.nextLevelRow}>
+                              <Text style={styles.nextLevelIcon}>⚡</Text>
+                              <Text style={styles.nextLevelText}>Bina kapasitesi ve eğitim hızı artar</Text>
+                            </View>
+                          )}
+                        </View>
+                      );
+                    })()}
+                    {Object.entries(selectedBuilding.trainedUnits).some(([, c]) => c > 0) && (
+                      <View style={styles.trainedSection}>
+                        <Text style={styles.sectionLabel}>MEVCUT BİRİMLER</Text>
+                        {Object.entries(selectedBuilding.trainedUnits)
+                          .filter(([, c]) => c > 0)
+                          .map(([uid, cnt]) => {
+                            const unitDef = UNIT_MAP[uid];
+                            return (
+                              <View key={uid} style={styles.trainedRow}>
+                                {unitDef?.imageUri ? (
+                                  <UnitImage unitId={uid} uri={unitDef.imageUri} icon={unitDef.icon} style={styles.trainedThumb} />
+                                ) : (
+                                  <Text style={styles.trainedIcon}>{unitDef?.icon ?? '🪖'}</Text>
+                                )}
+                                <Text style={styles.trainedId}>{t(`units.${uid}.name`) !== `units.${uid}.name` ? t(`units.${uid}.name`) : (unitDef?.label ?? uid)}</Text>
+                                <Text style={styles.trainedCount}>×{cnt}</Text>
+                              </View>
+                            );
+                          })}
+                      </View>
+                    )}
+                  </View>
+                );
+              })()}
+
+            {panelTab === 'units' && (
+              <View>
+                {/* Eğitim timer — devam ediyorsa göster */}
+                {selectedBuilding.trainingQueue.length > 0 && (
+                  <View style={{ marginBottom: 8 }}>
+                    <CountdownTimer
+                      seconds={selectedBuilding.trainingQueue[0].secondsRemaining}
+                      total={selectedBuilding.trainingQueue[0].totalSeconds}
+                      label={t('base.training')}
+                      goldCost={calcGoldCost(selectedBuilding.trainingQueue.reduce((s, q) => s + (q.secondsRemaining ?? 0), 0))}
+                      onSpeedUp={() => speedUpWithGold('training', selectedBuilding.id)}
+                    />
+                  </View>
+                )}
+                {/* Bina Bazlı Birim Kapasitesi Gösterimi */}
+                {(() => {
+                  const buildingUnits = getBuildingUnitCount(selectedBuilding.id);
+                  const cap = getUnitCap();
+                  const isFull = buildingUnits >= cap;
+                  const BUILDING_LABELS_I18N: Record<string, string> = {
+                    barracks: 'common.land', tankFactory: 'common.land', airport: 'common.air',
+                    shipyard: 'common.sea', defenseTower: 'common.defense', hq: 'common.defense',
+                  };
+                  const label = t(BUILDING_LABELS_I18N[selectedBuilding.id] ?? 'common.units');
+                  return (
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: isFull ? '#4a1c1c' : '#1a2a1a', borderRadius: 8, padding: 8, marginBottom: 8 }}>
+                      <Text style={{ color: isFull ? '#ff6b6b' : '#8bc34a', fontWeight: 'bold', fontSize: 13 }}>
+                        {t('base.capacityLabel', { label })}
+                      </Text>
+                      <Text style={{ color: isFull ? '#ff6b6b' : '#ccc', fontWeight: 'bold', fontSize: 13 }}>
+                        {buildingUnits} / {cap}
+                      </Text>
+                    </View>
+                  );
+                })()}
+                {unlockedUnits.length === 0 ? (
+                  <Text style={styles.emptyText}>{t('base.noUnits')}</Text>
+                ) : (
+                  unlockedUnits.map(unit => {
+                    const isSel = selectedUnit?.id === unit.id;
+                    const trained = getTrainedCount(selectedBuilding.id, unit.id);
+                    return (
+                      <Pressable
+                        key={unit.id}
+                        onPress={() => {
+                          setSelectedUnit(isSel ? null : unit);
+                          setTrainQty(1);
+                        }}
+                      >
+                        <View style={[styles.unitCard, isSel && styles.unitCardSelected]}>
+                          {isSel && unit.imageUri && (
+                            <UnitImage
+                              unitId={unit.id}
+                              uri={unit.imageUri}
+                              icon={unit.icon}
+                              style={styles.unitCardBanner}
+                              banner
+                            />
+                          )}
+                          <View style={styles.unitCardRow}>
+                            {!isSel ? (
+                              unit.imageUri ? (
+                                <UnitImage
+                                  unitId={unit.id}
+                                  uri={unit.imageUri}
+                                  icon={unit.icon}
+                                  style={styles.unitCardThumb}
+                                />
+                              ) : (
+                                <Text style={styles.unitCardIcon}>{unit.icon}</Text>
+                              )
+                            ) : null}
+                            <View style={styles.unitCardInfo}>
+                              <Text style={styles.unitCardName}>{t(`units.${unit.id}.name`) !== `units.${unit.id}.name` ? t(`units.${unit.id}.name`) : unit.label}</Text>
+                              <Text style={styles.unitCardStat}>
+                                ATK {unit.attackPower} · DEF {unit.defensePower}
+                              </Text>
+                              <Text style={styles.unitCardTrained}>{t('base.trained', { count: String(trained) })}</Text>
+                            </View>
+                            <View>
+                              <Text style={styles.costSmall}>💵{unit.costCash}</Text>
+                              <Text style={styles.costSmall}>🛢️{unit.costOil}</Text>
+                              <Text style={styles.costSmall}>⛏️{unit.costOre}</Text>
+                            </View>
+                          </View>
+                          {isSel && (() => {
+                            const maxT = getMaxTrainable(selectedBuilding.id, unit.id);
+                            const clamp = (v: number) => Math.max(1, Math.min(v, Math.max(1, maxT)));
+                            return (
+                            <View style={styles.trainControls}>
+                              <View style={styles.stepperRow}>
+                                <StepBtn label="−100" onPress={() => setTrainQty(q => clamp(q - 100))} />
+                                <StepBtn label="−10" onPress={() => setTrainQty(q => clamp(q - 10))} />
+                                <StepBtn label="−" onPress={() => setTrainQty(q => clamp(q - 1))} />
+                                <TextInput
+                                  style={styles.stepperInput}
+                                  value={String(trainQty)}
+                                  onChangeText={val => {
+                                    const n = parseInt(val.replace(/[^0-9]/g, ''), 10);
+                                    setTrainQty(isNaN(n) ? 1 : clamp(n));
+                                  }}
+                                  keyboardType="number-pad"
+                                  selectTextOnFocus
+                                />
+                                <StepBtn label="+" onPress={() => setTrainQty(q => clamp(q + 1))} />
+                                <StepBtn label="+10" onPress={() => setTrainQty(q => clamp(q + 10))} />
+                                <StepBtn label="+100" onPress={() => setTrainQty(q => clamp(q + 100))} />
+                              </View>
+                              {trainCost && (
+                                <Text style={styles.trainCostText}>
+                                  💵{formatNumber(trainCost.cash)} 🛢️{formatNumber(trainCost.oil)}{' '}
+                                  ⛏️{formatNumber(trainCost.ore)}
+                                </Text>
+                              )}
+                              <ActionButton
+                                label={getBuildingUnitCount(selectedBuilding.id) + trainQty > getUnitCap() ? t('base.capacityFull', { current: String(getBuildingUnitCount(selectedBuilding.id)), cap: String(getUnitCap()) }) : t('base.trainBtn', { qty: String(trainQty) })}
+                                onPress={() => {
+                                  startTraining(selectedBuilding.id, unit.id, trainQty);
+                                  setSelectedUnit(null);
+                                }}
+                                disabled={!canStartTraining(selectedBuilding.id, unit.id, trainQty)}
+                              />
+                            </View>
+                            );
+                          })()}
+                        </View>
+                      </Pressable>
+                    );
+                  })
+                )}
+              </View>
+            )}
+
+            {panelTab === 'research' && (() => {
+              const branchTabs: { key: string; label: string }[] = [
+                { key: 'land',     label: t('common.land') },
+                { key: 'air',      label: t('common.air') },
+                { key: 'naval',    label: t('common.sea') },
+                { key: 'defense',  label: t('common.defense') },
+              ];
+              const filteredResearch = availableResearch.filter(n => n.branch === researchBranchTab);
+              return (
+                <View>
+                  {/* Alt sekmeler */}
+                  <View style={styles.researchBranchRow}>
+                    {branchTabs.map(bt => (
+                      <Pressable
+                        key={bt.key}
+                        onPress={() => { setResearchBranchTab(bt.key); setSelectedResearch(null); }}
+                        style={[
+                          styles.researchBranchBtn,
+                          researchBranchTab === bt.key && styles.researchBranchBtnActive,
+                        ]}
+                      >
+                        <Text style={[
+                          styles.researchBranchLabel,
+                          researchBranchTab === bt.key && styles.researchBranchLabelActive,
+                        ]}>
+                          {bt.label}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                  {/* Araştırma timer — devam ediyorsa göster */}
+                  {selectedBuilding.researchSecondsRemaining > 0 && (
+                    <View style={{ marginBottom: 8 }}>
+                      <CountdownTimer
+                        seconds={selectedBuilding.researchSecondsRemaining}
+                        total={selectedBuilding.researchSecondsRemaining + 10}
+                        label={t('base.researchInProgress')}
+                        goldCost={calcGoldCost(selectedBuilding.researchSecondsRemaining)}
+                        onSpeedUp={() => speedUpWithGold('research', selectedBuilding.activeResearchNodeId ?? '')}
+                      />
+                    </View>
+                  )}
+                  {/* Araştırma listesi */}
+                  {filteredResearch.length === 0 ? (
+                    <Text style={styles.emptyText}>
+                      {selectedBuilding.researchSecondsRemaining > 0
+                        ? t('base.noResearchBusy')
+                        : t('base.noResearchEmpty')}
+                    </Text>
+                  ) : (
+                    filteredResearch.map(node => {
+                      const isSel = selectedResearch?.id === node.id;
+                      return (
+                        <Pressable
+                          key={node.id}
+                          onPress={() => setSelectedResearch(isSel ? null : node)}
+                        >
+                          <View style={[styles.researchCard, isSel && styles.researchCardSelected]}>
+                            <Text style={styles.researchName}>{node.label}</Text>{/* research labels stay as-is — no i18n keys for research nodes */}
+                            <Text style={styles.researchDesc}>{node.description}</Text>
+                            <View style={styles.costRow}>
+                              {node.costCash > 0 && (
+                                <CostChip icon="💵" value={formatNumber(node.costCash)} />
+                              )}
+                              {node.costOil > 0 && (
+                                <CostChip icon="🛢️" value={formatNumber(node.costOil)} />
+                              )}
+                              {node.costOre > 0 && (
+                                <CostChip icon="⛏️" value={formatNumber(node.costOre)} />
+                              )}
+                              <CostChip icon="⏱️" value={formatDuration(node.researchSeconds)} />
+                              <CostChip icon="⚡" value={t('base.unlockPower', { n: String(node.tier * 50) })} />
+                            </View>
+                            {isSel && (
+                              <ActionButton
+                                label={t('base.researchBtn')}
+                                onPress={() => {
+                                  startResearch(selectedBuilding.id, node.id);
+                                  setSelectedResearch(null);
+                                }}
+                                disabled={!canStartResearch(selectedBuilding.id, node.id)}
+                                style={{ marginTop: 6 }}
+                              />
+                            )}
+                          </View>
+                        </Pressable>
+                      );
+                    })
+                  )}
+                </View>
+              );
+            })()}
+            {panelTab === 'harekat' && (() => {
+              const totalUnits = getTotalTrainedUnits();
+              // Birlik or manual committed count
+              const selectedBirlikler = birlikler.filter(b => selectedBirlikIds.has(b.id));
+              const birlikTotal = selectedBirlikler.reduce((sum, bl) => sum + bl.slots.reduce((a, s) => a + s.count, 0), 0);
+              const hasSelectedBirlik = selectedBirlikler.length > 0;
+              const safeCommitted = hasSelectedBirlik
+                ? birlikTotal
+                : 0;
+              const atkPower = getTotalAttackPower(safeCommitted);
+
+              // Mevcut eğitilmiş birimler — her birim ayrı satır
+              const unitAvail: { unitId: string; buildingId: string; label: string; icon: string; imageUri?: string; avail: number }[] = [];
+              BUILDING_BRANCHES.filter(br => br.id !== 'defenseTower').forEach(br => {
+                const b = buildings.find(bl => bl.id === br.id);
+                if (!b?.trainedUnits) return;
+                Object.entries(b.trainedUnits).forEach(([uid, cnt]) => {
+                  if (cnt <= 0) return;
+                  const def = UNIT_MAP[uid];
+                  unitAvail.push({
+                    unitId: uid,
+                    buildingId: br.id,
+                    label: def?.label ?? uid,
+                    icon: def?.icon ?? br.icon,
+                    imageUri: def?.imageUri,
+                    avail: cnt,
+                  });
+                });
+              });
+
+              const unitBreakdown = BUILDING_BRANCHES
+                .map(({ id, label, icon }) => {
+                  const b = buildings.find(bl => bl.id === id);
+                  const count = b?.trainedUnits
+                    ? Object.values(b.trainedUnits).reduce((a, v) => a + v, 0)
+                    : 0;
+                  return { label, icon, count };
+                })
+                .filter(u => u.count > 0);
+
+
+              return (
+                <View style={styles.harekatContent}>
+                  {/* Active march */}
+                  {activeMarch && (
+                    <View style={styles.hqMarchBox}>
+                      <Text style={styles.hqMarchTitle}>🗺️ Aktif Sefer</Text>
+                      <Text style={styles.hqMarchTarget}>{activeMarch.targetName}</Text>
+                      <CountdownTimer seconds={activeMarch.secondsRemaining} total={activeMarch.totalSeconds} />
+                      <Text style={styles.hqMarchSub}>{t('base.marchUnits', { count: String(activeMarch.committedUnits), power: String(activeMarch.attackPower) })}</Text>
+                    </View>
+                  )}
+
+                  {/* Army status */}
+                  <View style={styles.hqArmyBox}>
+                    <View style={styles.hqArmyRow}>
+                      <Text style={styles.hqArmyTotal}>{t('base.armyStatus', { count: String(totalUnits) })}</Text>
+                      {atkPower > 0 && <Text style={styles.hqArmyPower}>⚔️ {atkPower}</Text>}
+                    </View>
+                    {unitBreakdown.length > 0 && (
+                      <View style={styles.hqBreakdownRow}>
+                        {unitBreakdown.map(u => (
+                          <View key={u.label} style={styles.hqChip}>
+                            <Text style={styles.hqChipIcon}>{u.icon}</Text>
+                            <Text style={styles.hqChipLabel}>{t(`units.${u.id ?? u.unitId}.name`) !== `units.${u.id ?? u.unitId}.name` ? t(`units.${u.id ?? u.unitId}.name`) : u.label}</Text>
+                            <Text style={styles.hqChipCount}>{u.count}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+                    {totalUnits === 0 && (
+                      <Text style={styles.emptyText}>{t('base.noTrainedUnits')}</Text>
+                    )}
+                  </View>
+
+                  {/* ── BİRLİKLERİM ── */}
+                  <View style={styles.birlikSection}>
+                    <View style={styles.birlikHeader}>
+                      <Text style={styles.hqTargetSectionLabel}>{t('base.mySquads', { count: String(birlikler.length) })}</Text>
+                      {birlikler.length < 5 && totalUnits > 0 && (
+                        <Pressable
+                          style={styles.birlikCreateBtn}
+                          onPress={() => {
+                            setNewBirlikName(t('base.defaultSquadName', { n: String(birlikler.length + 1) }));
+                            setNewBirlikSlots({});
+                            setShowBirlikForm(true);
+                          }}
+                        >
+                          <Text style={styles.birlikCreateBtnText}>{t('base.createSquad')}</Text>
+                        </Pressable>
+                      )}
+                    </View>
+                    {birlikler.length === 0 && (
+                      <Text style={styles.emptyText}>{t('base.noSquads')}</Text>
+                    )}
+                    {birlikler.map(bl => {
+                      const blTotal = bl.slots.reduce((a, s) => a + s.count, 0);
+                      const isSel = selectedBirlikIds.has(bl.id);
+                      return (
+                        <View key={bl.id} style={[styles.birlikCard, isSel && styles.birlikCardSel]}>
+                          <View style={styles.birlikCardRow}>
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.birlikName}>{bl.name}</Text>
+                              <View style={styles.birlikSlotRow}>
+                                {bl.slots.map(s => (
+                                  <Text key={s.unitId} style={styles.birlikSlotChip}>
+                                    {s.icon}{s.count}
+                                  </Text>
+                                ))}
+                                <Text style={styles.birlikTotal}>{t('base.squadTotal', { count: String(blTotal) })}</Text>
+                              </View>
+                            </View>
+                            <Pressable
+                              style={[styles.birlikSelBtn, isSel && styles.birlikSelBtnActive]}
+                              onPress={() => setSelectedBirlikIds(prev => {
+                                const next = new Set(prev);
+                                if (isSel) next.delete(bl.id); else next.add(bl.id);
+                                return next;
+                              })}
+                            >
+                              <Text style={[styles.birlikSelBtnText, isSel && styles.birlikSelBtnTextActive]}>
+                                {isSel ? t('base.squadSelected') : t('base.squadSelect')}
+                              </Text>
+                            </Pressable>
+                            <Pressable
+                              style={styles.birlikDelBtn}
+                              onPress={() => {
+                                removeBirlik(bl.id);
+                                setSelectedBirlikIds(prev => { const next = new Set(prev); next.delete(bl.id); return next; });
+                              }}
+                            >
+                              <Text style={styles.birlikDelBtnText}>🗑️</Text>
+                            </Pressable>
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </View>
+
+
+                </View>
+              );
+            })()}
+
+            {/* Takas kaldırıldı — mağaza ekranına taşındı */}
+
+            <View style={{ height: 20 }} />
+          </ScrollView>
+        </Animated.View>
+      )}
+      {viewReport && (
+        <BattleResultModal report={viewReport} onClose={() => setViewReport(null)} />
+      )}
+
+      {/* ── Birlik Oluştur Modal ── */}
+      <Modal visible={showBirlikForm} transparent animationType="slide">
+        <View style={styles.birlikModalOverlay}>
+          <View style={styles.birlikModalPanel}>
+            <View style={styles.birlikModalHeader}>
+              <Text style={styles.birlikModalTitle}>{t('base.squadCreateTitle')}</Text>
+              <Pressable onPress={() => setShowBirlikForm(false)} style={styles.birlikModalClose}>
+                <Text style={styles.birlikModalCloseText}>✕</Text>
+              </Pressable>
+            </View>
+
+            <TextInput
+              style={styles.birlikNameInput}
+              value={newBirlikName}
+              onChangeText={setNewBirlikName}
+              placeholder={t('base.squadNamePlaceholder')}
+              placeholderTextColor={colors.textMuted}
+              maxLength={20}
+            />
+
+            <View style={styles.birlikModalSelectHeader}>
+              <Text style={styles.birlikModalSelectLabel}>{t('base.squadSelectHeader')}</Text>
+              <Pressable onPress={() => {
+                const all: Record<string, number> = {};
+                unitAvailForBirlik.forEach(u => { all[u.unitId] = u.avail; });
+                setNewBirlikSlots(all);
+              }}>
+                <Text style={styles.birlikModalSelectAll}>{t('base.selectAll')}</Text>
+              </Pressable>
+            </View>
+
+            <ScrollView style={styles.birlikModalList}>
+              {unitAvailForBirlik.length === 0 && (
+                <View style={styles.birlikModalNoUnits}>
+                  <Text style={styles.birlikModalNoUnitsIcon}>⚠️</Text>
+                  <Text style={styles.birlikModalNoUnitsTitle}>Birim Yok</Text>
+                  <Text style={styles.birlikModalNoUnitsDesc}>{t('base.noUnitsDesc')}</Text>
+                </View>
+              )}
+              {BUILDING_BRANCHES.filter(br => br.id !== 'defenseTower').map(br => {
+                const branchUnits = unitAvailForBirlik.filter(u => u.buildingId === br.id);
+                if (branchUnits.length === 0) return null;
+                return (
+                  <View key={br.id}>
+                    <View style={styles.birlikModalBranchHeader}>
+                      <Text style={styles.birlikModalBranchIcon}>{br.icon}</Text>
+                      <Text style={styles.birlikModalBranchLabel}>{t(br.i18n)}</Text>
+                    </View>
+                    {branchUnits.map(u => {
+                      const cur = newBirlikSlots[u.unitId] ?? 0;
+                      return (
+                        <View key={u.unitId} style={styles.birlikModalUnitRow}>
+                          <View style={styles.birlikModalUnitInfo}>
+                            <UnitImage unitId={u.unitId} uri={u.imageUri} icon={u.icon} style={styles.birlikModalUnitImg} />
+                            <View>
+                              <Text style={styles.birlikModalUnitName}>{t(`units.${u.unitId}.name`) !== `units.${u.unitId}.name` ? t(`units.${u.unitId}.name`) : u.label}</Text>
+                              <Text style={styles.birlikModalUnitAvail}>{t('base.availableLabel', { count: String(u.avail) })}</Text>
+                            </View>
+                          </View>
+                          <View style={styles.birlikModalStepper}>
+                            <Pressable style={styles.birlikModalStepBtn} onPress={() => setNewBirlikSlots(p => ({ ...p, [u.unitId]: Math.max(0, (p[u.unitId] ?? 0) - 100) }))}>
+                              <Text style={styles.birlikModalStepBtnText}>-100</Text>
+                            </Pressable>
+                            <Pressable style={styles.birlikModalStepBtn} onPress={() => setNewBirlikSlots(p => ({ ...p, [u.unitId]: Math.max(0, (p[u.unitId] ?? 0) - 10) }))}>
+                              <Text style={styles.birlikModalStepBtnText}>-10</Text>
+                            </Pressable>
+                            <Pressable style={styles.birlikModalStepBtn} onPress={() => setNewBirlikSlots(p => ({ ...p, [u.unitId]: Math.max(0, (p[u.unitId] ?? 0) - 1) }))}>
+                              <Text style={styles.birlikModalStepBtnText}>−</Text>
+                            </Pressable>
+                            <TextInput
+                              style={styles.birlikModalStepInput}
+                              value={String(cur)}
+                              onChangeText={text => {
+                                const val = parseInt(text, 10);
+                                if (text === '') setNewBirlikSlots(p => ({ ...p, [u.unitId]: 0 }));
+                                else if (!isNaN(val)) setNewBirlikSlots(p => ({ ...p, [u.unitId]: Math.min(u.avail, Math.max(0, val)) }));
+                              }}
+                              keyboardType="numeric"
+                              selectTextOnFocus
+                            />
+                            <Pressable style={styles.birlikModalStepBtn} onPress={() => setNewBirlikSlots(p => ({ ...p, [u.unitId]: Math.min(u.avail, (p[u.unitId] ?? 0) + 1) }))}>
+                              <Text style={styles.birlikModalStepBtnText}>+</Text>
+                            </Pressable>
+                            <Pressable style={styles.birlikModalStepBtn} onPress={() => setNewBirlikSlots(p => ({ ...p, [u.unitId]: Math.min(u.avail, (p[u.unitId] ?? 0) + 10) }))}>
+                              <Text style={styles.birlikModalStepBtnText}>+10</Text>
+                            </Pressable>
+                            <Pressable style={styles.birlikModalStepBtn} onPress={() => setNewBirlikSlots(p => ({ ...p, [u.unitId]: Math.min(u.avail, (p[u.unitId] ?? 0) + 100) }))}>
+                              <Text style={styles.birlikModalStepBtnText}>+100</Text>
+                            </Pressable>
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </View>
+                );
+              })}
+            </ScrollView>
+
+            <View style={styles.birlikModalSummary}>
+              <Text style={styles.birlikModalSummaryText}>
+                {t('base.summaryText', { count: String(Object.values(newBirlikSlots).reduce((a, v) => a + v, 0)) })}
+              </Text>
+            </View>
+
+            <ActionButton
+              label={t('base.saveSquad', { count: String(Object.values(newBirlikSlots).reduce((a, v) => a + v, 0)) })}
+              disabled={Object.values(newBirlikSlots).reduce((a, v) => a + v, 0) === 0 || !newBirlikName.trim()}
+              onPress={() => {
+                const total = Object.values(newBirlikSlots).reduce((a, v) => a + v, 0);
+                if (total === 0 || !newBirlikName.trim()) return;
+                const slots: BirlikSlot[] = unitAvailForBirlik
+                  .filter(u => (newBirlikSlots[u.unitId] ?? 0) > 0)
+                  .map(u => ({ unitId: u.unitId, buildingId: u.buildingId, icon: u.icon, label: u.label, imageUri: u.imageUri, count: newBirlikSlots[u.unitId]! }));
+                const newBl: Birlik = { id: Date.now().toString(), name: newBirlikName.trim(), slots };
+                addBirlik(newBl);
+                setShowBirlikForm(false);
+              }}
+            />
+            <ActionButton label={t('common.cancel')} onPress={() => setShowBirlikForm(false)} variant="secondary" />
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+function CostChip({ icon, value }: { icon: string; value: string }) {
+  return (
+    <View style={styles.costChip}>
+      <Text style={styles.costChipIcon}>{icon}</Text>
+      <Text style={styles.costChipVal}>{value}</Text>
+    </View>
+  );
+}
+
+function StepBtn({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable style={styles.stepBtn} onPress={onPress}>
+      <Text style={styles.stepBtnText}>{label}</Text>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.background },
+  editToggle: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 100,
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.panelBorder,
+    borderRadius: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  editToggleActive: { borderColor: colors.sand, backgroundColor: colors.militaryDark },
+  editToggleText: { color: colors.sand, fontSize: 11, fontWeight: '700' },
+
+  canvasScroll: { flex: 1, overflow: 'scroll' as any },
+  terrain: {
+    width: CANVAS_W,
+    height: CANVAS_H,
+    backgroundColor: '#111109',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  terrainBg: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: CANVAS_W,
+    height: CANVAS_H,
+  },
+
+  hotspot: {
+    position: 'absolute',
+    width: HOTSPOT,
+    height: HOTSPOT,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 6,
+    backgroundColor: 'transparent',
+  },
+  hotspotSelected: {
+    borderWidth: 2,
+    borderColor: colors.sand,
+    backgroundColor: 'rgba(200,168,75,0.15)',
+  },
+  hotspotEdit: {
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  hotspotEditTarget: {
+    borderWidth: 2,
+    borderColor: colors.sand,
+    backgroundColor: 'rgba(200,168,75,0.2)',
+  },
+  glowRing: {
+    position: 'absolute',
+    top: -4,
+    left: -4,
+    right: -4,
+    bottom: -4,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: colors.sandDark,
+    opacity: 0.7,
+  },
+  levelBadge: {
+    position: 'absolute',
+    top: 3,
+    right: 3,
+    backgroundColor: colors.militaryDark,
+    borderRadius: 4,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderWidth: 1,
+    borderColor: colors.military,
+  },
+  levelBadgeBusy: { borderColor: colors.success },
+  levelBadgeText: { color: colors.textPrimary, fontSize: 9, fontWeight: '700' },
+  busyDot: {
+    position: 'absolute',
+    top: 3,
+    left: 3,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.success,
+  },
+  hotspotLabelBox: {
+    position: 'absolute',
+    bottom: -20,
+    left: '50%' as any,
+    marginLeft: -90,
+    width: 180,
+    alignItems: 'center',
+  },
+  hotspotLabel: {
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    overflow: 'hidden',
+    fontSize: 10,
+    color: '#FFD98E',
+    fontWeight: '800',
+    letterSpacing: 1.2,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+  },
+  hotspotLabelEdit: {
+    color: '#00FF88',
+    backgroundColor: 'rgba(0,0,0,0.85)',
+  },
+  hotspotLabelSelected: {
+    color: '#FFFFFF',
+    backgroundColor: 'rgba(196,164,85,0.5)',
+    fontSize: 11,
+    fontWeight: '900',
+  },
+
+  editorPanel: {
+    backgroundColor: colors.surface,
+    borderTopWidth: 1.5,
+    borderTopColor: colors.sand,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  buildingPicker: { maxHeight: 36 },
+  pickerItem: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginRight: 6,
+    borderWidth: 1,
+    borderColor: colors.panelBorder,
+    borderRadius: 4,
+    backgroundColor: colors.surfaceAlt,
+  },
+  pickerItemActive: { borderColor: colors.sand, backgroundColor: colors.militaryDark },
+  pickerText: { color: colors.textMuted, fontSize: 11, fontWeight: '600' },
+  pickerTextActive: { color: colors.sand },
+
+  coordRow: { flexDirection: 'row', gap: 16, paddingVertical: 4 },
+  coordLabel: { color: colors.textSecondary, fontSize: 12 },
+  coordVal: { color: colors.sand, fontWeight: '700' },
+
+  controlRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  axisLabel: { color: colors.textMuted, fontSize: 11, width: 50, fontWeight: '600' },
+  ctrlBtn: {
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.panelBorder,
+    borderRadius: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    minWidth: 36,
+    alignItems: 'center',
+  },
+  ctrlBtnText: { color: colors.textPrimary, fontSize: 11, fontWeight: '700' },
+
+  editorHint: {
+    color: colors.textMuted,
+    fontSize: 12,
+    textAlign: 'center',
+    paddingVertical: 8,
+  },
+
+  exportBtn: {
+    backgroundColor: colors.militaryDark,
+    borderWidth: 1,
+    borderColor: colors.military,
+    borderRadius: 4,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  exportBtnText: { color: colors.militaryLight, fontSize: 12, fontWeight: '700' },
+
+  panel: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: PANEL_H,
+    backgroundColor: colors.panel,
+    borderTopWidth: 1.5,
+    borderTopColor: colors.sand,
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
+    paddingHorizontal: 14,
+    paddingBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 16,
+  },
+  panelHandle: {
+    alignItems: 'center',
+    paddingTop: 8,
+    marginBottom: 6,
+    justifyContent: 'center',
+  },
+  handleBar: { width: 36, height: 4, borderRadius: 2, backgroundColor: colors.panelBorder },
+  closeBtn: { position: 'absolute', right: 4, top: 2, padding: 12, zIndex: 20 },
+  closeBtnText: { color: '#ffffff', fontSize: 22, fontWeight: '900' as const },
+  panelHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
+  panelTitleBlock: { flex: 1 },
+  panelName: { color: colors.textPrimary, fontSize: 16, fontWeight: '700' },
+  panelLevel: { color: colors.sand, fontSize: 12 },
+  tabRow: { flexDirection: 'row', gap: 4, marginBottom: 8 },
+  tabBtn: {
+    flex: 1,
+    paddingVertical: 6,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.panelBorder,
+    borderRadius: 3,
+  },
+  tabBtnActive: { borderColor: colors.sand, backgroundColor: colors.surfaceAlt },
+  tabBtnText: { color: colors.textMuted, fontSize: 11, fontWeight: '600' },
+  tabBtnTextActive: { color: colors.sand },
+  tabContent: { flex: 1 },
+
+  overviewContent: { gap: 8 },
+  prodInfoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4, borderWidth: 1, borderColor: colors.panelBorder, borderRadius: 4, paddingHorizontal: 8, backgroundColor: colors.surfaceAlt },
+  prodLabel: { color: colors.textMuted, fontSize: 11 },
+  prodCurrent: { color: colors.sand, fontSize: 12, fontWeight: '700' },
+  prodNext: { color: colors.military, fontSize: 11 },
+  costRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 6 },
+  costChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.panelBorder,
+    borderRadius: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+  },
+  costChipIcon: { fontSize: 11 },
+  costChipVal: { color: colors.textPrimary, fontSize: 11, fontWeight: '600' },
+  blockRow: {
+    backgroundColor: 'rgba(200,80,80,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(200,80,80,0.3)',
+    borderRadius: 4,
+    padding: 8,
+    marginBottom: 6,
+  },
+  blockText: {
+    color: colors.danger,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  nextLevelBox: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: 'rgba(210,180,100,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(210,180,100,0.25)',
+    borderRadius: 6,
+    gap: 6,
+  },
+  nextLevelTitle: {
+    color: colors.sand,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  nextLevelTitleFar: { color: colors.textMuted },
+  nextLevelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  nextLevelThumb: { width: 36, height: 36, borderRadius: 4 },
+  nextLevelIcon: { fontSize: 14 },
+  nextLevelText: { color: colors.textSecondary, fontSize: 12, flex: 1 },
+  nextLevelBadge: {
+    color: colors.sand,
+    fontSize: 9,
+    fontWeight: '900',
+    borderWidth: 1,
+    borderColor: colors.sand,
+    borderRadius: 3,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+  },
+  nextLevelBadgeFar: {
+    color: colors.textMuted,
+    fontSize: 9,
+    fontWeight: '700',
+    borderWidth: 1,
+    borderColor: colors.textMuted,
+    borderRadius: 3,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+  },
+  trainedSection: {
+    borderTopWidth: 1,
+    borderTopColor: colors.panelBorder,
+    paddingTop: 8,
+    gap: 4,
+  },
+  sectionLabel: { color: colors.textMuted, fontSize: 9, letterSpacing: 1.5, marginBottom: 4 },
+  trainedRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 2 },
+  trainedThumb: { width: 32, height: 32, borderRadius: 4 },
+  trainedIcon: { fontSize: 14, width: 20 },
+  trainedId: { color: colors.textSecondary, fontSize: 12, flex: 1 },
+  trainedCount: { color: colors.sand, fontSize: 12, fontWeight: '700' },
+  emptyText: { color: colors.textMuted, fontSize: 12, textAlign: 'center', paddingVertical: 12 },
+
+  unitCard: {
+    borderWidth: 1,
+    borderColor: colors.panelBorder,
+    borderRadius: 4,
+    padding: 8,
+    marginBottom: 6,
+    backgroundColor: colors.surface,
+  },
+  unitCardSelected: { borderColor: colors.sand },
+  unitCardRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  unitCardIcon: { fontSize: 24 },
+  unitCardBanner: {
+    width: '100%',
+    height: 120,
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
+    backgroundColor: colors.surfaceAlt,
+  },
+  unitCardThumb: {
+    width: 72,
+    height: 50,
+    borderRadius: 3,
+    backgroundColor: colors.surfaceAlt,
+  },
+  unitCardInfo: { flex: 1 },
+  unitCardName: { color: colors.textPrimary, fontSize: 13, fontWeight: '700' },
+  unitCardStat: { color: colors.textSecondary, fontSize: 10, marginTop: 1 },
+  unitCardTrained: { color: colors.military, fontSize: 10 },
+  costSmall: { color: colors.textMuted, fontSize: 10 },
+  trainControls: {
+    marginTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: colors.panelBorder,
+    paddingTop: 8,
+    gap: 6,
+  },
+  stepperRow: { flexDirection: 'row', alignItems: 'center', gap: 4, flexWrap: 'wrap', justifyContent: 'center' },
+  stepBtn: {
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.panelBorder,
+    borderRadius: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 5,
+  },
+  stepBtnText: { color: colors.textPrimary, fontSize: 12, fontWeight: '700' },
+  stepperInput: {
+    color: colors.sand,
+    fontSize: 16,
+    fontWeight: '700',
+    minWidth: 50,
+    textAlign: 'center',
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.sand,
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+  },
+  trainCostText: { color: colors.textSecondary, fontSize: 11 },
+
+  researchCard: {
+    borderWidth: 1,
+    borderColor: colors.panelBorder,
+    borderRadius: 4,
+    padding: 8,
+    marginBottom: 6,
+    backgroundColor: colors.surface,
+    gap: 4,
+  },
+  researchCardSelected: { borderColor: colors.sand },
+  researchName: { color: colors.textPrimary, fontSize: 13, fontWeight: '700' },
+  researchDesc: { color: colors.textSecondary, fontSize: 11, lineHeight: 16 },
+
+  // ── Harekât tab ──────────────────────────────────────────────
+  harekatContent: { gap: 8 },
+
+  hqMarchBox: {
+    padding: 10, borderWidth: 1, borderColor: colors.sand,
+    borderRadius: 4, backgroundColor: 'rgba(200,168,75,0.08)', gap: 4,
+  },
+  hqMarchTitle: { color: colors.sand, fontSize: 11, fontWeight: '700', letterSpacing: 1 },
+  hqMarchTarget: { color: colors.textPrimary, fontSize: 13, fontWeight: '700' },
+  hqMarchSub: { color: colors.textSecondary, fontSize: 11 },
+
+  hqArmyBox: {
+    padding: 10, borderWidth: 1, borderColor: colors.panelBorder,
+    borderRadius: 4, backgroundColor: colors.surface, gap: 6,
+  },
+  hqArmyRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  hqArmyTotal: { color: colors.textPrimary, fontSize: 13, fontWeight: '700' },
+  hqArmyPower: { color: colors.sand, fontSize: 12, fontWeight: '700' },
+  hqBreakdownRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  hqChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 3,
+    backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.panelBorder,
+    borderRadius: 3, paddingHorizontal: 7, paddingVertical: 3,
+  },
+  hqChipIcon: { fontSize: 11 },
+  hqChipLabel: { color: colors.textSecondary, fontSize: 10 },
+  hqChipCount: { color: colors.sand, fontSize: 10, fontWeight: '700' },
+
+  hqStepperBox: {
+    padding: 10, borderWidth: 1, borderColor: colors.panelBorder,
+    borderRadius: 4, backgroundColor: colors.surface, gap: 6,
+  },
+  hqStepperLabel: { color: colors.textSecondary, fontSize: 11 },
+  hqStepperRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  hqStepBtn: {
+    backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.panelBorder,
+    borderRadius: 3, paddingHorizontal: 9, paddingVertical: 5,
+  },
+  hqStepBtnText: { color: colors.textPrimary, fontSize: 12, fontWeight: '700' },
+  hqStepVal: {
+    color: colors.sand, fontSize: 16, fontWeight: '700',
+    minWidth: 44, textAlign: 'center', fontVariant: ['tabular-nums'],
+  },
+
+  hqTargetSectionLabel: {
+    color: colors.textMuted, fontSize: 9, letterSpacing: 1.5, marginTop: 4,
+  },
+  hqTargetCard: {
+    borderWidth: 1, borderColor: colors.panelBorder, borderRadius: 3,
+    padding: 8, marginTop: 4, backgroundColor: colors.surface,
+  },
+  hqTargetCardSel: { borderColor: colors.sand },
+  hqTargetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 },
+  hqTargetName: { color: colors.textPrimary, fontSize: 13, fontWeight: '700' },
+  hqDiffBadge: { paddingHorizontal: 5, paddingVertical: 2, borderRadius: 2 },
+  hqDiffText: { fontSize: 9, fontWeight: '700', letterSpacing: 1 },
+  hqTargetPlayer: { color: colors.textSecondary, fontSize: 10, marginBottom: 4 },
+  hqTargetStats: { flexDirection: 'row', gap: 10, marginBottom: 4, alignItems: 'center' },
+  hqTargetStat: { color: colors.textSecondary, fontSize: 10 },
+  hqWinChance: { fontSize: 10, fontWeight: '700', marginLeft: 'auto' },
+  hqTargetRewards: { flexDirection: 'row', gap: 8 },
+  hqRewardText: { color: colors.textPrimary, fontSize: 11, fontWeight: '600' },
+
+  hqLogBox: { gap: 4, marginTop: 4 },
+  hqLogRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 7,
+    paddingVertical: 5, borderBottomWidth: 1, borderBottomColor: colors.panelBorder,
+  },
+  hqLogWon: { color: '#4caf50', fontSize: 14 },
+  hqLogLost: { color: '#f44336', fontSize: 14 },
+  hqLogName: { color: colors.textPrimary, fontSize: 11, fontWeight: '600' },
+  hqLogTime: { color: colors.textMuted, fontSize: 10 },
+  hqLogGain: { color: '#4caf50', fontSize: 10, fontWeight: '700' },
+  hqLogLossText: { color: '#FF5252', fontSize: 10, fontWeight: '700' },
+
+
+  // ── Birlik ───────────────────────────────────────────────────
+  birlikSection: { gap: 6 },
+  birlikHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  birlikCreateBtn: {
+    backgroundColor: colors.militaryDark, borderWidth: 1, borderColor: colors.military,
+    borderRadius: 3, paddingHorizontal: 10, paddingVertical: 5,
+  },
+  birlikCreateBtnText: { color: colors.militaryLight, fontSize: 11, fontWeight: '700' },
+  birlikCard: {
+    borderWidth: 1, borderColor: colors.panelBorder, borderRadius: 4,
+    padding: 8, backgroundColor: colors.surface,
+  },
+  birlikCardSel: { borderColor: colors.sand, backgroundColor: 'rgba(200,168,75,0.06)' },
+  birlikCardRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  birlikName: { color: colors.textPrimary, fontSize: 12, fontWeight: '700' },
+  birlikSlotRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3, flexWrap: 'wrap' },
+  birlikSlotChip: { color: colors.textSecondary, fontSize: 12 },
+  birlikTotal: { color: colors.sand, fontSize: 11, fontWeight: '700', marginLeft: 4 },
+  birlikSelBtn: {
+    borderWidth: 1, borderColor: colors.panelBorder, borderRadius: 3,
+    paddingHorizontal: 10, paddingVertical: 5,
+  },
+  birlikSelBtnActive: { borderColor: colors.sand, backgroundColor: colors.militaryDark },
+  birlikSelBtnText: { color: colors.textMuted, fontSize: 11, fontWeight: '700' },
+  birlikSelBtnTextActive: { color: colors.sand },
+  birlikDelBtn: { padding: 6 },
+  birlikDelBtnText: { fontSize: 14 },
+
+  birlikForm: {
+    borderWidth: 1, borderColor: colors.sand, borderRadius: 6,
+    padding: 10, backgroundColor: 'rgba(200,168,75,0.05)', gap: 8,
+  },
+  birlikFormTitle: { color: colors.sand, fontSize: 12, fontWeight: '700', letterSpacing: 1 },
+  birlikNameInput: {
+    borderWidth: 1, borderColor: colors.panelBorder, borderRadius: 4,
+    backgroundColor: colors.surfaceAlt, color: colors.textPrimary,
+    fontSize: 13, paddingHorizontal: 10, paddingVertical: 6,
+  },
+  birlikFormRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  birlikFormIcon: { fontSize: 16, width: 22 },
+  birlikFormThumb: { width: 28, height: 28, borderRadius: 4, marginRight: 4 },
+  birlikFormLabel: { color: colors.textSecondary, fontSize: 12, flex: 1 },
+  birlikFormAvail: { color: colors.textMuted, fontSize: 10 },
+  birlikFormBtn: {
+    backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.panelBorder,
+    borderRadius: 3, paddingHorizontal: 9, paddingVertical: 4,
+  },
+  birlikFormBtnText: { color: colors.textPrimary, fontSize: 13, fontWeight: '700' },
+  birlikFormCount: { color: colors.sand, fontSize: 15, fontWeight: '700', minWidth: 28, textAlign: 'center' },
+  birlikFormActions: { flexDirection: 'row', gap: 8, marginTop: 4 },
+  birlikCancelBtn: {
+    flex: 1, borderWidth: 1, borderColor: colors.panelBorder, borderRadius: 4,
+    paddingVertical: 8, alignItems: 'center',
+  },
+  birlikCancelBtnText: { color: colors.textMuted, fontSize: 12, fontWeight: '600' },
+  birlikSaveBtn: {
+    flex: 2, borderWidth: 1, borderColor: colors.military, borderRadius: 4,
+    paddingVertical: 8, alignItems: 'center', backgroundColor: colors.militaryDark,
+  },
+  birlikSaveBtnDisabled: { opacity: 0.4 },
+  birlikSaveBtnText: { color: colors.militaryLight, fontSize: 12, fontWeight: '700' },
+  // ── Araştırma Merkezi alt sekmeleri ──
+  researchBranchRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+    gap: 4,
+  },
+  researchBranchBtn: {
+    flex: 1,
+    paddingVertical: 6,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: colors.panelBorder,
+    alignItems: 'center',
+  },
+  researchBranchBtnActive: {
+    backgroundColor: colors.military,
+    borderColor: colors.military,
+  },
+  researchBranchLabel: {
+    color: colors.textMuted,
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  researchBranchLabelActive: {
+    color: '#fff',
+  },
+
+  // ── Birlik Modal ──
+  birlikModalOverlay: {
+    flex: 1, backgroundColor: colors.overlay,
+    justifyContent: 'center', alignItems: 'center', padding: 16,
+  },
+  birlikModalPanel: {
+    backgroundColor: colors.panel, borderWidth: 1, borderColor: colors.sand,
+    borderRadius: 6, padding: 16, width: '100%', maxHeight: '85%', gap: 10,
+  },
+  birlikModalHeader: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+  },
+  birlikModalTitle: { color: colors.sand, fontSize: 18, fontWeight: '900', letterSpacing: 2 },
+  birlikModalClose: { padding: 4 },
+  birlikModalCloseText: { color: colors.textSecondary, fontSize: 18 },
+  birlikModalSelectHeader: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+  },
+  birlikModalSelectLabel: { color: colors.textPrimary, fontSize: 13, fontWeight: '700' },
+  birlikModalSelectAll: { color: colors.sand, fontSize: 12, fontWeight: '700' },
+  birlikModalList: { maxHeight: 340 },
+  birlikModalBranchHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingVertical: 6, marginTop: 4,
+    borderBottomWidth: 1, borderBottomColor: colors.sand + '33',
+  },
+  birlikModalBranchIcon: { fontSize: 14 },
+  birlikModalBranchLabel: { color: colors.sand, fontSize: 12, fontWeight: '800', letterSpacing: 1 },
+  birlikModalNoUnits: { alignItems: 'center', paddingVertical: 20, gap: 6 },
+  birlikModalNoUnitsIcon: { fontSize: 32 },
+  birlikModalNoUnitsTitle: { color: colors.sand, fontSize: 16, fontWeight: '700' },
+  birlikModalNoUnitsDesc: { color: colors.textSecondary, fontSize: 12, textAlign: 'center' },
+  birlikModalUnitRow: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.panelBorder,
+  },
+  birlikModalUnitInfo: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
+  birlikModalUnitImg: { width: 40, height: 28, borderRadius: 3 },
+  birlikModalUnitName: { color: colors.textPrimary, fontSize: 12, fontWeight: '600' },
+  birlikModalUnitAvail: { color: colors.textMuted, fontSize: 10 },
+  birlikModalStepper: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  birlikModalStepBtn: {
+    backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.panelBorder,
+    borderRadius: 3, paddingHorizontal: 8, paddingVertical: 4,
+  },
+  birlikModalStepBtnText: { color: colors.textPrimary, fontSize: 11, fontWeight: '700' },
+  birlikModalStepVal: { color: colors.sand, fontSize: 13, fontWeight: '700', minWidth: 28, textAlign: 'center' },
+  birlikModalStepInput: { color: colors.sand, fontSize: 13, fontWeight: '700', minWidth: 42, textAlign: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.panelBorder, borderRadius: 4, paddingVertical: 2, paddingHorizontal: 4 },
+  birlikModalSummary: {
+    backgroundColor: colors.surfaceAlt, borderRadius: 3, padding: 8,
+    borderWidth: 1, borderColor: colors.panelBorder,
+  },
+  birlikModalSummaryText: { color: colors.textSecondary, fontSize: 12 },
+});

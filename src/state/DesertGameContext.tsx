@@ -14,20 +14,20 @@ import { UNIT_MAP } from '../data/units';
 import { RESEARCH_NODES, RESEARCH_MAP } from '../data/research';
 import { MAP_TARGETS, getMapTargets } from '../data/mapTargets';
 import { INITIAL_MISSIONS } from '../data/missions';
-import { calcBattleOutcome, deductUnitsProportionally } from '../utils/economyMath';
+// calcBattleOutcome, deductUnitsProportionally moved to useCombat
 import { resolveUnitCombat } from '../utils/combatEngine';
 import { saveToCloud, loadFromCloud, syncPlayerProfile, migratePlayerPower } from '../services/cloudSave';
 import { getCurrentUser } from '../services/authService';
 import { db, CF_BASE } from '../services/firebase';
 import { t } from '../i18n';
-import { findPvPTargets, launchPvPAttack, loadDefenderBase, listenIncomingMarches, resolvePvPMarch, cancelPvPMarch } from '../services/pvpService';
+import { loadDefenderBase, listenIncomingMarches, resolvePvPMarch } from '../services/pvpService';
 import type { PvPTarget } from '../services/pvpService';
 import { useAllianceState } from './useAllianceState';
 import { useEconomy } from './useEconomy';
 import { useBase } from './useBase';
+import { useCombat } from './useCombat';
 import { addWarScore as addWarScoreSvc, saveWarBattleLog } from '../services/allianceService';
-import { filterOffensiveUnits, calcMarchAttackPower, buildResearchBranchBonus, collectDefenderUnits, calcPvPTransfer, calcDefenderPower, applyBirlikLosses, PVP_COOLDOWN_MS } from './pvpHelpers';
-import { resolveMarchResult, resolveIncomingResult } from './combatResolvers';
+import { buildResearchBranchBonus, collectDefenderUnits, calcPvPTransfer, calcDefenderPower, applyBirlikLosses, PVP_COOLDOWN_MS } from './pvpHelpers';
 import { calcPlayerPower } from './powerCalc';
 import { syncMissionProgress } from './missionSync';
 import type { AllianceState } from './useAllianceState';
@@ -203,12 +203,6 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
   const [revengeTargets, setRevengeTargets] = useState<Record<string, number>>({}); // attackerUid → timestamp
   // PVP_COOLDOWN_MS imported from pvpHelpers
 
-  const getPvPCooldown = useCallback((targetUid: string): number => {
-    const lastAttack = pvpCooldowns[targetUid];
-    if (!lastAttack) return 0;
-    const remaining = Math.max(0, (lastAttack + PVP_COOLDOWN_MS) - Date.now());
-    return Math.ceil(remaining / 1000); // saniye
-  }, [pvpCooldowns]);
   const [allianceContribution, setAllianceContribution] = useState(0);
   const [missions, setMissions] = useState<Mission[]>(INITIAL_MISSIONS);
   const [loaded, setLoaded] = useState(false);
@@ -227,14 +221,6 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
   const battleReportsRef = useRef(battleReports);
   const playerPowerRef = useRef(0);
 
-  /** setBattleReports + ref anında güncelle (save'de ref kullanıldığı için) */
-  const addBattleReport = (report: BattleReport) => {
-    setBattleReports(prev => {
-      const next = [report, ...prev].slice(0, 20);
-      battleReportsRef.current = next;
-      return next;
-    });
-  };
   const firestoreMarchIdRef = useRef<string | null>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -605,6 +591,10 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     if (Object.keys(pvpCooldowns).length > 0) saveNow();
   }, [pvpCooldowns, loaded, saveNow]);
 
+  // ── Combat function refs (updated after useCombat hook) ─���───
+  const resolveMarchRef = useRef<(march: March) => void>(() => {});
+  const resolveIncomingAttackRef = useRef<(attack: IncomingAttack) => void>(() => {});
+
   // ── Arka plandan dönüşte timer catch-up ─────────────────────
   const backgroundAtRef = useRef<number>(0);
 
@@ -688,7 +678,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       if (next.secondsRemaining === 0) {
         const isCpu = MAP_TARGETS.some(t => t.id === next.targetId);
         if (isCpu) {
-          resolveMarch(next);
+          resolveMarchRef.current(next);
           return null;
         }
         return next; // PvP — useEffect çözecek
@@ -701,7 +691,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       if (!current) return null;
       const next = { ...current, secondsRemaining: Math.max(0, current.secondsRemaining - elapsedSec) };
       if (next.secondsRemaining === 0) {
-        resolveIncomingAttack(next);
+        resolveIncomingAttackRef.current(next);
         return null;
       }
       return next;
@@ -874,7 +864,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
         if (next.secondsRemaining === 0) {
           const isCpu = MAP_TARGETS.some(t => t.id === next.targetId);
           if (isCpu) {
-            resolveMarch(next);
+            resolveMarchRef.current(next);
             return null;
           }
           // PvP march — null yapma, useEffect çözecek
@@ -888,7 +878,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
         if (!current) return null;
         const next = { ...current, secondsRemaining: Math.max(0, current.secondsRemaining - 1) };
         if (next.secondsRemaining === 0) {
-          resolveIncomingAttack(next);
+          resolveIncomingAttackRef.current(next);
           return null;
         }
         return next;
@@ -899,253 +889,8 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loaded]);
 
-  // ── March Resolution ─────────────────────────────────────────
-  function resolveMarch(march: March) {
-    const target = MAP_TARGETS.find(t => t.id === march.targetId);
-    if (!target) return;
+  // resolveMarch and resolveIncomingAttack are now in useCombat hook
 
-    const hasShield = Date.now() < shieldUntil;
-    const res = resolveMarchResult(
-      march, target, researchRef.current, RESEARCH_MAP, warPower, hasShield,
-    );
-
-    // Apply power mutation
-    if (res.won) {
-      setWarPower(prev => prev + res.powerChange);
-    } else {
-      setWarPower(prev => Math.max(0, prev + res.powerChange));
-    }
-
-    // Apply birlikler wipe on loss
-    if (res.clearBirlikler) {
-      setBirlikler([]);
-    }
-
-    // Apply resource changes
-    const rc = res.resourceChanges;
-    setResources(current =>
-      current.map(r => {
-        if (r.key === 'cash') return { ...r, amount: res.won ? Math.min(r.capacity, r.amount + rc.cash) : Math.max(0, r.amount + rc.cash) };
-        if (r.key === 'oil') return { ...r, amount: res.won ? Math.min(r.capacity, r.amount + rc.oil) : Math.max(0, r.amount + rc.oil) };
-        if (r.key === 'ore') return { ...r, amount: res.won ? Math.min(r.capacity, r.amount + rc.ore) : Math.max(0, r.amount + rc.ore) };
-        return r;
-      }),
-    );
-
-    addBattleReport(res.report);
-    setLastBattleReport(res.report);
-
-    setMissions(prev =>
-      prev.map(m => {
-        if (m.type === 'attack' && !m.completed) {
-          if (m.requiresWin && !res.won) return m;
-          const next = { ...m, currentCount: m.currentCount + 1 };
-          if (next.currentCount >= next.targetCount) next.completed = true;
-          return next;
-        }
-        return m;
-      }),
-    );
-
-    // CPU counter-attack
-    if (res.counterAttack) {
-      const ca = res.counterAttack;
-      setIncomingAttack({
-        id: `incoming_${Date.now()}`,
-        attackerName: ca.attackerName,
-        unitCount: ca.unitCount,
-        attackUnits: ca.attackUnits,
-        totalSeconds: ca.totalSeconds,
-        secondsRemaining: ca.totalSeconds,
-      });
-    }
-
-    scheduleSave();
-    // İstatistikleri güncelle
-    if (uid) {
-      setTimeout(() => {
-        const hqLv = buildingsRef.current.find(b => b.id === 'hq')?.level ?? 1;
-        const brs = battleReportsRef.current;
-        syncPlayerProfile(uid, {
-          warPower, hqLevel: hqLv, playerPower: playerPowerRef.current,
-          wins: brs.filter(r => r.won).length,
-          losses: brs.filter(r => !r.won).length,
-        });
-      }, 1000);
-    }
-  }
-
-  // ── Incoming Attack Resolution ──────────────────────────────
-  async function resolveIncomingAttack(attack: IncomingAttack) {
-    // Savunma birimleri: ordu envanteri + birlik birimleri
-    const unitTotals: Record<string, number> = {};
-    // Envanterden
-    for (const b of buildingsRef.current) {
-      for (const [unitId, count] of Object.entries(b.trainedUnits ?? {})) {
-        if (count > 0) unitTotals[unitId] = (unitTotals[unitId] ?? 0) + count;
-      }
-    }
-    // Birliklerden (envanterden düşülmüş birimler)
-    for (const bl of birliklerRef.current) {
-      for (const slot of bl.slots) {
-        if (slot.count > 0) unitTotals[slot.unitId] = (unitTotals[slot.unitId] ?? 0) + slot.count;
-      }
-    }
-    const playerDefenseUnits: MarchUnit[] = Object.entries(unitTotals)
-      .filter(([_, count]) => count > 0)
-      .map(([unitId, count]) => ({ unitId, count, buildingId: '' }));
-
-    // Oyuncunun araştırma bonusları
-    const branchBonus: Record<string, number> = {};
-    for (const rs of researchRef.current) {
-      if (rs.completed) {
-        const node = RESEARCH_MAP[rs.nodeId];
-        if (node) branchBonus[node.branch] = (branchBonus[node.branch] ?? 0) + 0.12;
-      }
-    }
-
-    // Saldıranın profilini Firestore'dan oku (playerPower ve kaynaklar için)
-    let attackerPlayerPower = 0;
-    let attackerCash = 0, attackerOil = 0, attackerOre = 0;
-    if (attack.attackerUid) {
-      try {
-        const attackerBase = await loadDefenderBase(attack.attackerUid);
-        if (attackerBase) {
-          const aBlds = attackerBase.buildings ?? [];
-          attackerPlayerPower = calcDefenderPower(aBlds, UNIT_MAP, attackerBase.warPower ?? 0);
-          const aRes = attackerBase.resources ?? [];
-          attackerCash = (aRes.find((r: any) => r.key === 'cash')?.amount ?? 0);
-          attackerOil = (aRes.find((r: any) => r.key === 'oil')?.amount ?? 0);
-          attackerOre = (aRes.find((r: any) => r.key === 'ore')?.amount ?? 0);
-        }
-      } catch {}
-    }
-
-    const myResources = resourcesRef.current;
-    const myCash = myResources.find(r => r.key === 'cash')?.amount ?? 0;
-    const myOil = myResources.find(r => r.key === 'oil')?.amount ?? 0;
-    const myOre = myResources.find(r => r.key === 'ore')?.amount ?? 0;
-
-    // Pure combat resolution
-    const res = resolveIncomingResult(
-      attack.attackUnits,
-      playerDefenseUnits,
-      branchBonus,
-      { cash: attackerCash, oil: attackerOil, ore: attackerOre },
-      { cash: myCash, oil: myOil, ore: myOre },
-      attackerPlayerPower,
-      playerPower,
-      attack.attackerName,
-    );
-
-    // Apply unit losses to buildings and birlikler (only when defender lost)
-    if (res.defenderUnitLosses.length > 0) {
-      const remainingLoss: Record<string, number> = {};
-      for (const dl of res.defenderUnitLosses) {
-        remainingLoss[dl.unitId] = dl.destroyed;
-      }
-      // Envanterden düş
-      setBuildings(prev =>
-        prev.map(b => {
-          const newTrained = { ...b.trainedUnits };
-          let changed = false;
-          for (const [unitId, loss] of Object.entries(remainingLoss)) {
-            const current = newTrained[unitId] ?? 0;
-            if (current > 0) {
-              const deducted = Math.min(current, loss);
-              newTrained[unitId] = current - deducted;
-              remainingLoss[unitId] -= deducted;
-              changed = true;
-            }
-          }
-          return changed ? { ...b, trainedUnits: newTrained } : b;
-        }),
-      );
-      // Kalan kayıpları birliklerden düş
-      setBirlikler(prev => prev.map(bl => ({
-        ...bl,
-        slots: bl.slots.map(slot => {
-          const loss = remainingLoss[slot.unitId] ?? 0;
-          if (loss <= 0) return slot;
-          const deducted = Math.min(slot.count, loss);
-          remainingLoss[slot.unitId] -= deducted;
-          return { ...slot, count: slot.count - deducted };
-        }).filter(slot => slot.count > 0),
-      })).filter(bl => bl.slots.length > 0));
-    }
-
-    // Apply resource changes
-    const rc = res.resourceChanges;
-    if (res.defended) {
-      setWarPower(prev => prev + res.transferPower);
-      setResources(current =>
-        current.map(r => {
-          if (r.key === 'cash') return { ...r, amount: Math.min(r.capacity, r.amount + rc.cash) };
-          if (r.key === 'oil') return { ...r, amount: Math.min(r.capacity, r.amount + rc.oil) };
-          if (r.key === 'ore') return { ...r, amount: Math.min(r.capacity, r.amount + rc.ore) };
-          return r;
-        }),
-      );
-    } else {
-      setResources(current =>
-        current.map(r => {
-          if (r.key === 'cash') return { ...r, amount: Math.max(0, r.amount + rc.cash) };
-          if (r.key === 'oil') return { ...r, amount: Math.max(0, r.amount + rc.oil) };
-          if (r.key === 'ore') return { ...r, amount: Math.max(0, r.amount + rc.ore) };
-          return r;
-        }),
-      );
-      setWarPower(prev => Math.max(0, prev + res.powerChange));
-      setShieldUntil(Date.now() + 4 * 60 * 60 * 1000);
-      setBirlikler([]);
-    }
-
-    const { report, defended } = res;
-    addBattleReport(report);
-    setLastBattleReport(report);
-    // Firestore'daki march'ı resolved olarak işaretle
-    try { db.marches().doc(attack.id).update({ status: 'resolved' }); } catch {}
-    scheduleSave();
-    // İstatistikleri güncelle
-    if (uid) {
-      const hqLv = buildingsRef.current.find(b => b.id === 'hq')?.level ?? 1;
-      const brs = battleReportsRef.current;
-      syncPlayerProfile(uid, {
-        warPower, hqLevel: hqLv, playerPower: playerPowerRef.current,
-        wins: brs.filter(r => r.won).length,
-        losses: brs.filter(r => !r.won).length,
-      });
-      const attackerUid = attack.attackerUid;
-      if (attackerUid && attackerPlayerPower > 0) {
-        syncPlayerProfile(attackerUid, { playerPower: defended ? Math.max(0, attackerPlayerPower - res.transferPower) : attackerPlayerPower + res.transferPower });
-      }
-    }
-    // İttifak savaşı skor ekleme (savunan taraf — flag bazlı)
-    if (attack.isWarAttack && attack.warAllianceId) {
-      (async () => {
-        try {
-          const myPlayerSnap = await db.players().doc(uid).get();
-          const myAid = myPlayerSnap.exists() ? (myPlayerSnap.data() as any)?.allianceId : null;
-          const enemyAid = attack.warAllianceId;
-          if (myAid && enemyAid) {
-            const warScore = defended ? 10 : 0;
-            let myName = 'Komutan';
-            try { const u = getCurrentUser(); if (u?.displayName) myName = u.displayName; } catch {}
-            await addWarScoreSvc(myAid, enemyAid, warScore, myName, attack.attackerName, defended);
-            await saveWarBattleLog(myAid, report, defended ? myName : attack.attackerName, warScore);
-            const freshSnap = await db.alliances().doc(myAid).get();
-            if (freshSnap.exists()) {
-              setTimeout(async () => {
-                try {
-                  await db.alliances().doc(myAid).get();
-                } catch {}
-              }, 1500);
-            }
-          }
-        } catch (err) { console.warn('[PvP] resolveIncoming war score error:', err); }
-      })();
-    }
-  }
 
   // ── Economy helpers (extracted to useEconomy) ────────────────
   const {
@@ -1230,77 +975,6 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     scheduleSave, saveNow,
   );
 
-  // ── Combat helpers ───────────────────────────────────────────
-  const getTotalAttackPower = useCallback((committedUnits: number) => {
-    const total = getTotalTrainedUnits();
-    if (total === 0 || committedUnits === 0) return 0;
-    const ratio = Math.min(1, committedUnits / total);
-    // Research bonuses: each completed node in a branch adds 12% attack power for that branch
-    const branchBonus: Record<string, number> = {};
-    for (const rs of researchRef.current) {
-      if (rs.completed) {
-        const node = RESEARCH_MAP[rs.nodeId];
-        if (node) {
-          branchBonus[node.branch] = (branchBonus[node.branch] ?? 0) + 0.12;
-        }
-      }
-    }
-    let power = 0;
-    for (const b of buildingsRef.current) {
-      for (const [unitId, count] of Object.entries(b.trainedUnits ?? {})) {
-        const unit = UNIT_MAP[unitId];
-        if (!unit) continue;
-        const bonus = 1 + (branchBonus[unit.researchBranch] ?? 0);
-        power += Math.floor(count * ratio) * unit.attackPower * bonus;
-      }
-    }
-    return Math.max(1, Math.round(power));
-  }, [getTotalTrainedUnits]);
-
-  const canAttack = useCallback((targetId: string, committedUnits: number) => {
-    if (activeMarch !== null) return false;
-    if (committedUnits < 1) return false;
-    // Kalkan aktifken saldırı yapılamaz
-    if (Date.now() < shieldUntil) return false;
-    return getTotalTrainedUnits() >= committedUnits;
-  }, [activeMarch, getTotalTrainedUnits, shieldUntil]);
-
-  const attackTarget = useCallback((targetId: string, targetName: string, committedUnits: number, marchUnits?: MarchUnit[]) => {
-    if (!canAttack(targetId, committedUnits)) return;
-    const target = MAP_TARGETS.find(t => t.id === targetId);
-    if (!target) return;
-    const power = getTotalAttackPower(committedUnits);
-    const march: March = {
-      id: `march_${Date.now()}`,
-      targetId,
-      targetName,
-      type: 'attack',
-      committedUnits,
-      totalSeconds: target.travelSeconds,
-      secondsRemaining: target.travelSeconds,
-      attackPower: power,
-      marchUnits,
-    };
-    setActiveMarch(march);
-    scheduleSave();
-  }, [canAttack, getTotalAttackPower, scheduleSave]);
-
-  /** Aktif seferi iptal et — birlik bazlı saldırılarda birlikler korunur */
-  const cancelMarch = useCallback(async () => {
-    const march = marchRef.current;
-    if (!march || march.type === 'return') return;
-    // Firestore'daki march'ı iptal olarak işaretle
-    const fsId = firestoreMarchIdRef.current || march.id;
-    setActiveMarch(null);
-    firestoreMarchIdRef.current = null;
-    scheduleSave();
-    try {
-      await cancelPvPMarch(fsId);
-    } catch (err: any) {
-      console.warn('[PvP] İptal Firestore güncellenemedi:', err?.message);
-    }
-  }, [scheduleSave]);
-
   // ── Alliance helpers ─────────────────────────────────────────
   const canDonate = useCallback((resource: ResourceKey, amount: number) => {
     if (amount <= 0) return false;
@@ -1354,70 +1028,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     scheduleSave();
   }, [canRequestHelp, scheduleSave]);
 
-  // ── Joint Attack ─────────────────────────────────────────────
-  const launchJointAttack = useCallback((
-    targetId: string,
-    targetName: string,
-    committedUnits: number,
-    allyPower: number,
-  ): BattleReport | null => {
-    const target = MAP_TARGETS.find(t => t.id === targetId);
-    if (!target) return null;
-    const playerPower = getTotalAttackPower(committedUnits);
-    const combinedPower = playerPower + allyPower;
-    const { won, losses } = calcBattleOutcome(combinedPower, target.defenseRating, committedUnits);
-    if (losses > 0) {
-      setBuildings(current => {
-        let remaining = losses;
-        return current.map(b => {
-          if (remaining <= 0 || !b.trainedUnits) return b;
-          const total = Object.values(b.trainedUnits).reduce((a, v) => a + v, 0);
-          if (total === 0) return b;
-          const deduct = Math.min(remaining, total);
-          remaining -= deduct;
-          return { ...b, trainedUnits: deductUnitsProportionally(b.trainedUnits, deduct) };
-        });
-      });
-    }
-    if (won) {
-      setResources(current =>
-        current.map(r => {
-          if (r.key === 'cash') return { ...r, amount: Math.min(r.capacity, r.amount + target.rewardCash) };
-          if (r.key === 'oil') return { ...r, amount: Math.min(r.capacity, r.amount + target.rewardOil) };
-          if (r.key === 'ore') return { ...r, amount: Math.min(r.capacity, r.amount + target.rewardOre) };
-          return r;
-        }),
-      );
-    }
-    const report: BattleReport = {
-      id: `joint_${Date.now()}`,
-      targetId,
-      targetName: `[İTTİFAK] ${targetName}`,
-      timestamp: Date.now(),
-      won,
-      attackPower: combinedPower,
-      defensePower: target.defenseRating,
-      unitsLost: losses,
-      rewardCash: won ? target.rewardCash : 0,
-      rewardOil: won ? target.rewardOil : 0,
-      rewardOre: won ? target.rewardOre : 0,
-    };
-    addBattleReport(report);
-    setMissions(prev =>
-      prev.map(m => {
-        if (m.type === 'attack' && !m.completed) {
-          if (m.requiresWin && !won) return m;
-          const next = { ...m, currentCount: m.currentCount + 1 };
-          if (next.currentCount >= next.targetCount) next.completed = true;
-          return next;
-        }
-        return m;
-      }),
-    );
-    setAllianceContribution(c => c + 2); // joint attacks earn 2 contribution
-    scheduleSave();
-    return report;
-  }, [getTotalAttackPower, scheduleSave]);
+  // ── Joint Attack (extracted to useCombat) ──────────────────
 
   // ── Mission helpers ──────────────────────────────────────────
   const claimMissionReward = useCallback((missionId: string) => {
@@ -1465,6 +1076,38 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
   const allianceRef = useRef(alliance);
   useEffect(() => { allianceRef.current = alliance; }, [alliance]);
 
+  // ── Combat helpers (extracted to useCombat) ────────────────
+  const {
+    getTotalAttackPower, canAttack, attackTarget, cancelMarch,
+    resolveMarch, resolveIncomingAttack,
+    addBattleReport, clearLastBattleReport,
+    launchJointAttack,
+    getPvPCooldown, refreshPvPTargets, attackPvPTarget,
+    buyShield, buyWarPower,
+  } = useCombat(
+    uid ?? null,
+    // Refs
+    buildingsRef, resourcesRef, researchRef, marchRef,
+    birliklerRef, battleReportsRef, playerPowerRef,
+    firestoreMarchIdRef, allianceRef, shieldUntilRef,
+    // State setters
+    setResources, setBuildings, setActiveMarch, setBattleReports,
+    setIncomingAttack, setBirlikler, setWarPower, setShieldUntil,
+    setLastBattleReport, setMissions, setToastMsg,
+    setPvpTargets, setPvpLoading, setPvpCooldowns, setRevengeTargets,
+    // State values
+    pvpCooldowns, shieldUntil, warPower, playerPower,
+    // Economy functions
+    canAffordGold, deductGold, canAfford,
+    // Base functions
+    getTotalTrainedUnits,
+    // Save functions
+    scheduleSave, saveNow,
+  );
+  resolveMarchRef.current = resolveMarch;
+  resolveIncomingAttackRef.current = resolveIncomingAttack;
+
+
   // playerPower veya savaş sonuçları değiştiğinde Firestore'a yaz (sıralama için)
   const hasSyncedRef = useRef(false);
   useEffect(() => {
@@ -1497,96 +1140,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     });
   }, [playerPower, uid, loaded, battleReports, warPower]);
 
-  // ── PvP ─────────────────────────────────────────────────────
-  const refreshPvPTargets = useCallback(async () => {
-    if (!uid) return;
-    setPvpLoading(true);
-    try {
-      const hqLv = buildingsRef.current.find(b => b.id === 'hq')?.level ?? 1;
-      const targets = await findPvPTargets(uid, hqLv);
-      setPvpTargets(targets);
-    } catch (err) {
-      console.warn('[PvP] Target refresh failed:', err);
-    }
-    setPvpLoading(false);
-  }, [uid]);
-
-  const attackPvPTarget = useCallback(async (
-    target: PvPTarget,
-    committedUnits: number,
-    marchUnits: MarchUnit[],
-    isWarAttack = false,
-  ) => {
-    if (!uid) return;
-    if (marchRef.current) return;
-    // PvP cooldown kontrolü
-    const cooldown = getPvPCooldown(target.uid);
-    if (cooldown > 0) {
-      setToastMsg(t('pvp.cooldownRemaining', { h: String(Math.floor(cooldown / 3600)), m: String(Math.floor((cooldown % 3600) / 60)) }));
-      return;
-    }
-
-    // Aynı ittifak üyesine saldırı engelle
-    const myAllianceTag = allianceRef.current?.myAllianceData?.tag;
-    if (myAllianceTag && target.allianceTag && target.allianceTag === myAllianceTag) {
-      setToastMsg(t('pvp.cannotAttackAlly'));
-      return;
-    }
-
-    // Savunma birimlerini saldırıdan çıkar (airDefense saldırıda gitmez)
-    const filteredMarchUnits = filterOffensiveUnits(marchUnits, UNIT_MAP);
-    if (filteredMarchUnits.length === 0) {
-      setToastMsg(t('pvp.needOffensiveUnits'));
-      return;
-    }
-
-    // Güç hesabı: doğrudan marchUnits'ten (birlik bazlı)
-    const branchBonus = buildResearchBranchBonus(researchRef.current, RESEARCH_MAP);
-    const attackPower = calcMarchAttackPower(filteredMarchUnits, UNIT_MAP, branchBonus);
-
-    const travelSeconds = 180; // 3 dakika sabit sefer süresi
-
-    // Firestore'a march yaz — id'yi al, sonra lokal state set et
-    let attackerName = `Komutan_${uid.slice(0, 6)}`;
-    try { const u = getCurrentUser(); if (u?.displayName) attackerName = u.displayName; } catch {}
-
-    const now = Date.now();
-    let marchId: string;
-    try {
-      marchId = await launchPvPAttack({
-        attackerUid: uid,
-        attackerName,
-        defenderUid: target.uid,
-        defenderName: target.displayName,
-        marchUnits: filteredMarchUnits,
-        attackPower,
-        committedUnits: filteredMarchUnits.reduce((s, u) => s + u.count, 0),
-        startedAt: now,
-        arrivesAt: now + travelSeconds * 1000,
-        travelSeconds,
-        status: 'marching',
-      });
-    } catch {
-      setToastMsg(t('pvp.attackFailed'));
-      return;
-    }
-
-    firestoreMarchIdRef.current = marchId;
-    const march: March = {
-      id: marchId,
-      targetId: target.uid,
-      targetName: target.displayName,
-      type: 'attack',
-      committedUnits: filteredMarchUnits.reduce((s, u) => s + u.count, 0),
-      totalSeconds: travelSeconds,
-      secondsRemaining: travelSeconds,
-      attackPower,
-      marchUnits: filteredMarchUnits,
-      isWarAttack,
-    };
-    setActiveMarch(march);
-    scheduleSave();
-  }, [uid, scheduleSave, getPvPCooldown]);
+  // ── PvP callbacks (extracted to useCombat) ──────────────────
 
   // Gelen PvP saldırıları dinle
   useEffect(() => {
@@ -1720,7 +1274,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
           }
         } else {
           // battleResult yok — eski yöntemle çöz
-          resolveIncomingAttack({
+          resolveIncomingAttackRef.current({
             id: m.id,
             attackerUid: m.attackerUid,
             attackerName: m.attackerName,
@@ -2026,25 +1580,11 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     addBirlik,
     removeBirlik,
     shieldUntil,
-    buyShield: (durationMs: number, goldCost: number) => {
-      // İttifak savaşı sırasında kalkan satın alınamaz
-      if (allianceRef.current?.myAllianceData?.activeWar) return false;
-      if (!canAffordGold(goldCost)) return false;
-      deductGold(goldCost);
-      setShieldUntil(Date.now() + durationMs);
-      scheduleSave();
-      return true;
-    },
-    buyWarPower: (amount: number, goldCost: number) => {
-      if (!canAffordGold(goldCost)) return false;
-      deductGold(goldCost);
-      setWarPower(prev => prev + amount);
-      scheduleSave();
-      return true;
-    },
+    buyShield,
+    buyWarPower,
     playerPower,
     lastBattleReport,
-    clearLastBattleReport: () => setLastBattleReport(null),
+    clearLastBattleReport,
     getTotalAttackPower,
     canAttack,
     attackTarget,
@@ -2080,7 +1620,8 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     buildings, getBuilding, canUpgradeBuilding, upgradeBuilding, getUpgradeCost, getUpgradeTime,
     researchStates, isResearched, canStartResearch, startResearch, getAvailableResearch, getUnlockedUnitsForBuilding,
     getTrainedCount, getTotalTrainedUnits, getUnitCap, getBuildingUnitCount, canStartTraining, startTraining, getTrainingCost, getMaxTrainable, adjustTrainedUnits,
-    activeMarch, battleReports, incomingAttack, birlikler, addBirlik, removeBirlik, shieldUntil, playerPower, lastBattleReport, getTotalAttackPower, canAttack, attackTarget,
+    activeMarch, battleReports, incomingAttack, birlikler, addBirlik, removeBirlik, shieldUntil, buyShield, buyWarPower,
+    playerPower, lastBattleReport, clearLastBattleReport, getTotalAttackPower, canAttack, attackTarget, cancelMarch,
     pvpTargets, pvpLoading, refreshPvPTargets, attackPvPTarget, getPvPCooldown, revengeTargets, scheduleSave,
     allianceContribution, canDonate, donate, canRequestHelp, requestHelp,
     missions, claimMissionReward,

@@ -394,6 +394,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
             setBirlikler(saved.birlikler ?? []);
             if (saved.pvpCooldowns) setPvpCooldowns(saved.pvpCooldowns);
             if (saved.revengeTargets) setRevengeTargets(saved.revengeTargets);
+            if (saved.shieldUntil && saved.shieldUntil > Date.now()) setShieldUntil(saved.shieldUntil);
             // Görevleri merge et + mevcut durumla senkronize et
             const savedMissions = saved.missions ?? [];
             const merged = INITIAL_MISSIONS.map(ini => {
@@ -538,6 +539,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
         birlikler: birliklerRef.current,
         pvpCooldowns: pvpCooldownsRef.current,
         revengeTargets: revengeTargetsRef.current,
+        shieldUntil: shieldUntilRef.current,
       };
       // Yerel kayıt (offline cache)
       AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ ...payload, uid }));
@@ -586,6 +588,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       birlikler: birliklerRef.current,
       pvpCooldowns,
       revengeTargets,
+      shieldUntil: shieldUntilRef.current,
     };
     const json = JSON.stringify(payload);
     // Web'de localStorage senkron — beforeunload'da kesin kaydedilir
@@ -792,6 +795,8 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
   useEffect(() => { pvpCooldownsRef.current = pvpCooldowns; }, [pvpCooldowns]);
   const revengeTargetsRef = useRef(revengeTargets);
   useEffect(() => { revengeTargetsRef.current = revengeTargets; }, [revengeTargets]);
+  const shieldUntilRef = useRef(shieldUntil);
+  useEffect(() => { shieldUntilRef.current = shieldUntil; }, [shieldUntil]);
 
   // ── Tick (1s) ───────────────────────────────────────────────
   useEffect(() => {

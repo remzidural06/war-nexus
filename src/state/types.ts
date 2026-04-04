@@ -276,6 +276,7 @@ export interface PersistedGameState {
   birlikler?: Birlik[];
   pvpCooldowns?: Record<string, number>;
   revengeTargets?: Record<string, number>;
+  shieldUntil?: number;
 }
 
 // ─── Context Values ───────────────────────────────────────────

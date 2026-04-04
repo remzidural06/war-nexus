@@ -134,10 +134,6 @@ export function resolveUnitCombat(input: CombatInput): CombatResult {
   // ── Güç oranı ──
   const effectiveAtkPower = Math.max(1, atkDamage.totalDamage);
   const effectiveDefPower = Math.max(1, defDamage.totalDamage);
-  const ratio = won
-    ? effectiveAtkPower / effectiveDefPower
-    : effectiveDefPower / effectiveAtkPower;
-
   // ── Branch-aware kayıp dağıtımı ──
   // Kayıp sadece karşı tarafın vurabildiği birimlere dağıtılır.
   // Piyade gemiyi vuramaz → gemi birimler kayıp almaz.

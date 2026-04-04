@@ -126,8 +126,8 @@ export function calcDefenderPower(
 }
 
 /** Apply unit losses to birlikler after combat */
-export function applyBirlikLosses(
-  birlikler: { id: string; name: string; slots: { unitId: string; count: number; buildingId: string }[] }[],
+export function applyBirlikLosses<T extends { unitId: string; count: number; buildingId: string }>(
+  birlikler: { id: string; name: string; slots: T[] }[],
   attackerResults: { unitId: string; losses: number }[],
 ): typeof birlikler {
   const lossMap: Record<string, number> = {};

@@ -47,7 +47,7 @@ describe('resolveUnitCombat', () => {
     attackerResearchBonus: Record<string, number> = {},
     defenderResearchBonus: Record<string, number> = {},
   ): CombatInput => ({
-    attackerUnits: attackerUnits.map(u => ({ ...u, fromBuildingId: 'barracks' })),
+    attackerUnits: attackerUnits.map(u => ({ ...u, buildingId: 'barracks' })),
     defenderUnits: defenderUnits.map(u => ({ ...u })),
     attackerResearchBonus,
     defenderResearchBonus,

@@ -57,7 +57,7 @@ export function ProfileScreen() {
   const [canEdit, setCanEdit] = useState(false);
   const [lang, setLang] = useState(getLocale());
   const [email, setEmail] = useState<string | null>(null);
-  const [provider, setProvider] = useState<string | null>(null);
+  const [_provider, _setProvider] = useState<string | null>(null);
 
   // Bildirim ayarları
   const NOTIF_STORAGE_KEY = 'war-nexus-notif-prefs';

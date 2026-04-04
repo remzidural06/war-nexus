@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { t } from '../../i18n';
-import { UNIT_MAP } from '../../data/units';
 import { CountdownTimer } from '../CountdownTimer';
 import { styles } from '../../screens/BaseScreen.styles';
 import { BUILDING_BRANCHES } from '../../screens/BaseScreen.constants';

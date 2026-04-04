@@ -6,7 +6,6 @@ import { BUILDING_DEFINITIONS, ALL_BUILDING_IDS } from '../data/buildings';
 import { UNIT_DEFINITIONS } from '../data/units';
 import { getInteraction } from '../data/combatMatrix';
 import type { Interaction } from '../data/combatMatrix';
-import type { BuildingId } from '../state/types';
 import { t } from '../i18n';
 
 type HelpTab = 'guide' | 'resources' | 'buildings' | 'hqLevels' | 'combat' | 'pvp' | 'allianceWar' | 'birlik' | 'takas' | 'quests' | 'crossTable' | 'units';

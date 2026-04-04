@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
-import { colors } from '../../theme/colors';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { t } from '../../i18n';
 import { formatNumber } from '../../utils/formatters';
 import { styles } from '../../screens/AllianceScreen.styles';
+import type { AllianceRank } from '../../state/types';
 import { isOnline, rankLabel, rankBadgeColor, RANK_INFO, ASSIGNABLE_RANKS } from '../../screens/AllianceScreen.constants';
 
 interface MembersTabProps {
@@ -19,7 +19,7 @@ interface MembersTabProps {
   myUid: string | null;
   myRank: string | null;
   onKick: (uid: string) => Promise<void>;
-  onPromote: (uid: string, rank: string) => Promise<void>;
+  onPromote: (uid: string, rank: AllianceRank) => Promise<void>;
   onTransferLeadership: (uid: string) => void;
   onApprove: (uid: string) => Promise<void>;
   onReject: (uid: string) => Promise<void>;
@@ -27,7 +27,7 @@ interface MembersTabProps {
 
 export function MembersTab({
   members, joinRequests, myUid, myRank,
-  onKick, onPromote, onTransferLeadership, onApprove, onReject,
+  onKick: _onKick, onPromote, onTransferLeadership: _onTransferLeadership, onApprove, onReject,
 }: MembersTabProps) {
   const isLeader = myRank === 'leader';
   const isLeaderOrOfficer = myRank === 'leader' || myRank === 'officer';
@@ -47,30 +47,6 @@ export function MembersTab({
       await onReject(uid);
     } catch {}
     setHandledRequestIds(prev => new Set(prev).add(uid));
-  }
-
-  function confirmKick(targetUid: string, name: string) {
-    const msg = `${name} ittifaktan atılsın mı?`;
-    if (typeof window !== 'undefined' && window.confirm) {
-      if (window.confirm(msg)) onKick(targetUid);
-    } else {
-      Alert.alert('Üyeyi At', msg, [
-        { text: 'İptal', style: 'cancel' },
-        { text: 'At', style: 'destructive', onPress: () => onKick(targetUid) },
-      ]);
-    }
-  }
-
-  function confirmTransfer(targetUid: string, name: string) {
-    const msg = `Liderliği ${name} adlı üyeye devretmek istiyor musun? Bu işlem geri alınamaz.`;
-    if (typeof window !== 'undefined' && window.confirm) {
-      if (window.confirm(msg)) onTransferLeadership(targetUid);
-    } else {
-      Alert.alert('Liderliği Devret', msg, [
-        { text: 'İptal', style: 'cancel' },
-        { text: 'Devret', style: 'destructive', onPress: () => onTransferLeadership(targetUid) },
-      ]);
-    }
   }
 
   return (

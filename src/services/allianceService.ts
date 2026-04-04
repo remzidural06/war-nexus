@@ -5,7 +5,6 @@ import { db, firestore, CF_BASE } from './firebase';
 import type { AllianceData, AllianceMemberData, AllianceJoinRequest, AllianceChatMessage, AllianceJoinType, AllianceRank } from '../state/types';
 
 const MAX_MEMBERS = 30;
-const MAX_OFFICERS = 3;
 
 // ── İttifak CRUD ─────────────────────────────────────────────
 
@@ -59,7 +58,7 @@ export async function createAlliance(
 
 export async function getMyAlliance(allianceId: string): Promise<AllianceData | null> {
   const snap = await db.alliances().doc(allianceId).get();
-  return snap.exists ? (snap.data() as AllianceData) : null;
+  return snap.exists() ? (snap.data() as AllianceData) : null;
 }
 
 export async function searchAlliances(query: string, limit = 20): Promise<AllianceData[]> {
@@ -132,7 +131,7 @@ export async function approveJoinRequest(allianceId: string, requesterUid: strin
   let allianceTag: string;
   try {
     const reqSnap = await db.allianceRequests(allianceId).doc(requesterUid).get();
-    if (!reqSnap.exists) throw new Error('İstek bulunamadı');
+    if (!reqSnap.exists()) throw new Error('İstek bulunamadı');
     reqData = reqSnap.data() as AllianceJoinRequest;
     const alliance = await getMyAlliance(allianceId);
     if (!alliance) throw new Error('İttifak bulunamadı');
@@ -179,7 +178,7 @@ export async function rejectJoinRequest(allianceId: string, requesterUid: string
 
 export async function leaveAlliance(allianceId: string, uid: string): Promise<void> {
   const memberSnap = await db.allianceMembers(allianceId).doc(uid).get();
-  if (!memberSnap.exists) return;
+  if (!memberSnap.exists()) return;
   const member = memberSnap.data() as AllianceMemberData;
   if (member.rank === 'leader') throw new Error('Lider ayrılamaz — önce liderliği devret');
 
@@ -192,7 +191,7 @@ export async function leaveAlliance(allianceId: string, uid: string): Promise<vo
 export async function kickMember(allianceId: string, targetUid: string, kickerUid: string): Promise<void> {
   const kickerSnap = await db.allianceMembers(allianceId).doc(kickerUid).get();
   const targetSnap = await db.allianceMembers(allianceId).doc(targetUid).get();
-  if (!kickerSnap.exists || !targetSnap.exists) throw new Error('Üye bulunamadı');
+  if (!kickerSnap.exists() || !targetSnap.exists()) throw new Error('Üye bulunamadı');
   const kicker = kickerSnap.data() as AllianceMemberData;
   const target = targetSnap.data() as AllianceMemberData;
 
@@ -213,7 +212,7 @@ const RANK_LABELS: Record<string, string> = {
 
 export async function promoteMember(allianceId: string, targetUid: string, newRank: AllianceRank): Promise<void> {
   const targetSnap = await db.allianceMembers(allianceId).doc(targetUid).get();
-  if (!targetSnap.exists) throw new Error('Üye bulunamadı');
+  if (!targetSnap.exists()) throw new Error('Üye bulunamadı');
   const target = targetSnap.data() as AllianceMemberData;
   try { await db.allianceMembers(allianceId).doc(targetUid).set({ rank: newRank }, { merge: true }); } catch (err) { console.warn('[promoteMember]', err); }
   const label = RANK_LABELS[newRank] ?? newRank;
@@ -222,7 +221,7 @@ export async function promoteMember(allianceId: string, targetUid: string, newRa
 
 export async function transferLeadership(allianceId: string, newLeaderUid: string, currentLeaderUid: string): Promise<void> {
   const newSnap = await db.allianceMembers(allianceId).doc(newLeaderUid).get();
-  if (!newSnap.exists) throw new Error('Üye bulunamadı');
+  if (!newSnap.exists()) throw new Error('Üye bulunamadı');
   const newLeader = newSnap.data() as AllianceMemberData;
 
   try { await db.allianceMembers(allianceId).doc(newLeaderUid).set({ rank: 'leader' }, { merge: true }); } catch (err) { console.warn('[transferLeadership]', err); }
@@ -255,7 +254,7 @@ export async function donateToTreasury(
 ): Promise<void> {
   try {
     const snap = await db.alliances().doc(allianceId).get();
-    if (snap.exists) {
+    if (snap.exists()) {
       const data = snap.data() as any;
       const treasury = data.treasury ?? { cash: 0, oil: 0, ore: 0 };
       treasury[resource] = (treasury[resource] ?? 0) + amount;
@@ -271,7 +270,7 @@ export async function sendFromTreasury(
 ): Promise<void> {
   // Kasadan düş
   const aSnap = await db.alliances().doc(allianceId).get();
-  if (aSnap.exists) {
+  if (aSnap.exists()) {
     const data = aSnap.data() as any;
     const treasury = data.treasury ?? { cash: 0, oil: 0, ore: 0 };
     if ((treasury[resource] ?? 0) < amount) throw new Error('Kasada yeterli kaynak yok');
@@ -280,7 +279,7 @@ export async function sendFromTreasury(
   }
   // Hedef oyuncuya pending kaynak ekle
   const baseSnap = await db.playerBases().doc(targetUid).get();
-  if (baseSnap.exists) {
+  if (baseSnap.exists()) {
     const pending = (baseSnap.data() as any).pendingResources ?? { cash: 0, oil: 0, ore: 0 };
     pending[resource] = (pending[resource] ?? 0) + amount;
     await db.playerBases().doc(targetUid).set({ pendingResources: pending }, { merge: true });
@@ -306,13 +305,11 @@ export async function fulfillDonationRequest(
 ): Promise<void> {
   const reqRef = db.alliances().doc(allianceId).collection('donationRequests').doc(requestId);
   const reqSnap = await reqRef.get();
-  if (!reqSnap.exists) throw new Error('Talep bulunamadı');
+  if (!reqSnap.exists()) throw new Error('Talep bulunamadı');
   const req = reqSnap.data() as any;
-  const newFilled = Math.min(req.amount, (req.filled ?? 0) + amount);
-  const donors = [...(req.donors ?? []), { uid: donorUid, name: donorName, amount }];
   // Hedef oyuncuya pending kaynak ekle (oyuncu girdiğinde alacak — override güvenli)
   const targetBase = await db.playerBases().doc(req.requesterUid).get();
-  if (targetBase.exists) {
+  if (targetBase.exists()) {
     const pending = (targetBase.data() as any).pendingResources ?? { cash: 0, oil: 0, ore: 0 };
     pending[req.resource] = (pending[req.resource] ?? 0) + amount;
     await db.playerBases().doc(req.requesterUid).set({ pendingResources: pending }, { merge: true });
@@ -356,7 +353,7 @@ export function getAllianceMaxMembers(level: number): number {
 
 export async function upgradeAllianceLevel(allianceId: string): Promise<void> {
   const allianceSnap = await db.alliances().doc(allianceId).get();
-  if (!allianceSnap.exists) throw new Error('İttifak bulunamadı');
+  if (!allianceSnap.exists()) throw new Error('İttifak bulunamadı');
   const data = allianceSnap.data() as any;
   const currentLevel = data.allianceLevel ?? 1;
   if (currentLevel >= 10) throw new Error('Maksimum seviye');
@@ -383,7 +380,7 @@ const BOOST_COST = { cash: 200000, oil: 200000, ore: 200000 };
 
 export async function activateAllianceBoost(allianceId: string): Promise<void> {
   const allianceSnap = await db.alliances().doc(allianceId).get();
-  if (!allianceSnap.exists) throw new Error('İttifak bulunamadı');
+  if (!allianceSnap.exists()) throw new Error('İttifak bulunamadı');
   const data = allianceSnap.data() as any;
   const treasury = data.treasury ?? { cash: 0, oil: 0, ore: 0 };
   if (treasury.cash < BOOST_COST.cash || treasury.oil < BOOST_COST.oil || treasury.ore < BOOST_COST.ore) {
@@ -427,7 +424,7 @@ async function sendSystemMessage(allianceId: string, text: string): Promise<void
 
 export function listenAllianceData(allianceId: string, callback: (data: AllianceData | null) => void): () => void {
   return db.alliances().doc(allianceId).onSnapshot(snap => {
-    callback(snap.exists ? (snap.data() as AllianceData) : null);
+    callback(snap.exists() ? (snap.data() as AllianceData) : null);
   });
 }
 
@@ -438,7 +435,7 @@ export function listenAllianceMembers(allianceId: string, callback: (members: Al
     for (const m of members) {
       try {
         const pSnap = await db.players().doc(m.uid).get();
-        if (pSnap.exists) {
+        if (pSnap.exists()) {
           const pData = pSnap.data() as any;
           m.power = pData.playerPower ?? m.power;
         }
@@ -464,7 +461,6 @@ export function listenJoinRequests(allianceId: string, callback: (requests: Alli
 // ── İttifak Savaşı ──────────────────────────────────────────
 
 const WAR_DURATION_MS = 24 * 60 * 60 * 1000; // 24 saat
-const WAR_COST_GOLD = 5000;
 const WAR_REWARD = { cash: 50000, oil: 20000, ore: 15000 };
 
 export async function declareWar(
@@ -561,7 +557,7 @@ export async function addWarScore(
   // Bizim skoru artır
   try {
     const mySnap = await db.alliances().doc(allianceId).get();
-    if (mySnap.exists) {
+    if (mySnap.exists()) {
       const data = mySnap.data() as any;
       if (data?.activeWar) {
         newOurScore = (data.activeWar.ourScore ?? 0) + score;
@@ -574,7 +570,7 @@ export async function addWarScore(
   let newTheirScore = 0;
   try {
     const enemySnap = await db.alliances().doc(enemyAllianceId).get();
-    if (enemySnap.exists) {
+    if (enemySnap.exists()) {
       const data = enemySnap.data() as any;
       if (data?.activeWar) {
         newTheirScore = (data.activeWar.theirScore ?? 0) + score;
@@ -607,7 +603,7 @@ export async function resolveWar(allianceId: string): Promise<{ won: boolean; re
   try {
     await db.alliances().doc(allianceId).set({
       activeWar: null,
-      warHistory: firestore.FieldValue.arrayUnion ? [historyEntry] : [historyEntry],
+      warHistory: firestore.FieldValue.arrayUnion(historyEntry),
     } as any, { merge: true });
   } catch (err) { console.warn('[resolveWar]', err); }
 

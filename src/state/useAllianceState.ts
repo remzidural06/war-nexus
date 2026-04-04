@@ -5,7 +5,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CF_BASE } from '../services/firebase';
 import type { AllianceData, AllianceMemberData, AllianceJoinRequest, AllianceChatMessage, AllianceJoinType, AllianceRank, ResourceKey } from './types';
-import type { AllianceWar } from './types';
 import {
   createAlliance as createAllianceSvc,
   joinAlliance as joinAllianceSvc,
@@ -27,7 +26,6 @@ import {
   listenJoinRequests,
   declareWar as declareWarSvc,
   addWarScore as addWarScoreSvc,
-  resolveWar as resolveWarSvc,
   getEnemyMembers as getEnemyMembersSvc,
   listenWarBattleLogs,
   sendFromTreasury as sendFromTreasurySvc,
@@ -36,8 +34,6 @@ import {
   listenDonationRequests,
   upgradeAllianceLevel as upgradeLevelSvc,
   activateAllianceBoost as activateBoostSvc,
-  getAllianceLevelCost,
-  getAllianceMaxMembers,
 } from '../services/allianceService';
 import { db } from '../services/firebase';
 
@@ -101,7 +97,7 @@ export function useAllianceState(
   const [allianceError, setAllianceError] = useState<string | null>(null);
   const [warBattleLogs, setWarBattleLogs] = useState<any[]>([]);
   const [donationRequests, setDonationRequests] = useState<any[]>([]);
-  const [refreshCounter, setRefreshCounter] = useState(0);
+  const [_refreshCounter, setRefreshCounter] = useState(0);
 
   const myAllianceRank = allianceMembers.find(m => m.uid === uid)?.rank ?? null;
 
@@ -113,7 +109,7 @@ export function useAllianceState(
     let unsub: (() => void) | null = null;
     try {
       unsub = db.players().doc(uid).onSnapshot((snap: any) => {
-        if (snap.exists) {
+        if (snap.exists()) {
           const data = snap.data() as any;
           setMyAllianceId(data?.allianceId ?? null);
         }
@@ -126,7 +122,7 @@ export function useAllianceState(
     const interval = setInterval(async () => {
       try {
         const snap = await db.players().doc(uid).get();
-        if (snap.exists) {
+        if (snap.exists()) {
           const data = snap.data() as any;
           const newId = data?.allianceId ?? null;
           setMyAllianceId((prev: string | null) => prev !== newId ? newId : prev);
@@ -323,7 +319,7 @@ export function useAllianceState(
     if (!myAllianceId) return;
     try {
       const snap = await db.alliances().doc(myAllianceId).get();
-      if (snap.exists) {
+      if (snap.exists()) {
         setMyAllianceData(snap.data() as AllianceData);
         setRefreshCounter(c => c + 1);
       }

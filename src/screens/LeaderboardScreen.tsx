@@ -10,7 +10,7 @@ import { colors } from '../theme/colors';
 import { formatNumber } from '../utils/formatters';
 import { useDesertGame } from '../state/DesertGameContext';
 import { db } from '../services/firebase';
-import { UNIT_MAP, UNIT_DEFINITIONS } from '../data/units';
+import { UNIT_MAP } from '../data/units';
 import { UnitImage } from '../components/UnitImage';
 import type { MarchUnit } from '../state/types';
 

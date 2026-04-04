@@ -90,7 +90,7 @@ export async function launchPvPAttack(march: Omit<FirestoreMarch, 'id'>): Promis
  */
 export async function loadDefenderBase(defenderUid: string): Promise<PersistedGameState | null> {
   const snap = await db.playerBases().doc(defenderUid).get();
-  if (!snap.exists) return null;
+  if (!snap.exists()) return null;
   return snap.data() as PersistedGameState;
 }
 
@@ -109,6 +109,10 @@ export async function resolvePvPMarch(
     rewardOil: number;
     rewardOre: number;
     powerChange: number;
+    transferCash?: number;
+    transferOil?: number;
+    transferOre?: number;
+    transferPower?: number;
     attackerResults?: any[];
     defenderResults?: any[];
   },

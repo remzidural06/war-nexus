@@ -1,4 +1,4 @@
-import type { BuildingDefinition, BuildingState, ResourceKey } from '../state/types';
+import type { BuildingDefinition } from '../state/types';
 
 // Upgrade cost: baseCost * scaleFactor^(level-1)
 export function calcUpgradeCost(

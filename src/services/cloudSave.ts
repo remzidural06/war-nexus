@@ -2,7 +2,7 @@
  * Cloud Save servisi — Firestore'a oyun state'i kaydet/yükle.
  * AsyncStorage'ın bulut karşılığı.
  */
-import { db, firestore } from './firebase';
+import { db } from './firebase';
 import { UNIT_MAP } from '../data/units';
 import type { PersistedGameState } from '../state/types';
 
@@ -24,7 +24,7 @@ export async function saveToCloud(uid: string, state: PersistedGameState, displa
 export async function loadFromCloud(uid: string): Promise<PersistedGameState | null> {
   try {
     const snap = await db.playerBases().doc(uid).get();
-    if (!snap.exists) return null;
+    if (!snap.exists()) return null;
     return snap.data() as PersistedGameState;
   } catch (err) {
     console.warn('[CloudSave] Load failed:', err);
@@ -59,7 +59,7 @@ export async function migratePlayerPower(forceAll = false): Promise<void> {
       const data = doc.data();
       if (!forceAll && data.playerPower && data.playerPower > 0) continue;
       const baseSnap = await db.playerBases().doc(doc.id).get();
-      if (!baseSnap.exists) continue;
+      if (!baseSnap.exists()) continue;
       const state = baseSnap.data() as any;
       const power = calcPower(state);
       const wins = (state?.battleReports ?? []).filter((r: any) => r.won).length;
@@ -114,7 +114,7 @@ export async function enforceUnitCaps(onProgress?: (msg: string) => void): Promi
     try {
       onProgress?.(`${i + 1}/${playerUids.length} okunuyor...`);
       const baseSnap = await withTimeout(db.playerBases().doc(uid).get());
-      if (!baseSnap.exists) { debug.push(`${uid.slice(0,8)}: base yok`); processed++; continue; }
+      if (!baseSnap.exists()) { debug.push(`${uid.slice(0,8)}: base yok`); processed++; continue; }
       const state = baseSnap.data() as any;
       const buildings = state?.buildings ?? [];
       const hqLevel = buildings.find((b: any) => b.id === 'hq')?.level ?? 1;

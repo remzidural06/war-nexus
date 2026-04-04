@@ -28,7 +28,7 @@ export async function signInWithGoogle(): Promise<AuthUser> {
   // sorunu için önce mevcut oturumu kontrol et
   try {
     await GoogleSignin.signOut(); // stale session temizle
-  } catch (_) {}
+  } catch {}
 
   const response = await GoogleSignin.signIn();
   const idToken = response?.data?.idToken
@@ -39,7 +39,7 @@ export async function signInWithGoogle(): Promise<AuthUser> {
   const userCredential = await auth().signInWithCredential(googleCredential);
   if (!userCredential.user) throw new Error('Firebase sign-in failed');
   const snap = await db.players().doc(userCredential.user.uid).get();
-  if (snap.exists) {
+  if (snap.exists()) {
     await db.players().doc(userCredential.user.uid).update({ lastOnline: firestore.FieldValue.serverTimestamp() });
   }
   return userCredential.user;
@@ -67,14 +67,14 @@ export async function signInWithEmail(email: string, password: string): Promise<
 /** Oyuncunun profili var mı kontrol et */
 export async function hasPlayerProfile(uid: string): Promise<boolean> {
   const snap = await db.players().doc(uid).get();
-  return snap.exists;
+  return snap.exists();
 }
 
 /** Oyuncu admin mi kontrol et */
 export async function checkIsAdmin(uid: string): Promise<boolean> {
   try {
     const snap = await db.players().doc(uid).get();
-    return snap.exists && snap.data()?.isAdmin === true;
+    return snap.exists() && snap.data()?.isAdmin === true;
   } catch { return false; }
 }
 
@@ -93,7 +93,7 @@ export async function updateDisplayName(uid: string, displayName: string): Promi
 export async function getPlayerCoordinate(uid: string): Promise<string> {
   try {
     const snap = await db.players().doc(uid).get();
-    if (snap.exists) {
+    if (snap.exists()) {
       const data = snap.data() as any;
       if (data?.coordinate) return data.coordinate;
     }
@@ -110,7 +110,7 @@ export async function getPlayerCoordinate(uid: string): Promise<string> {
 export async function canChangeName(uid: string): Promise<{ allowed: boolean; remainingDays: number }> {
   try {
     const snap = await db.players().doc(uid).get();
-    if (!snap.exists) return { allowed: true, remainingDays: 0 };
+    if (!snap.exists()) return { allowed: true, remainingDays: 0 };
     const data = snap.data() as any;
     const changedAt = data?.nameChangedAt ?? 0;
     if (changedAt === 0) return { allowed: true, remainingDays: 0 };
@@ -162,7 +162,7 @@ function generateCoordinate(): string {
 export async function ensurePlayerProfilePublic(uid: string, displayName: string): Promise<void> {
   const ref = db.players().doc(uid);
   const snap = await ref.get();
-  if (!snap.exists) {
+  if (!snap.exists()) {
     await ref.set({
       displayName,
       coordinate: generateCoordinate(),
@@ -177,7 +177,7 @@ export async function ensurePlayerProfilePublic(uid: string, displayName: string
 async function ensurePlayerProfile(user: AuthUser, customName?: string): Promise<void> {
   const ref = db.players().doc(user.uid);
   const snap = await ref.get();
-  if (!snap.exists) {
+  if (!snap.exists()) {
     await ref.set({
       displayName: customName || user.displayName || `Komutan_${user.uid.slice(0, 6)}`,
       coordinate: generateCoordinate(),

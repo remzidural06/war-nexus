@@ -93,7 +93,7 @@ export function useDirectMessages(uid: string | null, displayName: string) {
       }, { merge: true }).catch(() => {});
     }
     return unsub;
-  }, [activeChat?.conversationId, uid]);
+  }, [activeChat, uid]);
 
   // Mesaj gönder
   const sendMessage = useCallback(async (text: string) => {
@@ -135,7 +135,7 @@ export function useDirectMessages(uid: string | null, displayName: string) {
 
     // Konuşma yoksa oluştur
     const snap = await db.directMessages().doc(convId).get();
-    if (!snap.exists) {
+    if (!snap.exists()) {
       await db.directMessages().doc(convId).set({
         participants: [uid, otherUid].sort(),
         [`name_${uid}`]: displayName,

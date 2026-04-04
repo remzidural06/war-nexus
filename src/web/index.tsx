@@ -13,7 +13,7 @@ import { ShopScreen } from '../screens/ShopScreen';
 import { AuthScreen } from '../screens/AuthScreen';
 import { UsernameScreen } from '../screens/UsernameScreen';
 import { TopBar } from '../components/TopBar';
-import { BottomTabs } from '../components/BottomTabs';
+import { BottomTabs, type RootTab } from '../components/BottomTabs';
 import { DesertGameProvider, useDesertGame } from '../state/DesertGameContext';
 import { IncomingAttackBanner } from '../components/IncomingAttackBanner';
 import { OutgoingAttackBanner } from '../components/OutgoingAttackBanner';
@@ -25,7 +25,7 @@ import { onAuthStateChanged, hasPlayerProfile } from '../services/authService';
 import type { AuthUser } from '../services/authService';
 import { colors } from '../theme/colors';
 
-type RootTab = 'base' | 'map' | 'alliance' | 'settings' | 'leaderboard' | 'shop' | 'help' | 'profile';
+
 
 function IncomingAttackOverlay() {
   const { incomingAttack, getTotalTrainedUnits } = useDesertGame();

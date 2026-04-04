@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { colors } from '../../theme/colors';
 import { t } from '../../i18n';
-import { formatNumber } from '../../utils/formatters';
 import { styles } from '../../screens/AllianceScreen.styles';
 import { BattleResultModal } from '../BattleResultModal';
 import type { BattleReport } from '../../state/types';

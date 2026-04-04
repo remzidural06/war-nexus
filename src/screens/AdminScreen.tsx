@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import {
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -102,7 +101,7 @@ export function AdminScreen() {
       });
       if (results.length === 0 && searchText.length > 10) {
         const docSnap = await db.players().doc(searchText.trim()).get();
-        if (docSnap.exists) {
+        if (docSnap.exists()) {
           const data = docSnap.data() as any;
           results.push({ uid: docSnap.id, displayName: data.displayName ?? '?', hqLevel: data.hqLevel ?? 1, playerPower: data.playerPower ?? 0, isBot: data.isBot, allianceId: data.allianceId, warPower: data.warPower ?? 0, wins: data.wins ?? 0, losses: data.losses ?? 0 });
         }
@@ -117,7 +116,7 @@ export function AdminScreen() {
     setSelPlayer(p);
     try {
       const snap = await db.playerBases().doc(p.uid).get();
-      setPlayerBase(snap.exists ? snap.data() : null);
+      setPlayerBase(snap.exists() ? snap.data() : null);
     } catch { setPlayerBase(null); }
   }, []);
 

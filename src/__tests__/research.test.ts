@@ -1,6 +1,7 @@
 import { RESEARCH_NODES } from '../data/research';
+import type { ResearchBranch } from '../state/types';
 
-const VALID_BRANCHES = ['land', 'air', 'naval', 'defense'];
+const VALID_BRANCHES: ResearchBranch[] = ['land', 'air', 'naval', 'defense'];
 const VALID_TIERS = [1, 2, 3, 4];
 
 // ─── Research data integrity ─────────────────────────────────

@@ -21,7 +21,7 @@ interface WarTabProps {
   getPvPCooldown: (uid: string) => number;
 }
 
-export function WarTab({ activeWar, myAllianceName, myRank, myAllianceId, warBattleLogs, onDeclareWar, onGetEnemyMembers, getAllianceRankings, birlikler, activeMarch, attackPvPTarget, getPvPCooldown }: WarTabProps) {
+export function WarTab({ activeWar, myAllianceName, myRank, myAllianceId, warBattleLogs: _warBattleLogs, onDeclareWar, onGetEnemyMembers, getAllianceRankings, birlikler, activeMarch, attackPvPTarget, getPvPCooldown }: WarTabProps) {
   const [targets, setTargets] = useState<AllianceData[]>([]);
   const [enemyMembers, setEnemyMembers] = useState<AllianceMemberData[]>([]);
   const [loading, setLoading] = useState(false);

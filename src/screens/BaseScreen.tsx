@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import {
   Animated,
   Image,
@@ -11,7 +11,7 @@ import { useDesertGame } from '../state/DesertGameContext';
 import { t } from '../i18n';
 import { BUILDING_DEFINITIONS } from '../data/buildings';
 import { UNIT_MAP } from '../data/units';
-import type { BuildingId, BuildingState, MapTarget, BattleReport, Birlik } from '../state/types';
+import type { BuildingId, BattleReport } from '../state/types';
 import { BattleResultModal } from '../components/BattleResultModal';
 import { DraggableHotspot } from '../components/DraggableHotspot';
 import { OverviewTab } from '../components/panels/OverviewTab';
@@ -23,10 +23,7 @@ import { useBaseEditorState } from '../hooks/useBaseEditorState';
 import { styles } from './BaseScreen.styles';
 import {
   CANVAS_W, CANVAS_H, BUILDING_BRANCHES,
-  DIFFICULTY_COLORS_HQ, DIFFICULTY_LABELS_HQ_KEYS,
-  HOTSPOT, PANEL_H,
-  hqWinChance, hqWinColor,
-  type HotspotPos,
+  PANEL_H,
 } from './BaseScreen.constants';
 
 const _baseScene = require('../assets/base/terrain/base_scene.jpg');
@@ -56,30 +53,19 @@ export function BaseScreen() {
     getMaxTrainable,
     getUnitCap,
     getBuildingUnitCount,
-    targets,
     activeMarch,
-    battleReports,
     getTotalTrainedUnits,
     getTotalAttackPower,
-    canAttack,
-    attackTarget,
-    adjustTrainedUnits,
     birlikler,
     addBirlik,
     removeBirlik,
     speedUpWithGold,
     calcGoldCost,
-    calcUpgradeGoldCost,
-    buyResourceWithGold,
-    gold,
-    getResource,
   } = useDesertGame();
 
   // ── Oyun paneli state ───────────────────────────────────────
   const [selectedId, setSelectedId] = useState<BuildingId | null>(null);
   const [panelTab, setPanelTab] = useState<PanelTab>('overview');
-  const [hqCommitted, setHqCommitted] = useState(1);
-  const [hqTarget, setHqTarget] = useState<MapTarget | null>(null);
   // Birlik state (birlikler context'ten geliyor)
   const [showBirlikForm, setShowBirlikForm] = useState(false);
   const [viewReport, setViewReport] = useState<BattleReport | null>(null);
@@ -88,7 +74,7 @@ export function BaseScreen() {
   // ── Editör state (hook) ──────────────────────────────────────
   const {
     editMode, toggleEditMode, positions, editTarget, setEditTarget,
-    copyMsg, editPos, handleDragEnd, updatePos, updateSize, updateRot,
+    copyMsg, editPos, handleDragEnd, updateSize, updateRot,
     updateLabelOffset, exportPositions,
   } = useBaseEditorState();
 
@@ -449,20 +435,4 @@ export function BaseScreen() {
   );
 }
 
-function CostChip({ icon, value }: { icon: string; value: string }) {
-  return (
-    <View style={styles.costChip}>
-      <Text style={styles.costChipIcon}>{icon}</Text>
-      <Text style={styles.costChipVal}>{value}</Text>
-    </View>
-  );
-}
-
-function StepBtn({ label, onPress }: { label: string; onPress: () => void }) {
-  return (
-    <Pressable style={styles.stepBtn} onPress={onPress}>
-      <Text style={styles.stepBtnText}>{label}</Text>
-    </Pressable>
-  );
-}
 

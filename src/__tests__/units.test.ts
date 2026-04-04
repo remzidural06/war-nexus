@@ -1,5 +1,5 @@
 import { UNIT_DEFINITIONS, UNIT_MAP, getUnitsForBuilding } from '../data/units';
-import { CAN_ATTACK, type UnitBranch } from '../data/combatMatrix';
+import { type UnitBranch } from '../data/combatMatrix';
 
 const VALID_BRANCHES: UnitBranch[] = [
   'infantry', 'armor', 'artillery', 'uav', 'helicopter',

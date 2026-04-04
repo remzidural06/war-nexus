@@ -52,7 +52,6 @@ export function MapScreen() {
     buildings,
     getTotalAttackPower,
     getTotalTrainedUnits,
-    canAttack,
     attackTarget,
     birlikler,
   } = useDesertGame();

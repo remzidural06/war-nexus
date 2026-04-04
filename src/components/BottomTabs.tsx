@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors } from '../theme/colors';
 import { t } from '../i18n';
-import type { RootTab } from '../../App';
+export type RootTab = 'base' | 'map' | 'alliance' | 'settings' | 'leaderboard' | 'shop' | 'help' | 'profile';
 
 const TAB_KEYS: { key: RootTab; i18n: string; icon: string }[] = [
   { key: 'base', i18n: 'nav.base', icon: '🏰' },

@@ -85,8 +85,8 @@ function AllianceHeader({ tag, name, memberCount, maxMembers, totalPower, treasu
 
 // ─── Main Screen ────────────────────────────────────���─────────
 
-export function AllianceScreen({ onGoToLeaderboard }: { onGoToLeaderboard?: () => void } = {}) {
-  const { alliance, gold, getResource, uid, playerPower, birlikler, activeMarch, attackPvPTarget, getPvPCooldown } = useDesertGame();
+export function AllianceScreen({ onGoToLeaderboard: _onGoToLeaderboard }: { onGoToLeaderboard?: () => void } = {}) {
+  const { alliance, gold, getResource, uid, birlikler, activeMarch, attackPvPTarget, getPvPCooldown } = useDesertGame();
   const {
     myAllianceId,
     myAllianceData,

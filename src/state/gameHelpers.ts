@@ -1,5 +1,5 @@
 import { UNIT_MAP } from '../data/units';
-import type { ResourceKey, Resource } from './types';
+import type { Resource } from './types';
 
 // ─── Unit Capacity Table ─────────────────────────────────────
 export const UNIT_CAP_TABLE: Record<number, number> = {

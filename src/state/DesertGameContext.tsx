@@ -10,20 +10,20 @@ import React, {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { BUILDING_DEFINITIONS, ALL_BUILDING_IDS } from '../data/buildings';
-import { UNIT_DEFINITIONS, UNIT_MAP, getUnitsForBuilding } from '../data/units';
+import { UNIT_MAP, getUnitsForBuilding } from '../data/units';
 import { RESEARCH_NODES, RESEARCH_MAP } from '../data/research';
 import { MAP_TARGETS, getMapTargets } from '../data/mapTargets';
 import { INITIAL_MISSIONS } from '../data/missions';
 import { calcUpgradeCost, calcUpgradeTime, calcBattleOutcome, deductUnitsProportionally } from '../utils/economyMath';
-import { resolveUnitCombat, resolveClassicCombat } from '../utils/combatEngine';
+import { resolveUnitCombat } from '../utils/combatEngine';
 import { saveToCloud, loadFromCloud, syncPlayerProfile, migratePlayerPower } from '../services/cloudSave';
 import { getCurrentUser } from '../services/authService';
 import { db, CF_BASE } from '../services/firebase';
 import { t } from '../i18n';
 import { findPvPTargets, launchPvPAttack, loadDefenderBase, listenIncomingMarches, resolvePvPMarch, cancelPvPMarch } from '../services/pvpService';
-import type { PvPTarget, FirestoreMarch } from '../services/pvpService';
+import type { PvPTarget } from '../services/pvpService';
 import { useAllianceState } from './useAllianceState';
-import { addWarScore as addWarScoreSvc, saveWarBattleLog, getMyAlliance } from '../services/allianceService';
+import { addWarScore as addWarScoreSvc, saveWarBattleLog } from '../services/allianceService';
 import { filterOffensiveUnits, calcMarchAttackPower, buildResearchBranchBonus, collectDefenderUnits, calcPvPTransfer, calcDefenderPower, applyBirlikLosses, PVP_COOLDOWN_MS } from './pvpHelpers';
 import type { AllianceState } from './useAllianceState';
 import type {
@@ -51,7 +51,6 @@ import {
   calcUpgradeGoldCostForLevel,
   calcTrainingCost,
   calcGoldExchangeAmount,
-  GOLD_TO_RESOURCE_BASE,
 } from './gameHelpers';
 
 // ─── Constants ────────────────────────────────────────────────
@@ -147,7 +146,7 @@ interface DesertGameContextValue {
   pvpTargets: PvPTarget[];
   pvpLoading: boolean;
   refreshPvPTargets: () => void;
-  attackPvPTarget: (target: PvPTarget, committedUnits: number, marchUnits: MarchUnit[]) => void;
+  attackPvPTarget: (target: PvPTarget, committedUnits: number, marchUnits: MarchUnit[], isWarAttack?: boolean) => void;
   getPvPCooldown: (targetUid: string) => number; // kalan saniye, 0 = saldırabilir
   revengeTargets: Record<string, number>; // targetUid → timestamp (intikam hakkı)
 
@@ -367,7 +366,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
               // Kapasiteleri güncel değerlere zorla
               const CURRENT_CAPS: Record<string, number> = { cash: 10000000, oil: 10000000, ore: 10000000, gold: 1000000 };
               migratedRes = migratedRes.map((r: any) => CURRENT_CAPS[r.key] ? { ...r, capacity: CURRENT_CAPS[r.key] } : r);
-              setResources(migratedRes);
+              setResources(migratedRes as Resource[]);
               setBuildings(saved.buildings);
             }
             setResearchStates(saved.researchStates);
@@ -466,7 +465,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       if (uid) {
         try {
           const pgSnap = await db.playerBases().doc(uid).get();
-          const pending = pgSnap.exists ? (pgSnap.data()?.pendingGold ?? 0) : 0;
+          const pending = pgSnap.exists() ? (pgSnap.data()?.pendingGold ?? 0) : 0;
           if (pending > 0) {
             setResources(curr => curr.map(r =>
               r.key === 'gold' ? { ...r, amount: Math.min(r.capacity, r.amount + pending) } : r
@@ -480,7 +479,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
         // pendingResources kontrolü — ittifak bağışı/kasadan gönderilen kaynaklar
         try {
           const prSnap = await db.playerBases().doc(uid).get();
-          const pr = prSnap.exists ? (prSnap.data()?.pendingResources ?? null) : null;
+          const pr = prSnap.exists() ? (prSnap.data()?.pendingResources ?? null) : null;
           if (pr && (pr.cash > 0 || pr.oil > 0 || pr.ore > 0)) {
             setResources(curr => curr.map(r => {
               const add = pr[r.key] ?? 0;
@@ -598,6 +597,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       const _user = getCurrentUser();
       saveToCloud(uid, payload, _user?.displayName ?? undefined);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allianceContribution, missions, warPower, uid]);
 
   // pvpCooldowns değiştiğinde ANINDA kaydet (cooldown persist — 4sn gecikme yüzünden kayboluyordu)
@@ -707,6 +707,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       }
       return next;
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -802,8 +803,6 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
   useEffect(() => {
     if (!loaded) return;
     const interval = setInterval(() => {
-      const now = Date.now();
-
       // Resource production (base + bina + banka faizi)
       setResources(current =>
         current.map(r => {
@@ -1276,7 +1275,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
         try {
           // Kendi ittifak ID'mi players dokümanından oku
           const myPlayerSnap = await db.players().doc(uid).get();
-          const myAid = myPlayerSnap.exists ? (myPlayerSnap.data() as any)?.allianceId : null;
+          const myAid = myPlayerSnap.exists() ? (myPlayerSnap.data() as any)?.allianceId : null;
           const enemyAid = attack.warAllianceId;
           if (myAid && enemyAid) {
             const warScore = defended ? 10 : 0;
@@ -1286,12 +1285,12 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
             await saveWarBattleLog(myAid, report, defended ? myName : attack.attackerName, warScore);
             // Güncel veriyi oku — UI anında güncellensin
             const freshSnap = await db.alliances().doc(myAid).get();
-            if (freshSnap.exists) {
+            if (freshSnap.exists()) {
               // Alliance hook'taki listener zaten tetiklenmiş olmalı
               // Ama tetiklenmemişse 1sn sonra tekrar dene
               setTimeout(async () => {
                 try {
-                  const s = await db.alliances().doc(myAid).get();
+                  await db.alliances().doc(myAid).get();
                   // onSnapshot listener bunu yakalayacak
                 } catch {}
               }, 1500);
@@ -1328,6 +1327,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
   }, []);
 
   // ── Gold helpers ────────────────────────────────────────────
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const goldAmount = useMemo(() => resourcesRef.current.find(r => r.key === 'gold')?.amount ?? 0, [resources]);
 
   const canAffordGold = useCallback((amount: number) => {
@@ -1406,7 +1406,8 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       setBuildings(updatedBlds);
     }
     saveNow();
-  }, [calcGoldCost, calcUpgradeGoldCost, canAffordGold, deductGold, saveNow]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calcGoldCost, canAffordGold, deductGold, saveNow]);
 
   const buyResourceWithGold = useCallback((resourceKey: 'cash' | 'oil' | 'ore', goldAmount: number): boolean => {
     if (goldAmount <= 0) return false;
@@ -1488,7 +1489,8 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       if (state?.completed || state?.inProgress) return false;
       return n.requires.every(req => isResearched(req));
     });
-  }, [isResearched, researchStates]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isResearched]);
 
   const canStartResearch = useCallback((buildingId: BuildingId, nodeId: string) => {
     const building = buildingsRef.current.find(b => b.id === buildingId);
@@ -1681,7 +1683,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     // Kalkan aktifken saldırı yapılamaz
     if (Date.now() < shieldUntil) return false;
     return getTotalTrainedUnits() >= committedUnits;
-  }, [activeMarch, getTotalTrainedUnits]);
+  }, [activeMarch, getTotalTrainedUnits, shieldUntil]);
 
   const attackTarget = useCallback((targetId: string, targetName: string, committedUnits: number, marchUnits?: MarchUnit[]) => {
     if (!canAttack(targetId, committedUnits)) return;
@@ -1879,6 +1881,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     const basePower = buildingPower + unitPower + researchPower;
     const cappedWarPower = Math.min(warPower, basePower);
     return basePower + cappedWarPower;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [buildings, researchStates, warPower]);
   playerPowerRef.current = playerPower;
 
@@ -1931,7 +1934,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       wins: brs.filter(r => r.won).length,
       losses: brs.filter(r => !r.won).length,
     });
-  }, [playerPower, uid, loaded, battleReports]);
+  }, [playerPower, uid, loaded, battleReports, warPower]);
 
   // ── PvP ─────────────────────────────────────────────────────
   const refreshPvPTargets = useCallback(async () => {
@@ -2002,7 +2005,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
         travelSeconds,
         status: 'marching',
       });
-    } catch (err: any) {
+    } catch {
       setToastMsg(t('pvp.attackFailed'));
       return;
     }
@@ -2046,11 +2049,6 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
         if (br) {
           // Saldıran zaten çözmüş — sonucu direkt uygula (savunan perspektifinden)
           const defenderWon = !br.won; // saldıran kazandıysa savunan kaybetti
-          const myRes = resourcesRef.current;
-          const myCash = myRes.find(r => r.key === 'cash')?.amount ?? 0;
-          const myOil = myRes.find(r => r.key === 'oil')?.amount ?? 0;
-          const myOre = myRes.find(r => r.key === 'ore')?.amount ?? 0;
-
           // transfer değerleri: kaybeden ne kaybediyorsa kazanan o kadarını alır
           const tp = br.transferPower ?? Math.abs(br.powerChange);
           const tc = br.transferCash ?? Math.abs(br.rewardCash);
@@ -2134,7 +2132,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
               const myAid = allianceNow?.myAllianceId;
               if (aw && myAid && m.attackerUid) {
                 const atkSnap = await db.players().doc(m.attackerUid).get();
-                const atkData = atkSnap.exists ? atkSnap.data() as any : null;
+                const atkData = atkSnap.exists() ? atkSnap.data() as any : null;
                 const isWarEnemy = atkData?.allianceId === aw.enemyAllianceId || atkData?.allianceTag === aw.enemyTag;
                 if (isWarEnemy) {
                   const warScore = defenderWon ? 10 : 0;
@@ -2206,6 +2204,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       }
     });
     return unsubscribe;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uid]);
 
   // PvP march varış — savunanın verisini oku ve savaşı çöz
@@ -2417,6 +2416,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       scheduleSave();
     });
     return () => clearTimeout(safetyTimer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uid, activeMarch?.secondsRemaining]);
 
   // ── Context Value ────────────────────────────────────────────
@@ -2543,6 +2543,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     toastMsg,
     clearToast: () => setToastMsg(null),
     alliance,
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [
     resources, getResource, canAfford, buyResourceWithGold,
     buildings, getBuilding, canUpgradeBuilding, upgradeBuilding, getUpgradeCost, getUpgradeTime,

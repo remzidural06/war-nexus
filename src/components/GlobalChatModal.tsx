@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { colors } from '../theme/colors';
 import { t } from '../i18n';
-import { db, firestore } from '../services/firebase';
+import { db } from '../services/firebase';
 import { filterProfanity } from '../data/profanityFilter';
 import { useDesertGame } from '../state/DesertGameContext';
 
@@ -30,7 +30,7 @@ export function GlobalChatModal({ visible, onClose }: { visible: boolean; onClos
   useEffect(() => {
     if (!uid) return;
     db.players().doc(uid).get().then(doc => {
-      setIsAdmin(doc.exists && doc.data()?.isAdmin === true);
+      setIsAdmin(doc.exists() && doc.data()?.isAdmin === true);
     }).catch(() => {});
   }, [uid]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -108,8 +108,6 @@ export function GlobalChatModal({ visible, onClose }: { visible: boolean; onClos
     const d = new Date(ts);
     return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
   }
-
-  const cooldownRemaining = Math.max(0, SPAM_COOLDOWN_MS - (Date.now() - lastSentAt));
 
   return (
     <Modal visible={visible} animationType="slide" transparent={false}>

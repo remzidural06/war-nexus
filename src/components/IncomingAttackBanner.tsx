@@ -2,7 +2,6 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '../theme/colors';
 import type { IncomingAttack } from '../state/types';
-import { t } from '../i18n';
 
 function formatTime(secs: number): string {
   const m = Math.floor(secs / 60);

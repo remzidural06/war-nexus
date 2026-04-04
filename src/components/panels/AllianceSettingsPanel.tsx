@@ -19,7 +19,7 @@ interface SettingsTabProps {
   onUpdateInfo: (updates: { name?: string; tag?: string; joinType?: 'open' | 'approval' }) => Promise<void>;
 }
 
-export function SettingsTab({ allianceName, allianceTag, allianceJoinType, myRank, myAllianceId, members, loading, onLeave, onDisband, onKick, onTransferLeadership, onUpdateInfo }: SettingsTabProps) {
+export function SettingsTab({ allianceName, allianceTag, allianceJoinType, myRank, myAllianceId: _myAllianceId, members, loading, onLeave, onDisband, onKick, onTransferLeadership, onUpdateInfo }: SettingsTabProps) {
   const [editName, setEditName] = useState(allianceName);
   const [editTag, setEditTag] = useState(allianceTag);
   const [editJoinType, setEditJoinType] = useState(allianceJoinType);

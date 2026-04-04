@@ -25,6 +25,9 @@ import type { PvPTarget } from '../services/pvpService';
 import { useAllianceState } from './useAllianceState';
 import { addWarScore as addWarScoreSvc, saveWarBattleLog } from '../services/allianceService';
 import { filterOffensiveUnits, calcMarchAttackPower, buildResearchBranchBonus, collectDefenderUnits, calcPvPTransfer, calcDefenderPower, applyBirlikLosses, PVP_COOLDOWN_MS } from './pvpHelpers';
+import { resolveMarchResult, resolveIncomingResult } from './combatResolvers';
+import { calcPlayerPower } from './powerCalc';
+import { syncMissionProgress } from './missionSync';
 import type { AllianceState } from './useAllianceState';
 import type {
   Resource,
@@ -754,35 +757,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
   // ── Görev senkronizasyonu — mevcut state'e göre güncelle ────
   useEffect(() => {
     if (!loaded) return;
-    setMissions(prev => prev.map(m => {
-      if (m.claimed) return m;
-      let count = m.currentCount;
-      if (m.type === 'upgrade') {
-        if (m.targetBuildingId) {
-          const b = buildings.find(x => x.id === m.targetBuildingId);
-          count = Math.max(count, b ? Math.max(0, b.level - 1) : 0);
-        } else {
-          count = Math.max(count, buildings.reduce((s, b) => s + Math.max(0, b.level - 1), 0));
-        }
-      } else if (m.type === 'train') {
-        if ((m as any).targetUnitId) {
-          const uid = (m as any).targetUnitId;
-          count = Math.max(count, buildings.reduce((s, b) => s + ((b.trainedUnits ?? {})[uid] ?? 0), 0));
-        } else {
-          count = Math.max(count, buildings.reduce((s, b) =>
-            s + Object.values(b.trainedUnits ?? {}).reduce((a: number, c: any) => a + (c as number), 0), 0));
-        }
-      } else if (m.type === 'research') {
-        count = Math.max(count, researchStates.filter(r => r.completed).length);
-      } else if (m.type === 'attack') {
-        const wins = battleReports.filter(r => r.won).length;
-        count = Math.max(count, (m as any).requiresWin ? wins : battleReports.length);
-      }
-      // donate tipi görevler handleDonateSuccess callback'i ile doğrudan artırılıyor
-      const completed = count >= m.targetCount;
-      if (count === m.currentCount && completed === m.completed) return m;
-      return { ...m, currentCount: Math.min(count, m.targetCount), completed };
-    }));
+    setMissions(prev => syncMissionProgress(prev, buildings, researchStates, battleReports));
   }, [loaded, buildings, researchStates, battleReports]);
 
   // Keep refs in sync
@@ -933,101 +908,41 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     const target = MAP_TARGETS.find(t => t.id === march.targetId);
     if (!target) return;
 
-    // Araştırma bonusları
-    const branchBonus: Record<string, number> = {};
-    for (const rs of researchRef.current) {
-      if (rs.completed) {
-        const node = RESEARCH_MAP[rs.nodeId];
-        if (node) branchBonus[node.branch] = (branchBonus[node.branch] ?? 0) + 0.12;
-      }
-    }
+    const hasShield = Date.now() < shieldUntil;
+    const res = resolveMarchResult(
+      march, target, researchRef.current, RESEARCH_MAP, warPower, hasShield,
+    );
 
-    let won: boolean;
-    let losses: number;
-    let attackerResults: BattleReport['attackerResults'];
-    let defenderResults: BattleReport['defenderResults'];
-    let totalDefPower: number;
-
-    // Savaş çöz — her zaman resolveUnitCombat kullan
-    const result = resolveUnitCombat({
-      attackerUnits: march.marchUnits ?? [],
-      defenderUnits: target.defenseUnits ?? [],
-      attackerResearchBonus: branchBonus,
-    });
-    won = result.won;
-    totalDefPower = result.totalDefensePower;
-    attackerResults = result.attackerResults;
-    defenderResults = result.defenderResults;
-    losses = result.totalAttackerLosses;
-
-    // Savaş gücü: kazanınca artar, kaybedince düşer
-    let powerChange = 0;
-    if (won) {
-      powerChange = Math.max(20, Math.round(totalDefPower * 0.3));
-      setWarPower(prev => prev + powerChange);
+    // Apply power mutation
+    if (res.won) {
+      setWarPower(prev => prev + res.powerChange);
     } else {
-      powerChange = -Math.round(warPower * 0.1);
-      setWarPower(prev => Math.max(0, prev + powerChange));
+      setWarPower(prev => Math.max(0, prev + res.powerChange));
     }
 
-    // Birlik bazlı saldırı: kazanınca kayıp yok, kaybedince tüm birlikler silinir
-    if (attackerResults) {
-      if (!won) {
-        setBirlikler([]);
-      }
-      // Kazanınca: 0 kayıp (birlikler korunur)
+    // Apply birlikler wipe on loss
+    if (res.clearBirlikler) {
+      setBirlikler([]);
     }
 
-    // Kazanan: ödül kazan
-    if (won) {
-      setResources(current =>
-        current.map(r => {
-          if (r.key === 'cash') return { ...r, amount: Math.min(r.capacity, r.amount + target.rewardCash) };
-          if (r.key === 'oil') return { ...r, amount: Math.min(r.capacity, r.amount + target.rewardOil) };
-          if (r.key === 'ore') return { ...r, amount: Math.min(r.capacity, r.amount + target.rewardOre) };
-          return r;
-        }),
-      );
-    }
+    // Apply resource changes
+    const rc = res.resourceChanges;
+    setResources(current =>
+      current.map(r => {
+        if (r.key === 'cash') return { ...r, amount: res.won ? Math.min(r.capacity, r.amount + rc.cash) : Math.max(0, r.amount + rc.cash) };
+        if (r.key === 'oil') return { ...r, amount: res.won ? Math.min(r.capacity, r.amount + rc.oil) : Math.max(0, r.amount + rc.oil) };
+        if (r.key === 'ore') return { ...r, amount: res.won ? Math.min(r.capacity, r.amount + rc.ore) : Math.max(0, r.amount + rc.ore) };
+        return r;
+      }),
+    );
 
-    // Kaybeden: kaynak + XP kaybeder
-    if (!won) {
-      const cashLoss = Math.round(target.rewardCash * 0.5);
-      const oilLoss = Math.round(target.rewardOil * 0.5);
-      const oreLoss = Math.round(target.rewardOre * 0.5);
-      setResources(current =>
-        current.map(r => {
-          if (r.key === 'cash') return { ...r, amount: Math.max(0, r.amount - cashLoss) };
-          if (r.key === 'oil') return { ...r, amount: Math.max(0, r.amount - oilLoss) };
-          if (r.key === 'ore') return { ...r, amount: Math.max(0, r.amount - oreLoss) };
-          return r;
-        }),
-      );
-    }
-
-    const report: BattleReport = {
-      id: `report_${Date.now()}`,
-      targetId: march.targetId,
-      targetName: march.targetName,
-      timestamp: Date.now(),
-      won,
-      attackPower: result.totalAttackPower,
-      defensePower: result.totalDefensePower,
-      unitsLost: losses,
-      rewardCash: won ? target.rewardCash : -Math.round(target.rewardCash * 0.5),
-      rewardOil: won ? target.rewardOil : -Math.round(target.rewardOil * 0.5),
-      rewardOre: won ? target.rewardOre : -Math.round(target.rewardOre * 0.5),
-      powerChange,
-      attackerResults,
-      defenderResults,
-    };
-    addBattleReport(report);
-    setLastBattleReport(report);
+    addBattleReport(res.report);
+    setLastBattleReport(res.report);
 
     setMissions(prev =>
       prev.map(m => {
         if (m.type === 'attack' && !m.completed) {
-          if (m.requiresWin && !won) return m;
+          if (m.requiresWin && !res.won) return m;
           const next = { ...m, currentCount: m.currentCount + 1 };
           if (next.currentCount >= next.targetCount) next.completed = true;
           return next;
@@ -1036,23 +951,16 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       }),
     );
 
-    // CPU karşı saldırı tetikle (%40 ihtimal, koruma kalkanı yoksa)
-    const hasShield = Date.now() < shieldUntil;
-    if (!hasShield && Math.random() < 0.4 && target.defenseUnits && target.defenseUnits.length > 0) {
-      // Hedefin birimlerinden orantılı bir seçim
-      const scale = 0.3 + Math.random() * 0.5;
-      const attackUnits = target.defenseUnits
-        .map(du => ({ unitId: du.unitId, count: Math.max(1, Math.round(du.count * scale)) }))
-        .filter(du => du.count > 0);
-      const retaliationCount = attackUnits.reduce((s, u) => s + u.count, 0);
-      const retaliationTime = 600 + Math.round(Math.random() * 900); // 10-25 dk
+    // CPU counter-attack
+    if (res.counterAttack) {
+      const ca = res.counterAttack;
       setIncomingAttack({
         id: `incoming_${Date.now()}`,
-        attackerName: target.player,
-        unitCount: retaliationCount,
-        attackUnits,
-        totalSeconds: retaliationTime,
-        secondsRemaining: retaliationTime,
+        attackerName: ca.attackerName,
+        unitCount: ca.unitCount,
+        attackUnits: ca.attackUnits,
+        totalSeconds: ca.totalSeconds,
+        secondsRemaining: ca.totalSeconds,
       });
     }
 
@@ -1100,26 +1008,45 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       }
     }
 
-    // Savaş: düşman saldırıyor, oyuncu savunuyor
-    // Düşman = attacker, Oyuncu = defender (doğal roller)
-    // Araştırma bonusu savunana uygulanır (defenderResearchBonus olarak)
-    const result = resolveUnitCombat({
-      attackerUnits: attack.attackUnits.map(u => ({ unitId: u.unitId, count: u.count, buildingId: '' })),
-      defenderUnits: playerDefenseUnits.map(u => ({ unitId: u.unitId, count: u.count })),
-      attackerResearchBonus: {},  // düşmanın araştırma bonusu yok
-      defenderResearchBonus: branchBonus,  // oyuncunun araştırma bonusu savunmada
-    });
+    // Saldıranın profilini Firestore'dan oku (playerPower ve kaynaklar için)
+    let attackerPlayerPower = 0;
+    let attackerCash = 0, attackerOil = 0, attackerOre = 0;
+    if (attack.attackerUid) {
+      try {
+        const attackerBase = await loadDefenderBase(attack.attackerUid);
+        if (attackerBase) {
+          const aBlds = attackerBase.buildings ?? [];
+          attackerPlayerPower = calcDefenderPower(aBlds, UNIT_MAP, attackerBase.warPower ?? 0);
+          const aRes = attackerBase.resources ?? [];
+          attackerCash = (aRes.find((r: any) => r.key === 'cash')?.amount ?? 0);
+          attackerOil = (aRes.find((r: any) => r.key === 'oil')?.amount ?? 0);
+          attackerOre = (aRes.find((r: any) => r.key === 'ore')?.amount ?? 0);
+        }
+      } catch {}
+    }
 
-    // Düşman kazandıysa savunan kaybetti
-    const defended = !result.won;
+    const myResources = resourcesRef.current;
+    const myCash = myResources.find(r => r.key === 'cash')?.amount ?? 0;
+    const myOil = myResources.find(r => r.key === 'oil')?.amount ?? 0;
+    const myOre = myResources.find(r => r.key === 'ore')?.amount ?? 0;
 
-    // Savunanın kayıplarını envanterden VE birliklerden düş (sadece savunan kaybettiyse)
-    const defenderUnitLosses = defended ? 0 : result.totalDefenderDestroyed;
-    if (!defended && result.defenderResults) {
-      // Kalan kayıp miktarını takip et — önce envanterden düş, kalanı birlikten
+    // Pure combat resolution
+    const res = resolveIncomingResult(
+      attack.attackUnits,
+      playerDefenseUnits,
+      branchBonus,
+      { cash: attackerCash, oil: attackerOil, ore: attackerOre },
+      { cash: myCash, oil: myOil, ore: myOre },
+      attackerPlayerPower,
+      playerPower,
+      attack.attackerName,
+    );
+
+    // Apply unit losses to buildings and birlikler (only when defender lost)
+    if (res.defenderUnitLosses.length > 0) {
       const remainingLoss: Record<string, number> = {};
-      for (const dr of result.defenderResults) {
-        if (dr.destroyed > 0) remainingLoss[dr.unitId] = dr.destroyed;
+      for (const dl of res.defenderUnitLosses) {
+        remainingLoss[dl.unitId] = dl.destroyed;
       }
       // Envanterden düş
       setBuildings(prev =>
@@ -1151,105 +1078,33 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       })).filter(bl => bl.slots.length > 0));
     }
 
-    // Saldıranın profilini Firestore'dan oku (playerPower ve kaynaklar için)
-    let attackerPlayerPower = 0;
-    let attackerCash = 0, attackerOil = 0, attackerOre = 0;
-    if (attack.attackerUid) {
-      try {
-        const attackerBase = await loadDefenderBase(attack.attackerUid);
-        if (attackerBase) {
-          // playerPower hesapla
-          const aBlds = attackerBase.buildings ?? [];
-          const aBp = aBlds.reduce((s: number, b: any) => s + (b.level ?? 1) * 100, 0);
-          const aUp = aBlds.reduce((s: number, b: any) => {
-            for (const [uId, cnt] of Object.entries(b.trainedUnits ?? {})) {
-              const def = UNIT_MAP[uId];
-              s += (cnt as number) * ({ 1: 10, 2: 30, 3: 60, 4: 100 }[def?.tier ?? 1] ?? 10);
-            }
-            return s;
-          }, 0);
-          attackerPlayerPower = aBp + aUp + (attackerBase.warPower ?? 0);
-          const aRes = attackerBase.resources ?? [];
-          attackerCash = (aRes.find((r: any) => r.key === 'cash')?.amount ?? 0);
-          attackerOil = (aRes.find((r: any) => r.key === 'oil')?.amount ?? 0);
-          attackerOre = (aRes.find((r: any) => r.key === 'ore')?.amount ?? 0);
-        }
-      } catch {}
-    }
-
-    const myResources = resourcesRef.current;
-    const myCash = myResources.find(r => r.key === 'cash')?.amount ?? 0;
-    const myOil = myResources.find(r => r.key === 'oil')?.amount ?? 0;
-    const myOre = myResources.find(r => r.key === 'ore')?.amount ?? 0;
-
-    let cashChange = 0;
-    let oilChange = 0;
-    let oreChange = 0;
-    let defPowerChange = 0;
-
-    // Artık roller düz: attacker = düşman, defender = oyuncu
-    const enemyPower = result.totalAttackPower;   // düşmanın birim gücü
-    const myPower = result.totalDefensePower;      // oyuncunun birim gücü
-
-    // Kaybeden tarafın playerPower ve kaynaklarının %20'si — kazanana aynısı eklenir
-    const loserPP = defended ? attackerPlayerPower : playerPower;
-    const loserC = defended ? attackerCash : myCash;
-    const loserO = defended ? attackerOil : myOil;
-    const loserR = defended ? attackerOre : myOre;
-    const tCash = Math.round(loserC * 0.2);
-    const tOil = Math.round(loserO * 0.2);
-    const tOre = Math.round(loserR * 0.2);
-    const tPower = Math.max(10, Math.round(loserPP * 0.2));
-
-    if (defended) {
-      cashChange = tCash;
-      oilChange = tOil;
-      oreChange = tOre;
-      defPowerChange = tPower;
-      setWarPower(prev => prev + tPower);
+    // Apply resource changes
+    const rc = res.resourceChanges;
+    if (res.defended) {
+      setWarPower(prev => prev + res.transferPower);
       setResources(current =>
         current.map(r => {
-          if (r.key === 'cash') return { ...r, amount: Math.min(r.capacity, r.amount + tCash) };
-          if (r.key === 'oil') return { ...r, amount: Math.min(r.capacity, r.amount + tOil) };
-          if (r.key === 'ore') return { ...r, amount: Math.min(r.capacity, r.amount + tOre) };
+          if (r.key === 'cash') return { ...r, amount: Math.min(r.capacity, r.amount + rc.cash) };
+          if (r.key === 'oil') return { ...r, amount: Math.min(r.capacity, r.amount + rc.oil) };
+          if (r.key === 'ore') return { ...r, amount: Math.min(r.capacity, r.amount + rc.ore) };
           return r;
         }),
       );
     } else {
-      cashChange = -tCash;
-      oilChange = -tOil;
-      oreChange = -tOre;
-      defPowerChange = -tPower;
       setResources(current =>
         current.map(r => {
-          if (r.key === 'cash') return { ...r, amount: Math.max(0, r.amount + cashChange) };
-          if (r.key === 'oil') return { ...r, amount: Math.max(0, r.amount + oilChange) };
-          if (r.key === 'ore') return { ...r, amount: Math.max(0, r.amount + oreChange) };
+          if (r.key === 'cash') return { ...r, amount: Math.max(0, r.amount + rc.cash) };
+          if (r.key === 'oil') return { ...r, amount: Math.max(0, r.amount + rc.oil) };
+          if (r.key === 'ore') return { ...r, amount: Math.max(0, r.amount + rc.ore) };
           return r;
         }),
       );
-      setWarPower(prev => Math.max(0, prev + defPowerChange));
+      setWarPower(prev => Math.max(0, prev + res.powerChange));
       setShieldUntil(Date.now() + 4 * 60 * 60 * 1000);
       setBirlikler([]);
     }
 
-    // Rapor: attackerResults = düşman birlikleri, defenderResults = senin birliklerin
-    const report: BattleReport = {
-      id: `report_def_${Date.now()}`,
-      targetId: 'defense',
-      targetName: `${attack.attackerName} Saldırısı`,
-      timestamp: Date.now(),
-      won: defended,
-      attackPower: enemyPower,
-      defensePower: myPower,
-      unitsLost: defenderUnitLosses,
-      rewardCash: cashChange,
-      rewardOil: oilChange,
-      rewardOre: oreChange,
-      powerChange: defPowerChange,
-      attackerResults: result.attackerResults,  // düşman (saldıran) birimleri
-      defenderResults: result.defenderResults,  // senin (savunan) birimlerin
-    };
+    const { report, defended } = res;
     addBattleReport(report);
     setLastBattleReport(report);
     // Firestore'daki march'ı resolved olarak işaretle
@@ -1266,14 +1121,13 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       });
       const attackerUid = attack.attackerUid;
       if (attackerUid && attackerPlayerPower > 0) {
-        syncPlayerProfile(attackerUid, { playerPower: defended ? Math.max(0, attackerPlayerPower - tPower) : attackerPlayerPower + tPower });
+        syncPlayerProfile(attackerUid, { playerPower: defended ? Math.max(0, attackerPlayerPower - res.transferPower) : attackerPlayerPower + res.transferPower });
       }
     }
     // İttifak savaşı skor ekleme (savunan taraf — flag bazlı)
     if (attack.isWarAttack && attack.warAllianceId) {
       (async () => {
         try {
-          // Kendi ittifak ID'mi players dokümanından oku
           const myPlayerSnap = await db.players().doc(uid).get();
           const myAid = myPlayerSnap.exists() ? (myPlayerSnap.data() as any)?.allianceId : null;
           const enemyAid = attack.warAllianceId;
@@ -1283,15 +1137,11 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
             try { const u = getCurrentUser(); if (u?.displayName) myName = u.displayName; } catch {}
             await addWarScoreSvc(myAid, enemyAid, warScore, myName, attack.attackerName, defended);
             await saveWarBattleLog(myAid, report, defended ? myName : attack.attackerName, warScore);
-            // Güncel veriyi oku — UI anında güncellensin
             const freshSnap = await db.alliances().doc(myAid).get();
             if (freshSnap.exists()) {
-              // Alliance hook'taki listener zaten tetiklenmiş olmalı
-              // Ama tetiklenmemişse 1sn sonra tekrar dene
               setTimeout(async () => {
                 try {
                   await db.alliances().doc(myAid).get();
-                  // onSnapshot listener bunu yakalayacak
                 } catch {}
               }, 1500);
             }
@@ -1859,30 +1709,11 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
   }, [missions, saveNow]);
 
   // ── Player Power ─────────────────────────────────────────────
-  const POWER_PER_UNIT_TIER: Record<number, number> = { 1: 10, 2: 30, 3: 60, 4: 100 };
-  const playerPower = useMemo(() => {
-    // Bina seviyeleri: kademeli güç (seviye N'e yükseltme +N×100 güç verir)
-    const buildingPower = buildings.reduce((sum, b) => sum + b.level * (b.level + 1) / 2 * 100, 0);
-    // Eğitilmiş birimler: adet × tier ağırlığı
-    const unitPower = buildings.reduce((sum, b) => {
-      for (const [unitId, count] of Object.entries(b.trainedUnits ?? {})) {
-        const def = UNIT_MAP[unitId];
-        sum += count * (POWER_PER_UNIT_TIER[def?.tier ?? 1] ?? 10);
-      }
-      return sum;
-    }, 0);
-    // Tamamlanan araştırmalar: tier × 50
-    const researchPower = researchStates
-      .filter(r => r.completed)
-      .reduce((sum, r) => {
-        const node = RESEARCH_MAP[r.nodeId];
-        return sum + (node?.tier ?? 1) * 50;
-      }, 0);
-    const basePower = buildingPower + unitPower + researchPower;
-    const cappedWarPower = Math.min(warPower, basePower);
-    return basePower + cappedWarPower;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [buildings, researchStates, warPower]);
+  const playerPower = useMemo(
+    () => calcPlayerPower(buildings, researchStates, warPower, UNIT_MAP, RESEARCH_MAP),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [buildings, researchStates, warPower],
+  );
   playerPowerRef.current = playerPower;
 
   const hqLevelForAlliance = buildingsRef.current.find(b => b.id === 'hq')?.level ?? 1;

@@ -4,7 +4,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { CF_BASE } from '../services/firebase';
-import type { AllianceData, AllianceMemberData, AllianceJoinRequest, AllianceChatMessage, AllianceJoinType, AllianceRank, ResourceKey } from './types';
+import type { AllianceData, AllianceMemberData, AllianceJoinRequest, AllianceChatMessage, AllianceJoinType, AllianceRank, ResourceKey, AllianceWarReport } from './types';
 import {
   createAlliance as createAllianceSvc,
   joinAlliance as joinAllianceSvc,
@@ -28,6 +28,7 @@ import {
   addWarScore as addWarScoreSvc,
   getEnemyMembers as getEnemyMembersSvc,
   listenWarBattleLogs,
+  listenWarReports,
   sendFromTreasury as sendFromTreasurySvc,
   createDonationRequest as createDonReqSvc,
   fulfillDonationRequest as fulfillDonReqSvc,
@@ -63,6 +64,7 @@ export interface AllianceState {
   getAllianceRankings: () => Promise<AllianceData[]>;
   // Savaş
   warBattleLogs: any[];
+  warReports: AllianceWarReport[];
   declareWar: (enemyAllianceId: string) => Promise<boolean>;
   addWarScore: (score: number, attackerName: string, defenderName: string, won: boolean) => Promise<void>;
   refreshAllianceData: () => Promise<void>;
@@ -96,6 +98,7 @@ export function useAllianceState(
   const [allianceLoading, setAllianceLoading] = useState(false);
   const [allianceError, setAllianceError] = useState<string | null>(null);
   const [warBattleLogs, setWarBattleLogs] = useState<any[]>([]);
+  const [warReports, setWarReports] = useState<AllianceWarReport[]>([]);
   const [donationRequests, setDonationRequests] = useState<any[]>([]);
   const [_refreshCounter, setRefreshCounter] = useState(0);
 
@@ -165,13 +168,23 @@ export function useAllianceState(
     return () => { unsub1(); unsub2(); unsub3(); unsub4(); unsub5(); };
   }, [myAllianceId, uid]);
 
-  // War battle logs listener (savaş bitse bile sonuç raporları kalsın)
+  // War battle logs listener (savas sirasinda canli loglar)
   useEffect(() => {
     if (!myAllianceId) {
       setWarBattleLogs([]);
       return;
     }
     const unsub = listenWarBattleLogs(myAllianceId, setWarBattleLogs);
+    return () => unsub();
+  }, [myAllianceId]);
+
+  // War reports listener (kalici savas sonuc raporlari)
+  useEffect(() => {
+    if (!myAllianceId) {
+      setWarReports([]);
+      return;
+    }
+    const unsub = listenWarReports(myAllianceId, setWarReports);
     return () => unsub();
   }, [myAllianceId]);
 
@@ -407,6 +420,7 @@ export function useAllianceState(
     searchAlliances,
     getAllianceRankings,
     warBattleLogs,
+    warReports,
     declareWar,
     addWarScore,
     refreshAllianceData,

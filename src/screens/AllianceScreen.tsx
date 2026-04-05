@@ -243,7 +243,7 @@ export function AllianceScreen({ onGoToLeaderboard: _onGoToLeaderboard }: { onGo
       )}
 
       {activeTab === 3 && (
-        <WarReportsTab warBattleLogs={alliance.warBattleLogs} />
+        <WarReportsTab warBattleLogs={alliance.warBattleLogs} warReports={alliance.warReports} />
       )}
 
       {activeTab === 4 && (

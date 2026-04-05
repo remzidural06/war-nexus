@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { t } from '../../i18n';
 import { formatNumber, formatDuration } from '../../utils/formatters';
-import { getUnitsForBuilding, UNIT_MAP } from '../../data/units';
+import { getUnitsForBuilding, UNIT_MAP, getUnitLabel } from '../../data/units';
 import { ActionButton } from '../ActionButton';
 import { CountdownTimer } from '../CountdownTimer';
 import { UnitImage } from '../UnitImage';
@@ -150,7 +150,7 @@ export function OverviewTab({
                       ? <UnitImage unitId={u.id} uri={u.imageUri} icon={u.icon} style={styles.nextLevelThumb} />
                       : <Text style={styles.nextLevelIcon}>{u.icon}</Text>
                     }
-                    <Text style={styles.nextLevelText}>{t(`units.${u.id}.name`) !== `units.${u.id}.name` ? t(`units.${u.id}.name`) : u.label}</Text>
+                    <Text style={styles.nextLevelText}>{getUnitLabel(u, u.id)}</Text>
                     {isNext
                       ? <Text style={styles.nextLevelBadge}>Yeni</Text>
                       : <Text style={styles.nextLevelBadgeFar}>Lv.{milestoneLv}</Text>
@@ -184,7 +184,7 @@ export function OverviewTab({
                   ) : (
                     <Text style={styles.trainedIcon}>{unitDef?.icon ?? '🪖'}</Text>
                   )}
-                  <Text style={styles.trainedId}>{t(`units.${uid}.name`) !== `units.${uid}.name` ? t(`units.${uid}.name`) : (unitDef?.label ?? uid)}</Text>
+                  <Text style={styles.trainedId}>{getUnitLabel(unitDef, uid)}</Text>
                   <Text style={styles.trainedCount}>×{cnt}</Text>
                 </View>
               );

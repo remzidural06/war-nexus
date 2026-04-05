@@ -269,6 +269,15 @@ export function useCombat(
         if (slot.count > 0) unitTotals[slot.unitId] = (unitTotals[slot.unitId] ?? 0) + slot.count;
       }
     }
+    // Seferdeki birimleri savunmadan cikar — sefere giden birimler usste kalmaz
+    const march = marchRef.current;
+    if (march?.marchUnits) {
+      for (const mu of march.marchUnits) {
+        if (unitTotals[mu.unitId]) {
+          unitTotals[mu.unitId] = Math.max(0, unitTotals[mu.unitId] - mu.count);
+        }
+      }
+    }
     const playerDefenseUnits: MarchUnit[] = Object.entries(unitTotals)
       .filter(([_, count]) => count > 0)
       .map(([unitId, count]) => ({ unitId, count, buildingId: '' }));

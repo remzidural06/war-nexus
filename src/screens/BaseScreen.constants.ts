@@ -61,8 +61,8 @@ export const INITIAL_POSITIONS = IS_WEB ? WEB_POSITIONS : ANDROID_POSITIONS;
 // ─── HQ Attack helpers ────────────────────────────────────────
 export const BUILDING_BRANCHES = [
   { id: 'barracks',     i18n: 'branches.infantry',   icon: '🪖' },
-  { id: 'tankFactory',  i18n: 'branches.armor',      icon: '🛡️' },
-  { id: 'airport',      i18n: 'branches.air',        icon: '✈️' },
+  { id: 'tankFactory',  i18n: 'branches.armor',      icon: '🔫' },
+  { id: 'airport',      i18n: 'branches.air',        icon: '🛩️' },
   { id: 'shipyard',     i18n: 'branches.naval',      icon: '⚓' },
   { id: 'defenseTower', i18n: 'branches.airDefense',  icon: '🎯' },
 ] as const;

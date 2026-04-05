@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ActivityIndicator, View, StatusBar, StyleSheet } from 'react-native';
+import { ActivityIndicator, Image, View, StatusBar, StyleSheet } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { BaseScreen } from '../screens/BaseScreen';
 import { MapScreen } from '../screens/MapScreen';
@@ -118,6 +118,14 @@ function GameApp({ uid }: { uid: string }) {
   );
 }
 
+function SplashScreen() {
+  return (
+    <View style={s.loading}>
+      <ActivityIndicator size="large" color={colors.sand} />
+    </View>
+  );
+}
+
 function WebApp() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [initializing, setInitializing] = useState(true);
@@ -127,22 +135,24 @@ function WebApp() {
     const unsubscribe = onAuthStateChanged(async (u: AuthUser | null) => {
       setUser(u);
       if (u) {
-        const hasProfile = await hasPlayerProfile(u.uid);
-        setNeedsUsername(!hasProfile);
+        try {
+          const hasProfile = await hasPlayerProfile(u.uid);
+          setNeedsUsername(!hasProfile);
+        } catch {
+          setNeedsUsername(false);
+        }
       } else {
         setNeedsUsername(false);
       }
       setInitializing(false);
     });
-    return unsubscribe;
+    // Firebase auth hic yanit vermezse 5sn sonra auth ekranina gec
+    const timeout = setTimeout(() => setInitializing(false), 5000);
+    return () => { unsubscribe(); clearTimeout(timeout); };
   }, []);
 
   if (initializing) {
-    return (
-      <SafeAreaView style={s.loading}>
-        <ActivityIndicator size="large" color={colors.sand} />
-      </SafeAreaView>
-    );
+    return <SplashScreen />;
   }
 
   if (!user) {
@@ -161,6 +171,8 @@ const s = StyleSheet.create({
   app: { flex: 1, backgroundColor: colors.background },
   content: { flex: 1 },
   loading: { flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' },
+  splashLogo: { width: 340, height: 250 },
+  splashSpinner: { marginTop: 24 },
 });
 
 const root = createRoot(document.getElementById('root')!);

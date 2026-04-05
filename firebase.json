@@ -4,6 +4,15 @@
     "runtime": "nodejs20"
   },
   "firestore": {
-    "rules": "firestore.rules"
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "public": "dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      { "source": "/war-nexus/**", "destination": "/index.html" },
+      { "source": "**", "destination": "/index.html" }
+    ]
   }
 }

@@ -8,6 +8,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'rifleman',
     label: 'Piyade Tüfekçisi',
+    labelEn: 'Rifleman',
     branch: 'infantry',
     researchBranch: 'land',
     tier: 1,
@@ -27,6 +28,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'machineGunner',
     label: 'Makineli Tüfekçi',
+    labelEn: 'Machine Gunner',
     branch: 'infantry',
     researchBranch: 'land',
     tier: 1,
@@ -46,6 +48,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'antiTankOp',
     label: 'Javelin Operatörü',
+    labelEn: 'Javelin Operator',
     branch: 'infantry',
     researchBranch: 'land',
     tier: 2,
@@ -65,6 +68,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'manpadsOp',
     label: 'MANPADS Operatörü',
+    labelEn: 'MANPADS Operator',
     branch: 'infantry',
     researchBranch: 'land',
     tier: 2,
@@ -84,6 +88,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'sniper',
     label: 'Keskin Nişancı',
+    labelEn: 'Sniper',
     branch: 'infantry',
     researchBranch: 'land',
     tier: 2,
@@ -103,6 +108,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'combatEngineer',
     label: 'Muharebe Mühendisi',
+    labelEn: 'Combat Engineer',
     branch: 'infantry',
     researchBranch: 'land',
     tier: 2,
@@ -122,6 +128,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'paradropper',
     label: 'Para Komando',
+    labelEn: 'Paratrooper',
     branch: 'infantry',
     researchBranch: 'land',
     tier: 3,
@@ -141,6 +148,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'frogman',
     label: 'SAT Komandosu',
+    labelEn: 'Navy SEAL',
     branch: 'infantry',
     researchBranch: 'land',
     tier: 3,
@@ -160,6 +168,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'droneOp',
     label: 'FPV Drone Operatörü',
+    labelEn: 'FPV Drone Operator',
     branch: 'infantry',
     researchBranch: 'land',
     tier: 3,
@@ -179,6 +188,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'specOps',
     label: 'Özel Kuvvetler',
+    labelEn: 'Special Forces',
     branch: 'infantry',
     researchBranch: 'land',
     tier: 3,
@@ -202,6 +212,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'kirpi',
     label: 'BMC Kirpi MRAP',
+    labelEn: 'BMC Kirpi MRAP',
     branch: 'armor',
     researchBranch: 'land',
     tier: 1,
@@ -221,6 +232,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'cobra2',
     label: 'Otokar Cobra II',
+    labelEn: 'Otokar Cobra II',
     branch: 'armor',
     researchBranch: 'land',
     tier: 1,
@@ -240,6 +252,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'kaplanIfv',
     label: 'FNSS Kaplan IFV',
+    labelEn: 'FNSS Kaplan IFV',
     branch: 'armor',
     researchBranch: 'land',
     tier: 2,
@@ -259,6 +272,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'bradley',
     label: 'M2A4 Bradley IFV',
+    labelEn: 'M2A4 Bradley IFV',
     branch: 'armor',
     researchBranch: 'land',
     tier: 2,
@@ -278,6 +292,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'puma',
     label: 'Puma IFV',
+    labelEn: 'Puma IFV',
     branch: 'armor',
     researchBranch: 'land',
     tier: 2,
@@ -297,6 +312,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'leopard2a7',
     label: 'Leopard 2A7+',
+    labelEn: 'Leopard 2A7+',
     branch: 'armor',
     researchBranch: 'land',
     tier: 3,
@@ -316,6 +332,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'm1a2sep3',
     label: 'M1A2 SEPv3 Abrams',
+    labelEn: 'M1A2 SEPv3 Abrams',
     branch: 'armor',
     researchBranch: 'land',
     tier: 3,
@@ -335,6 +352,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 't90m',
     label: 'T-90M Proryv-3',
+    labelEn: 'T-90M Proryv-3',
     branch: 'armor',
     researchBranch: 'land',
     tier: 3,
@@ -354,6 +372,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'k2panther',
     label: 'K2 Black Panther',
+    labelEn: 'K2 Black Panther',
     branch: 'armor',
     researchBranch: 'land',
     tier: 3,
@@ -373,6 +392,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'altay',
     label: 'Altay',
+    labelEn: 'Altay',
     branch: 'armor',
     researchBranch: 'land',
     tier: 3,
@@ -392,6 +412,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 't14armata',
     label: 'T-14 Armata',
+    labelEn: 'T-14 Armata',
     branch: 'armor',
     researchBranch: 'land',
     tier: 3,
@@ -411,6 +432,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'merkava4',
     label: 'Merkava Mk.4 Windbreaker',
+    labelEn: 'Merkava Mk.4',
     branch: 'armor',
     researchBranch: 'land',
     tier: 3,
@@ -430,6 +452,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'firtina',
     label: 'T-155 Fırtına SPH',
+    labelEn: 'T-155 Fırtına SPH',
     branch: 'artillery',
     researchBranch: 'land',
     tier: 3,
@@ -449,6 +472,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'himars',
     label: 'M142 HIMARS',
+    labelEn: 'M142 HIMARS',
     branch: 'artillery',
     researchBranch: 'land',
     tier: 3,
@@ -468,6 +492,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'kasirga',
     label: 'TRG-300 Kasırga',
+    labelEn: 'T-300 Kasırga MLRS',
     branch: 'artillery',
     researchBranch: 'land',
     tier: 3,
@@ -493,6 +518,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'tb2',
     label: 'Bayraktar TB2',
+    labelEn: 'Bayraktar TB2',
     branch: 'uav',
     researchBranch: 'air',
     tier: 1,
@@ -512,6 +538,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'mq9reaper',
     label: 'MQ-9B SkyGuardian',
+    labelEn: 'MQ-9 Reaper',
     branch: 'uav',
     researchBranch: 'air',
     tier: 1,
@@ -531,6 +558,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'akinci',
     label: 'Bayraktar Akıncı',
+    labelEn: 'Bayraktar Akıncı',
     branch: 'uav',
     researchBranch: 'air',
     tier: 2,
@@ -550,6 +578,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'ah1z',
     label: 'AH-1Z Viper',
+    labelEn: 'AH-1Z Viper',
     branch: 'helicopter',
     researchBranch: 'air',
     tier: 2,
@@ -569,6 +598,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'tb3',
     label: 'Bayraktar TB3',
+    labelEn: 'Bayraktar TB3',
     branch: 'uav',
     researchBranch: 'air',
     tier: 2,
@@ -588,6 +618,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'harop',
     label: 'IAI Harop',
+    labelEn: 'IAI Harop',
     branch: 'uav',
     researchBranch: 'air',
     tier: 2,
@@ -607,6 +638,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'switchblade600',
     label: 'Switchblade 600',
+    labelEn: 'Switchblade 600',
     branch: 'uav',
     researchBranch: 'air',
     tier: 2,
@@ -626,6 +658,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'xq58valkyrie',
     label: 'XQ-58A Valkyrie',
+    labelEn: 'XQ-58A Valkyrie',
     branch: 'uav',
     researchBranch: 'air',
     tier: 3,
@@ -647,6 +680,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'uh60m',
     label: 'UH-60M Black Hawk',
+    labelEn: 'UH-60M Black Hawk',
     branch: 'helicopter',
     researchBranch: 'air',
     tier: 1,
@@ -666,6 +700,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'ah64e',
     label: 'AH-64E Apache Guardian',
+    labelEn: 'AH-64E Apache',
     branch: 'helicopter',
     researchBranch: 'air',
     tier: 2,
@@ -685,6 +720,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 't129atak',
     label: 'T129 ATAK-II',
+    labelEn: 'T129 ATAK',
     branch: 'helicopter',
     researchBranch: 'air',
     tier: 2,
@@ -704,6 +740,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'ka52m',
     label: 'Ka-52M Alligator',
+    labelEn: 'Ka-52M Alligator',
     branch: 'helicopter',
     researchBranch: 'air',
     tier: 2,
@@ -723,6 +760,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'mi28nm',
     label: 'Mi-28NM Havoc-M',
+    labelEn: 'Mi-28NM Havoc',
     branch: 'helicopter',
     researchBranch: 'air',
     tier: 2,
@@ -744,6 +782,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'f16v',
     label: 'F-16 Block 70 Viper',
+    labelEn: 'F-16 Block 70 Viper',
     branch: 'fixedWing',
     researchBranch: 'air',
     tier: 2,
@@ -763,6 +802,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'fa18ef',
     label: 'F/A-18E/F Super Hornet',
+    labelEn: 'F/A-18E/F Super Hornet',
     branch: 'fixedWing',
     researchBranch: 'air',
     tier: 2,
@@ -782,6 +822,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'rafale',
     label: 'Dassault Rafale F4',
+    labelEn: 'Dassault Rafale',
     branch: 'fixedWing',
     researchBranch: 'air',
     tier: 2,
@@ -801,6 +842,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'typhoon',
     label: 'Eurofighter Typhoon',
+    labelEn: 'Eurofighter Typhoon',
     branch: 'fixedWing',
     researchBranch: 'air',
     tier: 2,
@@ -820,6 +862,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'su35s',
     label: 'Su-35S Flanker-E',
+    labelEn: 'Su-35S Flanker-E',
     branch: 'fixedWing',
     researchBranch: 'air',
     tier: 2,
@@ -839,6 +882,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'gripenE',
     label: 'JAS-39E Gripen',
+    labelEn: 'JAS 39E Gripen',
     branch: 'fixedWing',
     researchBranch: 'air',
     tier: 2,
@@ -858,6 +902,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'j16',
     label: 'J-16',
+    labelEn: 'J-16',
     branch: 'fixedWing',
     researchBranch: 'air',
     tier: 2,
@@ -879,6 +924,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'f35a',
     label: 'F-35A Lightning II',
+    labelEn: 'F-35A Lightning II',
     branch: 'fixedWing',
     researchBranch: 'air',
     tier: 3,
@@ -898,6 +944,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'f22raptor',
     label: 'F-22 Raptor',
+    labelEn: 'F-22 Raptor',
     branch: 'fixedWing',
     researchBranch: 'air',
     tier: 3,
@@ -917,6 +964,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'su57felon',
     label: 'Su-57 Felon',
+    labelEn: 'Su-57 Felon',
     branch: 'fixedWing',
     researchBranch: 'air',
     tier: 3,
@@ -936,6 +984,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'j20',
     label: 'J-20 Chengdu',
+    labelEn: 'J-20 Mighty Dragon',
     branch: 'fixedWing',
     researchBranch: 'air',
     tier: 3,
@@ -955,6 +1004,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'kaan',
     label: 'KAAN (TF-X)',
+    labelEn: 'KAAN (TF-X)',
     branch: 'fixedWing',
     researchBranch: 'air',
     tier: 3,
@@ -974,6 +1024,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'kizilelmafighter',
     label: 'Bayraktar Kızılelma',
+    labelEn: 'Bayraktar Kızılelma',
     branch: 'fixedWing',
     researchBranch: 'air',
     tier: 3,
@@ -995,6 +1046,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'b2spirit',
     label: 'B-2 Spirit',
+    labelEn: 'B-2 Spirit',
     branch: 'bomber',
     researchBranch: 'air',
     tier: 3,
@@ -1014,6 +1066,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'b21raider',
     label: 'B-21 Raider',
+    labelEn: 'B-21 Raider',
     branch: 'bomber',
     researchBranch: 'air',
     tier: 3,
@@ -1037,6 +1090,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'heybeliada',
     label: 'TCG Heybeliada',
+    labelEn: 'TCG Heybeliada',
     branch: 'naval',
     researchBranch: 'naval',
     tier: 1,
@@ -1056,6 +1110,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'milgem',
     label: 'TCG İstanbul F-515',
+    labelEn: 'TCG İstanbul F-515',
     branch: 'naval',
     researchBranch: 'naval',
     tier: 1,
@@ -1075,6 +1130,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'tf2000',
     label: 'TF-2000 Fırkateyn',
+    labelEn: 'TF-2000 Frigate',
     branch: 'naval',
     researchBranch: 'naval',
     tier: 2,
@@ -1094,6 +1150,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'f125',
     label: 'F-125 Baden-Württemberg',
+    labelEn: 'F-125 Baden-Württemberg',
     branch: 'naval',
     researchBranch: 'naval',
     tier: 2,
@@ -1113,6 +1170,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'constellation',
     label: 'FFG-62 Constellation',
+    labelEn: 'FFG-62 Constellation',
     branch: 'naval',
     researchBranch: 'naval',
     tier: 2,
@@ -1132,6 +1190,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'type212a',
     label: 'Type 212A Denizaltı',
+    labelEn: 'Type 212A Submarine',
     branch: 'naval',
     researchBranch: 'naval',
     tier: 2,
@@ -1151,6 +1210,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'arleighburke',
     label: 'Arleigh Burke Flight III',
+    labelEn: 'Arleigh Burke DDG',
     branch: 'naval',
     researchBranch: 'naval',
     tier: 3,
@@ -1170,6 +1230,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'type055',
     label: 'Type 055 Destroyer',
+    labelEn: 'Type 055 Renhai',
     branch: 'naval',
     researchBranch: 'naval',
     tier: 3,
@@ -1189,6 +1250,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'zumwalt',
     label: 'DDG-1000 Zumwalt',
+    labelEn: 'USS Zumwalt DDG-1000',
     branch: 'naval',
     researchBranch: 'naval',
     tier: 3,
@@ -1208,6 +1270,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'qecarrier',
     label: 'HMS Queen Elizabeth',
+    labelEn: 'HMS Queen Elizabeth',
     branch: 'naval',
     researchBranch: 'naval',
     tier: 3,
@@ -1227,6 +1290,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'fordcarrier',
     label: 'USS Gerald R. Ford',
+    labelEn: 'USS Gerald R. Ford',
     branch: 'naval',
     researchBranch: 'naval',
     tier: 3,
@@ -1246,6 +1310,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'virginiaclass',
     label: 'Virginia-class SSN',
+    labelEn: 'Virginia-class SSN',
     branch: 'naval',
     researchBranch: 'naval',
     tier: 3,
@@ -1269,6 +1334,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'stinger',
     label: 'FIM-92 Stinger',
+    labelEn: 'FIM-92 Stinger',
     branch: 'airDefense',
     researchBranch: 'defense',
     tier: 1,
@@ -1288,6 +1354,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'iglaS',
     label: '9K338 Igla-S',
+    labelEn: 'Igla-S MANPADS',
     branch: 'airDefense',
     researchBranch: 'defense',
     tier: 1,
@@ -1307,6 +1374,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'hisarA',
     label: 'HİSAR-A+',
+    labelEn: 'HİSAR-A',
     branch: 'airDefense',
     researchBranch: 'defense',
     tier: 2,
@@ -1326,6 +1394,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'hisarO',
     label: 'HİSAR-O+',
+    labelEn: 'HİSAR-O',
     branch: 'airDefense',
     researchBranch: 'defense',
     tier: 2,
@@ -1345,6 +1414,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'ironDome',
     label: 'Iron Dome',
+    labelEn: 'Iron Dome',
     branch: 'airDefense',
     researchBranch: 'defense',
     tier: 2,
@@ -1364,6 +1434,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'patriotPac3',
     label: 'Patriot PAC-3 MSE',
+    labelEn: 'Patriot PAC-3',
     branch: 'airDefense',
     researchBranch: 'defense',
     tier: 2,
@@ -1383,6 +1454,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'siper',
     label: 'SİPER',
+    labelEn: 'SİPER',
     branch: 'airDefense',
     researchBranch: 'defense',
     tier: 3,
@@ -1402,6 +1474,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 's500',
     label: 'S-500 Prometheus',
+    labelEn: 'S-500 Prometheus',
     branch: 'airDefense',
     researchBranch: 'defense',
     tier: 3,
@@ -1421,6 +1494,7 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
   {
     id: 'thaad',
     label: 'THAAD',
+    labelEn: 'THAAD',
     branch: 'airDefense',
     researchBranch: 'defense',
     tier: 3,
@@ -1443,6 +1517,15 @@ export const UNIT_DEFINITIONS: UnitDefinition[] = [
 export const UNIT_MAP: Record<string, UnitDefinition> = Object.fromEntries(
   UNIT_DEFINITIONS.map(u => [u.id, u]),
 );
+
+/** Dile gore birim ismi dondur */
+export function getUnitLabel(unit: UnitDefinition | undefined, fallback = ''): string {
+  if (!unit) return fallback;
+  try {
+    const { getLocale } = require('../i18n');
+    return getLocale() === 'en' ? (unit.labelEn ?? unit.label) : unit.label;
+  } catch { return unit.label; }
+}
 
 export function getUnitsForBuilding(
   buildingId: string,

@@ -10,7 +10,7 @@ import { colors } from '../theme/colors';
 import { formatNumber } from '../utils/formatters';
 import { useDesertGame } from '../state/DesertGameContext';
 import { db } from '../services/firebase';
-import { UNIT_MAP } from '../data/units';
+import { UNIT_MAP, getUnitLabel } from '../data/units';
 import { UnitImage } from '../components/UnitImage';
 import type { MarchUnit } from '../state/types';
 
@@ -484,7 +484,7 @@ export function LeaderboardScreen({ onOpenDM }: { onOpenDM?: (otherUid: string, 
                                     ) : (
                                       <Text style={{ fontSize: 18 }}>{def?.icon ?? '?'}</Text>
                                     )}
-                                    <Text style={s.birlikDetailName} numberOfLines={1}>{def?.label ?? slot.unitId}</Text>
+                                    <Text style={s.birlikDetailName} numberOfLines={1}>{getUnitLabel(def, slot.unitId)}</Text>
                                     <Text style={s.birlikDetailCount}>×{slot.count}</Text>
                                   </View>
                                 );

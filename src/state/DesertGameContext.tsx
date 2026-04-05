@@ -462,6 +462,24 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
           }
         } catch (e) { console.warn('[pendingGold]', e); }
 
+        // warRewards kontrolu — ittifak savasi odulleri
+        try {
+          const wrSnap = await db.players().doc(uid).get();
+          const wr = wrSnap.exists() ? (wrSnap.data()?.warRewards ?? null) : null;
+          if (wr && ((wr.cash ?? 0) > 0 || (wr.oil ?? 0) > 0 || (wr.ore ?? 0) > 0 || (wr.gold ?? 0) > 0)) {
+            setResources(curr => curr.map(r => {
+              const add = wr[r.key] ?? 0;
+              return add > 0 ? { ...r, amount: Math.min(r.capacity, r.amount + add) } : r;
+            }));
+            await db.players().doc(uid).set({ warRewards: { cash: 0, oil: 0, ore: 0, gold: 0 } }, { merge: true });
+            const cashK = Math.round((wr.cash ?? 0) / 1000);
+            const oilK = Math.round((wr.oil ?? 0) / 1000);
+            const oreK = Math.round((wr.ore ?? 0) / 1000);
+            const goldAmt = wr.gold ?? 0;
+            setToastMsg(`⚔️ Savaş ödülü: ${cashK}K 💵 ${oilK}K 🛢️ ${oreK}K ⛏️${goldAmt > 0 ? ` ${goldAmt} 🪙` : ''}`);
+          }
+        } catch (e) { console.warn('[warRewards]', e); }
+
         // pendingResources kontrolü — ittifak bağışı/kasadan gönderilen kaynaklar
         try {
           const prSnap = await db.playerBases().doc(uid).get();

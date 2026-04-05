@@ -2,7 +2,7 @@
  * Alliance Service — İttifak CRUD, üyelik, bağış, chat
  */
 import { db, firestore, CF_BASE } from './firebase';
-import type { AllianceData, AllianceMemberData, AllianceJoinRequest, AllianceChatMessage, AllianceJoinType, AllianceRank } from '../state/types';
+import type { AllianceData, AllianceMemberData, AllianceJoinRequest, AllianceChatMessage, AllianceJoinType, AllianceRank, AllianceWarReport, AllianceWarMemberStat } from '../state/types';
 
 const MAX_MEMBERS = 30;
 
@@ -461,7 +461,9 @@ export function listenJoinRequests(allianceId: string, callback: (requests: Alli
 // ── İttifak Savaşı ──────────────────────────────────────────
 
 const WAR_DURATION_MS = 24 * 60 * 60 * 1000; // 24 saat
-const WAR_REWARD = { cash: 50000, oil: 20000, ore: 15000 };
+const WAR_REWARD = { cash: 100000, oil: 100000, ore: 100000 }; // Kazanan ittifak kasasina
+const MEMBER_REWARD = { cash: 50000, oil: 50000, ore: 50000, gold: 500 }; // Her katilan uyeye
+const MVP_GOLD = 250; // MVP'ye ekstra altin
 
 export async function declareWar(
   myAllianceId: string, enemyAllianceId: string,
@@ -545,6 +547,18 @@ export function listenWarBattleLogs(allianceId: string, callback: (logs: any[]) 
   );
 }
 
+/** Tum savas sonuc raporlarini dinle (warResult tipleri, kalici) */
+export function listenWarReports(allianceId: string, callback: (reports: AllianceWarReport[]) => void): () => void {
+  return db.alliances().doc(allianceId).collection('warBattleLogs')
+    .where('type', '==', 'warResult')
+    .orderBy('timestamp', 'desc')
+    .limit(50)
+    .onSnapshot(
+      (snap: any) => callback(snap.docs.map((d: any) => ({ id: d.id, ...d.data() } as AllianceWarReport))),
+      (err: any) => console.warn('[warReports]', err),
+    );
+}
+
 export async function addWarScore(
   allianceId: string, enemyAllianceId: string, score: number,
   attackerName: string, defenderName: string, won: boolean,
@@ -582,24 +596,92 @@ export async function addWarScore(
   if (onScoreUpdated) onScoreUpdated(newOurScore, newTheirScore);
 }
 
+/** Savas suresindeki tum battle log'lari topla ve uye istatistiklerini cikar */
+async function buildWarReport(
+  allianceId: string, alliance: AllianceData, won: boolean,
+): Promise<{ report: AllianceWarReport; memberStats: AllianceWarMemberStat[] }> {
+  const war = alliance.activeWar!;
+  const now = Date.now();
+
+  // Savas suresindeki tum loglari cek
+  let allLogs: any[] = [];
+  try {
+    const snap = await db.alliances().doc(allianceId).collection('warBattleLogs')
+      .where('savedAt', '>=', war.startedAt)
+      .where('savedAt', '<=', war.endsAt + 60000) // 1dk tolerans
+      .orderBy('savedAt', 'desc')
+      .get();
+    allLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (err) { console.warn('[buildWarReport] fetch logs:', err); }
+
+  // Uye bazli istatistik
+  const statsMap = new Map<string, AllianceWarMemberStat>();
+  for (const log of allLogs) {
+    if (log.type === 'warResult') continue; // onceki raporlari atla
+    const name = log.attackerName ?? 'Bilinmeyen';
+    const uid = log.attackerUid ?? name;
+    const existing = statsMap.get(uid) ?? { uid, name, attacks: 0, wins: 0, losses: 0, score: 0 };
+    existing.attacks += 1;
+    if (log.won) existing.wins += 1;
+    else existing.losses += 1;
+    existing.score += (log.score ?? 0);
+    statsMap.set(uid, existing);
+  }
+
+  const memberStats = Array.from(statsMap.values()).sort((a, b) => b.score - a.score);
+  const totalAttacks = memberStats.reduce((s, m) => s + m.attacks, 0);
+  const totalWins = memberStats.reduce((s, m) => s + m.wins, 0);
+  const mvpMember = memberStats[0] ?? null;
+
+  // Odul hesapla
+  let rewards: AllianceWarReport['rewards'] = null;
+  if (won) {
+    rewards = {
+      treasury: { ...WAR_REWARD },
+      perMember: `${(MEMBER_REWARD.cash / 1000).toFixed(0)}K 💵 + ${(MEMBER_REWARD.oil / 1000).toFixed(0)}K 🛢️ + ${(MEMBER_REWARD.ore / 1000).toFixed(0)}K ⛏️ + ${MEMBER_REWARD.gold} 🪙`,
+      mvpBonus: mvpMember ? `+${MVP_GOLD} 🪙` : '',
+    };
+  }
+
+  const report: AllianceWarReport = {
+    type: 'warResult',
+    timestamp: now,
+    ourName: alliance.name,
+    ourTag: alliance.tag,
+    enemyName: war.enemyName,
+    enemyTag: war.enemyTag,
+    won,
+    ourScore: war.ourScore,
+    theirScore: war.theirScore,
+    startedAt: war.startedAt,
+    endedAt: now,
+    rewards,
+    mvp: mvpMember?.name ?? null,
+    mvpScore: mvpMember?.score ?? 0,
+    memberStats,
+    totalAttacks,
+    totalWins,
+  };
+
+  return { report, memberStats };
+}
+
 export async function resolveWar(allianceId: string): Promise<{ won: boolean; reward: typeof WAR_REWARD | null } | null> {
   const alliance = await getMyAlliance(allianceId);
   if (!alliance?.activeWar) return null;
-  if (Date.now() < alliance.activeWar.endsAt) return null; // Henüz bitmedi
+  if (Date.now() < alliance.activeWar.endsAt) return null;
 
   const war = alliance.activeWar;
   const won = war.ourScore >= war.theirScore;
 
+  const { report, memberStats } = await buildWarReport(allianceId, alliance, won);
+
   const historyEntry: import('../state/types').AllianceWarHistory = {
-    enemyName: war.enemyName,
-    enemyTag: war.enemyTag,
-    ourScore: war.ourScore,
-    theirScore: war.theirScore,
-    won,
-    endedAt: Date.now(),
+    enemyName: war.enemyName, enemyTag: war.enemyTag,
+    ourScore: war.ourScore, theirScore: war.theirScore, won, endedAt: Date.now(),
   };
 
-  // Savaşı bitir + geçmişe ekle
+  // Savasi bitir + gecmise ekle
   try {
     await db.alliances().doc(allianceId).set({
       activeWar: null,
@@ -607,8 +689,13 @@ export async function resolveWar(allianceId: string): Promise<{ won: boolean; re
     } as any, { merge: true });
   } catch (err) { console.warn('[resolveWar]', err); }
 
-  // Kazandıysa ödül kasaya ekle
+  // Raporu kaydet
+  try {
+    await db.alliances().doc(allianceId).collection('warBattleLogs').add(report);
+  } catch (err) { console.warn('[resolveWar] save report:', err); }
+
   if (won) {
+    // 1) Kasa odulu: 100K nakit + 100K petrol + 100K cevher
     try {
       await db.alliances().doc(allianceId).set({
         ['treasury.cash']: firestore.FieldValue.increment(WAR_REWARD.cash),
@@ -616,10 +703,54 @@ export async function resolveWar(allianceId: string): Promise<{ won: boolean; re
         ['treasury.ore']: firestore.FieldValue.increment(WAR_REWARD.ore),
       } as any, { merge: true });
     } catch {}
-    try { await sendSystemMessage(allianceId, `🏆 Savaş kazanıldı! Kasaya ödül eklendi.`); } catch {}
+
+    // 2) Her katilan uyeye bireysel odul: 50K nakit + 50K petrol + 50K cevher + 500 altin
+    for (const ms of memberStats) {
+      try {
+        await db.players().doc(ms.uid).set({
+          ['warRewards.cash']: firestore.FieldValue.increment(MEMBER_REWARD.cash),
+          ['warRewards.oil']: firestore.FieldValue.increment(MEMBER_REWARD.oil),
+          ['warRewards.ore']: firestore.FieldValue.increment(MEMBER_REWARD.ore),
+          ['warRewards.gold']: firestore.FieldValue.increment(MEMBER_REWARD.gold),
+        } as any, { merge: true });
+      } catch (err) { console.warn('[resolveWar] member reward:', ms.uid, err); }
+    }
+
+    // 3) MVP'ye ekstra 250 altin
+    if (report.mvp && memberStats[0]) {
+      try {
+        await db.players().doc(memberStats[0].uid).set({
+          ['warRewards.gold']: firestore.FieldValue.increment(MVP_GOLD),
+        } as any, { merge: true });
+      } catch {}
+    }
+
+    try {
+      const mvpMsg = report.mvp ? `\n🌟 MVP: ${report.mvp} (${report.mvpScore} puan) +${MVP_GOLD} 🪙` : '';
+      await sendSystemMessage(allianceId,
+        `🏆 Savaş kazanıldı! Skor: ${war.ourScore}-${war.theirScore}\n` +
+        `💰 Kasa: 100K 💵 + 100K 🛢️ + 100K ⛏️\n` +
+        `👤 Her üyeye: 50K 💵 + 50K 🛢️ + 50K ⛏️ + 500 🪙` +
+        mvpMsg,
+      );
+    } catch {}
   } else {
-    try { await sendSystemMessage(allianceId, `💀 Savaş kaybedildi...`); } catch {}
+    try {
+      await sendSystemMessage(allianceId,
+        `💀 Savaş kaybedildi... Skor: ${war.ourScore}-${war.theirScore}` +
+        (report.mvp ? `\n🌟 En iyi performans: ${report.mvp} (${report.mvpScore} puan)` : ''),
+      );
+    } catch {}
   }
+
+  // Dusman ittifaka da rapor yaz
+  try {
+    const enemyAlliance = await getMyAlliance(war.enemyAllianceId);
+    if (enemyAlliance) {
+      const { report: enemyReport } = await buildWarReport(war.enemyAllianceId, enemyAlliance, !won);
+      await db.alliances().doc(war.enemyAllianceId).collection('warBattleLogs').add(enemyReport);
+    }
+  } catch (err) { console.warn('[resolveWar] enemy report:', err); }
 
   return { won, reward: won ? WAR_REWARD : null };
 }

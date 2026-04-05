@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, ScrollView, TextInput, Modal } from 'react-native';
+import { Image, View, Text, Pressable, ScrollView, TextInput, Modal } from 'react-native';
 import { t } from '../../i18n';
 import { ActionButton } from '../ActionButton';
 import { UnitImage } from '../UnitImage';
 import { styles } from '../../screens/BaseScreen.styles';
 import { BUILDING_BRANCHES } from '../../screens/BaseScreen.constants';
+import { getUnitLabel, UNIT_MAP } from '../../data/units';
 import { colors } from '../../theme/colors';
+
+const BRANCH_IMAGES: Record<string, any> = {
+  barracks: require('../../assets/base/branch_icons/infantry.png'),
+  tankFactory: require('../../assets/base/branch_icons/armor.png'),
+  airport: require('../../assets/base/branch_icons/air.png'),
+  shipyard: require('../../assets/base/branch_icons/naval.png'),
+  defenseTower: require('../../assets/base/branch_icons/airDefense.png'),
+};
 import type { Birlik, BirlikSlot } from '../../state/types';
 
 interface UnitAvailItem {
@@ -91,7 +100,11 @@ export function BirlikModal({
               return (
                 <View key={br.id}>
                   <View style={styles.birlikModalBranchHeader}>
-                    <Text style={styles.birlikModalBranchIcon}>{br.icon}</Text>
+                    {BRANCH_IMAGES[br.id] ? (
+                      <Image source={BRANCH_IMAGES[br.id]} style={{ width: 20, height: 20, borderRadius: 3 }} />
+                    ) : (
+                      <Text style={styles.birlikModalBranchIcon}>{br.icon}</Text>
+                    )}
                     <Text style={styles.birlikModalBranchLabel}>{t(br.i18n)}</Text>
                   </View>
                   {branchUnits.map(u => {
@@ -101,16 +114,13 @@ export function BirlikModal({
                         <View style={styles.birlikModalUnitInfo}>
                           <UnitImage unitId={u.unitId} uri={u.imageUri} icon={u.icon} style={styles.birlikModalUnitImg} />
                           <View>
-                            <Text style={styles.birlikModalUnitName}>{t(`units.${u.unitId}.name`) !== `units.${u.unitId}.name` ? t(`units.${u.unitId}.name`) : u.label}</Text>
+                            <Text style={styles.birlikModalUnitName}>{getUnitLabel(UNIT_MAP[u.unitId], u.label)}</Text>
                             <Text style={styles.birlikModalUnitAvail}>{t('base.availableLabel', { count: String(u.avail) })}</Text>
                           </View>
                         </View>
                         <View style={styles.birlikModalStepper}>
                           <Pressable style={styles.birlikModalStepBtn} onPress={() => setSlots(p => ({ ...p, [u.unitId]: Math.max(0, (p[u.unitId] ?? 0) - 100) }))}>
                             <Text style={styles.birlikModalStepBtnText}>-100</Text>
-                          </Pressable>
-                          <Pressable style={styles.birlikModalStepBtn} onPress={() => setSlots(p => ({ ...p, [u.unitId]: Math.max(0, (p[u.unitId] ?? 0) - 10) }))}>
-                            <Text style={styles.birlikModalStepBtnText}>-10</Text>
                           </Pressable>
                           <Pressable style={styles.birlikModalStepBtn} onPress={() => setSlots(p => ({ ...p, [u.unitId]: Math.max(0, (p[u.unitId] ?? 0) - 1) }))}>
                             <Text style={styles.birlikModalStepBtnText}>−</Text>
@@ -128,9 +138,6 @@ export function BirlikModal({
                           />
                           <Pressable style={styles.birlikModalStepBtn} onPress={() => setSlots(p => ({ ...p, [u.unitId]: Math.min(u.avail, (p[u.unitId] ?? 0) + 1) }))}>
                             <Text style={styles.birlikModalStepBtnText}>+</Text>
-                          </Pressable>
-                          <Pressable style={styles.birlikModalStepBtn} onPress={() => setSlots(p => ({ ...p, [u.unitId]: Math.min(u.avail, (p[u.unitId] ?? 0) + 10) }))}>
-                            <Text style={styles.birlikModalStepBtnText}>+10</Text>
                           </Pressable>
                           <Pressable style={styles.birlikModalStepBtn} onPress={() => setSlots(p => ({ ...p, [u.unitId]: Math.min(u.avail, (p[u.unitId] ?? 0) + 100) }))}>
                             <Text style={styles.birlikModalStepBtnText}>+100</Text>

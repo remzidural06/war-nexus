@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MilitaryPanel } from '../components/MilitaryPanel';
 import { ActionButton } from '../components/ActionButton';
@@ -6,7 +6,6 @@ import { colors } from '../theme/colors';
 import { useDesertGame } from '../state/DesertGameContext';
 import { formatNumber } from '../utils/formatters';
 import { t } from '../i18n';
-
 const TYPE_ICONS: Record<string, string> = {
   upgrade: '🏗️',
   train: '🪖',
@@ -67,9 +66,7 @@ export function SettingsScreen() {
                   {m.rewardOre > 0 && (
                     <Text style={styles.rewardChip}>⛏️ {formatNumber(m.rewardOre)}</Text>
                   )}
-                  {(m.rewardGold ?? 0) > 0 && (
-                    <Text style={styles.rewardChip}>🪙 {formatNumber(m.rewardGold!)}</Text>
-                  )}
+                  <Text style={styles.goldChip}>{'🪙'} 5</Text>
                   {m.completed && !m.claimed && (
                     <ActionButton
                       label={t('settings.claim')}
@@ -133,6 +130,7 @@ const styles = StyleSheet.create({
 
   rewardRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   rewardChip: { color: colors.textSecondary, fontSize: 11 },
+  goldChip: { color: colors.gold, fontSize: 11, fontWeight: '700' },
   claimBtn: { paddingVertical: 4, paddingHorizontal: 12, marginLeft: 'auto' },
   claimedText: { fontSize: 16, marginLeft: 'auto' },
 

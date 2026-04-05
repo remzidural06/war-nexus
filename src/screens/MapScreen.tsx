@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useDesertGame } from '../state/DesertGameContext';
 import { MilitaryPanel } from '../components/MilitaryPanel';
 import { ActionButton } from '../components/ActionButton';
@@ -24,10 +24,18 @@ const DIFFICULTY_LABEL_KEYS: Record<string, string> = {
   elite: 'map.elite',
 };
 
+const BRANCH_IMAGES: Record<string, any> = {
+  barracks: require('../assets/base/branch_icons/infantry.png'),
+  tankFactory: require('../assets/base/branch_icons/armor.png'),
+  airport: require('../assets/base/branch_icons/air.png'),
+  shipyard: require('../assets/base/branch_icons/naval.png'),
+  defenseTower: require('../assets/base/branch_icons/airDefense.png'),
+};
+
 const BUILDING_BRANCHES = [
   { id: 'barracks',     branchKey: 'branches.infantry',   icon: '🪖' },
-  { id: 'tankFactory',  branchKey: 'branches.armor',      icon: '🛡️' },
-  { id: 'airport',      branchKey: 'branches.air',        icon: '✈️' },
+  { id: 'tankFactory',  branchKey: 'branches.armor',      icon: '🔫' },
+  { id: 'airport',      branchKey: 'branches.air',        icon: '🛩️' },
   { id: 'shipyard',     branchKey: 'branches.naval',      icon: '⚓' },
   { id: 'defenseTower', branchKey: 'branches.airDefense', icon: '🎯' },
 ];
@@ -69,9 +77,8 @@ export function MapScreen() {
         const count = b?.trainedUnits
           ? Object.values(b.trainedUnits).reduce((a, v) => a + v, 0)
           : 0;
-        return { branchKey, icon, count };
-      })
-      .filter(u => u.count > 0);
+        return { id, branchKey, icon, count };
+      });
   }, [buildings]);
 
   const attackPower = getTotalAttackPower(totalUnits);
@@ -132,8 +139,12 @@ export function MapScreen() {
           <View style={styles.breakdownRow}>
             {unitBreakdown.map(u => (
               <View key={u.branchKey} style={styles.breakdownChip}>
-                <Text style={styles.breakdownIcon}>{u.icon}</Text>
-                <Text style={styles.breakdownLabel}>{t(u.branchKey)}</Text>
+                {BRANCH_IMAGES[u.id] ? (
+                  <Image source={BRANCH_IMAGES[u.id]} style={styles.branchImg} />
+                ) : (
+                  <Text style={styles.breakdownIcon}>{u.icon}</Text>
+                )}
+                <Text style={styles.breakdownLabel} numberOfLines={1} adjustsFontSizeToFit>{t(u.branchKey)}</Text>
                 <Text style={styles.breakdownCount}>{u.count}</Text>
               </View>
             ))}
@@ -193,33 +204,7 @@ export function MapScreen() {
 
       {/* TEMP: PvP bölümü geçici olarak gizlendi */}
 
-      {/* Savaş Günlüğü */}
-      {battleReports.length > 0 && (
-        <MilitaryPanel title={t('map.battleLogTitle', { count: String(battleReports.length) })}>
-          {battleReports.map(report => {
-            const d = new Date(report.timestamp);
-            const timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
-            return (
-              <Pressable key={report.id} onPress={() => setReportTarget(report)}>
-                <View style={styles.reportRow}>
-                  <Text style={report.won ? styles.reportWon : styles.reportLost}>
-                    {report.won ? '🏆' : '💀'}
-                  </Text>
-                  <View style={styles.reportInfo}>
-                    <Text style={styles.reportName}>{report.targetName}</Text>
-                    <Text style={styles.reportTime}>{timeStr} · {t('map.unitsLost', { count: String(report.unitsLost) })}</Text>
-                  </View>
-                  {report.won ? (
-                    <Text style={styles.reportGain}>+💵{formatNumber(report.rewardCash)}</Text>
-                  ) : (
-                    <Text style={styles.reportLoss}>Yenilgi</Text>
-                  )}
-                </View>
-              </Pressable>
-            );
-          })}
-        </MilitaryPanel>
-      )}
+      {/* Savaş Günlüğü — profil ekranında gösteriliyor */}
 
       {/* Savaş Raporu Modal */}
       {reportTarget && (
@@ -365,6 +350,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.panelBorder,
     borderRadius: 3, paddingHorizontal: 8, paddingVertical: 4,
   },
+  branchImg: { width: 24, height: 24, borderRadius: 4 },
   breakdownIcon: { fontSize: 12 },
   breakdownLabel: { color: colors.textSecondary, fontSize: 11 },
   breakdownCount: { color: colors.sand, fontSize: 11, fontWeight: '700' },

@@ -109,6 +109,7 @@ export type UnitBranch =
 export interface UnitDefinition {
   id: string;
   label: string;
+  labelEn?: string;
   branch: UnitBranch;
   researchBranch: ResearchBranch;
   tier: ResearchTier;
@@ -421,4 +422,43 @@ export interface AllianceWarHistory {
   theirScore: number;
   won: boolean;
   endedAt: number;
+}
+
+export interface AllianceWarMemberStat {
+  uid: string;
+  name: string;
+  attacks: number;
+  wins: number;
+  losses: number;
+  score: number;
+}
+
+export interface AllianceWarReport {
+  type: 'warResult';
+  timestamp: number;
+  // Ittifak bilgileri
+  ourName: string;
+  ourTag: string;
+  enemyName: string;
+  enemyTag: string;
+  // Sonuc
+  won: boolean;
+  ourScore: number;
+  theirScore: number;
+  startedAt: number;
+  endedAt: number;
+  // Oduller
+  rewards: {
+    treasury: { cash: number; oil: number; ore: number };
+    perMember: string;
+    mvpBonus: string;
+  } | null;
+  // MVP
+  mvp: string | null;
+  mvpScore: number;
+  // Uye istatistikleri (skora gore siralanmis)
+  memberStats: AllianceWarMemberStat[];
+  // Toplam
+  totalAttacks: number;
+  totalWins: number;
 }

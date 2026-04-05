@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { colors } from '../theme/colors';
 import { UnitImage } from './UnitImage';
-import { UNIT_MAP } from '../data/units';
+import { UNIT_MAP, getUnitLabel } from '../data/units';
 import type { BattleReport } from '../state/types';
 import { t } from '../i18n';
 
@@ -132,7 +132,7 @@ export function BattleResultModal({
                           : <View style={s.unitImgPlaceholder}><Text style={s.unitImgIcon}>{unit?.icon ?? '❓'}</Text></View>
                         }
                         <View style={s.unitCardInfo}>
-                          <Text style={s.unitCardName} numberOfLines={1}>{unit?.label ?? ar.unitId}</Text>
+                          <Text style={s.unitCardName} numberOfLines={1}>{getUnitLabel(unit, ar.unitId)}</Text>
                           <Text style={s.unitCardBranch}>{unit?.branch ?? ''}</Text>
                         </View>
                       </View>
@@ -173,7 +173,7 @@ export function BattleResultModal({
                           : <View style={s.unitImgPlaceholder}><Text style={s.unitImgIcon}>{unit?.icon ?? '❓'}</Text></View>
                         }
                         <View style={s.unitCardInfo}>
-                          <Text style={s.unitCardName} numberOfLines={1}>{unit?.label ?? dr.unitId}</Text>
+                          <Text style={s.unitCardName} numberOfLines={1}>{getUnitLabel(unit, dr.unitId)}</Text>
                           <Text style={s.unitCardBranch}>{unit?.branch ?? ''}</Text>
                         </View>
                       </View>

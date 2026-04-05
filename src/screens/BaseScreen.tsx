@@ -10,7 +10,7 @@ import {
 import { useDesertGame } from '../state/DesertGameContext';
 import { t } from '../i18n';
 import { BUILDING_DEFINITIONS } from '../data/buildings';
-import { UNIT_MAP } from '../data/units';
+import { UNIT_MAP, getUnitLabel } from '../data/units';
 import type { BuildingId, BattleReport } from '../state/types';
 import { BattleResultModal } from '../components/BattleResultModal';
 import { DraggableHotspot } from '../components/DraggableHotspot';
@@ -97,7 +97,7 @@ export function BaseScreen() {
         result.push({
           unitId: uid,
           buildingId: br.id,
-          label: def?.label ?? uid,
+          label: getUnitLabel(def, uid),
           icon: def?.icon ?? br.icon,
           imageUri: def?.imageUri,
           avail: cnt,

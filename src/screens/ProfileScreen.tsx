@@ -49,6 +49,8 @@ export function ProfileScreen() {
 
   const [viewReport, setViewReport] = useState<any>(null);
   const [showReports, setShowReports] = useState(false);
+  const [reportTab, setReportTab] = useState<'pvp' | 'alliance'>('pvp');
+  const [expandedWar, setExpandedWar] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [newName, setNewName] = useState('');
   const [nameError, setNameError] = useState<string | null>(null);
@@ -243,37 +245,150 @@ export function ProfileScreen() {
         <Text style={s.reportsBtnArrow}>{showReports ? '▲' : '▼'}</Text>
       </Pressable>
       {showReports && (
-        <MilitaryPanel title={t('profile.battleReports')}>
-          {battleReports.length === 0 ? (
-            <Text style={s.emptyText}>{t('profile.noReports')}</Text>
-          ) : (
-            battleReports.slice(-10).reverse().map(r => {
-              const d = new Date(r.timestamp);
-              const timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
-              const dateStr = `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}`;
-              const isDefense = r.targetId === 'defense';
-              return (
-                <Pressable key={r.id} onPress={() => setViewReport(r)}>
-                  <View style={s.reportRow}>
-                    <Text style={{ fontSize: 18 }}>{r.won ? '🏆' : '💀'}</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text style={s.reportName}>
-                        {isDefense ? '🛡️' : '⚔️'} {r.targetName}
-                      </Text>
-                      <Text style={s.reportTime}>
-                        {dateStr} {timeStr} · {r.unitsLost > 0 ? `−${r.unitsLost} ${t('common.units')}` : t('profile.noLoss')}
-                      </Text>
-                    </View>
-                    <View style={{ alignItems: 'flex-end' }}>
-                      {r.rewardCash > 0 && <Text style={s.reportGain}>+💵{formatNumber(r.rewardCash)}</Text>}
-                      {r.rewardCash < 0 && <Text style={s.reportLoss}>💵{formatNumber(r.rewardCash)}</Text>}
-                    </View>
-                  </View>
-                </Pressable>
-              );
-            })
+        <>
+          {/* Tab Toggle */}
+          <View style={s.reportTabRow}>
+            <Pressable
+              style={[s.reportTab, reportTab === 'pvp' && s.reportTabActive]}
+              onPress={() => setReportTab('pvp')}
+            >
+              <Text style={[s.reportTabText, reportTab === 'pvp' && s.reportTabTextActive]}>
+                ⚔️ PvP ({battleReports.length})
+              </Text>
+            </Pressable>
+            <Pressable
+              style={[s.reportTab, reportTab === 'alliance' && s.reportTabActive]}
+              onPress={() => setReportTab('alliance')}
+            >
+              <Text style={[s.reportTabText, reportTab === 'alliance' && s.reportTabTextActive]}>
+                🛡️ {t('alliance.warResultsTitle')} ({(alliance?.warReports ?? []).length})
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* PvP Raporları */}
+          {reportTab === 'pvp' && (
+            <MilitaryPanel title={`PvP (${battleReports.length})`}>
+              {battleReports.length === 0 ? (
+                <Text style={s.emptyText}>{t('profile.noReports')}</Text>
+              ) : (
+                battleReports.slice(-10).reverse().map(r => {
+                  const d = new Date(r.timestamp);
+                  const timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+                  const dateStr = `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}`;
+                  const isDefense = r.targetId === 'defense';
+                  return (
+                    <Pressable key={r.id} onPress={() => setViewReport(r)}>
+                      <View style={s.reportRow}>
+                        <Text style={{ fontSize: 18 }}>{r.won ? '🏆' : '💀'}</Text>
+                        <View style={{ flex: 1 }}>
+                          <Text style={s.reportName}>
+                            {isDefense ? '🛡️' : '⚔️'} {r.targetName}
+                          </Text>
+                          <Text style={s.reportTime}>
+                            {dateStr} {timeStr} · {r.unitsLost > 0 ? `−${r.unitsLost} ${t('common.units')}` : t('profile.noLoss')}
+                          </Text>
+                        </View>
+                        <View style={{ alignItems: 'flex-end' }}>
+                          {r.rewardCash > 0 && <Text style={s.reportGain}>+💵{formatNumber(r.rewardCash)}</Text>}
+                          {r.rewardCash < 0 && <Text style={s.reportLoss}>💵{formatNumber(r.rewardCash)}</Text>}
+                        </View>
+                      </View>
+                    </Pressable>
+                  );
+                })
+              )}
+            </MilitaryPanel>
           )}
-        </MilitaryPanel>
+
+          {/* İttifak Savaş Raporları */}
+          {reportTab === 'alliance' && (
+            <MilitaryPanel title={`${t('alliance.warResultsTitle')} (${(alliance?.warReports ?? []).length})`}>
+              {(!alliance?.warReports || alliance.warReports.length === 0) ? (
+                <Text style={s.emptyText}>{t('alliance.noReports')}</Text>
+              ) : (
+                alliance.warReports.filter((wr: any) => wr.ourTag && wr.enemyTag).slice(0, 10).map((wr: any, i: number) => {
+                  const wrId = (wr as any).id ?? `wr-${i}`;
+                  const isExpanded = expandedWar === wrId;
+                  const d = new Date(wr.timestamp);
+                  const dateStr = `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}`;
+                  const scoreTotal = (wr.ourScore + wr.theirScore) || 1;
+                  const ourPct = Math.round((wr.ourScore / scoreTotal) * 100);
+                  const durationH = wr.startedAt && wr.endedAt ? Math.round((wr.endedAt - wr.startedAt) / 3600000) : 24;
+                  return (
+                    <Pressable key={wrId} onPress={() => setExpandedWar(isExpanded ? null : wrId)}>
+                      <View style={s.warReportRow}>
+                        {/* Baslik */}
+                        <View style={s.warReportHeader}>
+                          <Text style={{ color: wr.won ? colors.success : colors.danger, fontSize: 14, fontWeight: '800' }}>
+                            {wr.won ? t('alliance.warVictory') : t('alliance.warDefeat')}
+                          </Text>
+                          <Text style={s.reportTime}>{dateStr}</Text>
+                        </View>
+                        <Text style={{ color: '#fff', fontSize: 12, fontWeight: '600', marginBottom: 4 }}>
+                          [{wr.ourTag}] vs [{wr.enemyTag}] {wr.enemyName}
+                        </Text>
+                        {/* Skor bar */}
+                        <View style={s.warScoreRow}>
+                          <Text style={{ color: colors.sand, fontSize: 13, fontWeight: '800' }}>{wr.ourScore}</Text>
+                          <View style={s.warScoreBar}>
+                            <View style={[s.warScoreBarFill, { width: `${ourPct}%`, backgroundColor: wr.won ? colors.success : colors.danger }]} />
+                          </View>
+                          <Text style={{ color: colors.sand, fontSize: 13, fontWeight: '800' }}>{wr.theirScore}</Text>
+                        </View>
+
+                        {/* Genisletilmis detay */}
+                        {isExpanded && (
+                          <View style={s.warDetailSection}>
+                            {/* Savas detaylari */}
+                            <Text style={s.warDetailTitle}>📊 {t('alliance.warDetails')}</Text>
+                            <Text style={s.warDetailText}>{t('alliance.warDuration')}: {durationH} {t('alliance.hours')}</Text>
+                            <Text style={s.warDetailText}>{t('alliance.totalAttacks')}: {wr.totalAttacks ?? 0}</Text>
+                            <Text style={s.warDetailText}>{t('alliance.totalWins')}: {wr.totalWins ?? 0}</Text>
+
+                            {/* Oduller */}
+                            {wr.won && (
+                              <>
+                                <Text style={[s.warDetailTitle, { marginTop: 8 }]}>💰 {t('alliance.rewardsLabel')}</Text>
+                                <Text style={s.warDetailText}>{t('alliance.treasuryReward')}: 100K 💵 + 100K 🛢️ + 100K ⛏️</Text>
+                                <Text style={s.warDetailText}>{t('alliance.perMemberReward')}: 50K 💵 + 50K 🛢️ + 50K ⛏️ + 500 🪙</Text>
+                              </>
+                            )}
+
+                            {/* MVP */}
+                            {wr.mvp && (
+                              <>
+                                <Text style={[s.warDetailTitle, { marginTop: 8 }]}>🌟 MVP</Text>
+                                <Text style={s.warDetailMvp}>{wr.mvp} — {wr.mvpScore} {t('alliance.points')}{wr.won ? ` (+250 🪙)` : ''}</Text>
+                              </>
+                            )}
+
+                            {/* Uye katkilari */}
+                            {(wr.memberStats ?? []).length > 0 && (
+                              <>
+                                <Text style={[s.warDetailTitle, { marginTop: 8 }]}>👥 {t('alliance.memberContributions')}</Text>
+                                {(wr.memberStats ?? []).map((ms: any, j: number) => (
+                                  <View key={ms.uid ?? j} style={s.warMemberRow}>
+                                    <Text style={s.warMemberRank}>{j === 0 ? '🥇' : j === 1 ? '🥈' : j === 2 ? '🥉' : `#${j+1}`}</Text>
+                                    <Text style={s.warMemberName} numberOfLines={1}>{ms.name}</Text>
+                                    <Text style={s.warMemberStat}>{ms.wins}W/{ms.losses}L</Text>
+                                    <Text style={s.warMemberScore}>{ms.score} {t('alliance.points')}</Text>
+                                  </View>
+                                ))}
+                              </>
+                            )}
+                          </View>
+                        )}
+
+                        <Text style={s.warExpandHint}>{isExpanded ? '▲' : '▼ ' + t('alliance.tapToExpand')}</Text>
+                      </View>
+                    </Pressable>
+                  );
+                })
+              )}
+            </MilitaryPanel>
+          )}
+        </>
       )}
       {viewReport && (
         <BattleResultModal report={viewReport} onClose={() => setViewReport(null)} />
@@ -376,6 +491,24 @@ const s = StyleSheet.create({
   },
   reportsBtnText: { color: colors.sand, fontSize: 14, fontWeight: '700' },
   reportsBtnArrow: { color: colors.textMuted, fontSize: 12 },
+  reportTabRow: {
+    flexDirection: 'row', gap: 0, marginBottom: 12,
+    borderRadius: 6, overflow: 'hidden',
+    borderWidth: 1, borderColor: colors.panelBorder,
+  },
+  reportTab: {
+    flex: 1, paddingVertical: 10, alignItems: 'center',
+    backgroundColor: colors.surfaceAlt,
+  },
+  reportTabActive: {
+    backgroundColor: colors.military, borderColor: colors.sand,
+  },
+  reportTabText: {
+    color: colors.textMuted, fontSize: 12, fontWeight: '600',
+  },
+  reportTabTextActive: {
+    color: '#fff',
+  },
   reportRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: colors.panelBorder,
@@ -406,4 +539,51 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: colors.danger, alignItems: 'center',
   },
   logoutText: { color: colors.danger, fontSize: 14, fontWeight: '700' },
+  // War Reports
+  warReportRow: {
+    paddingVertical: 10,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.panelBorder,
+  },
+  warReportHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  warScoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  warScoreBar: {
+    flex: 1,
+    height: 6,
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  warScoreBarFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  warDetailSection: {
+    marginTop: 8, borderTopWidth: 1, borderTopColor: colors.panelBorder, paddingTop: 8,
+  },
+  warDetailTitle: {
+    color: colors.textPrimary, fontSize: 12, fontWeight: '700', marginBottom: 4,
+  },
+  warDetailText: {
+    color: colors.textSecondary, fontSize: 11, marginBottom: 2,
+  },
+  warDetailMvp: {
+    color: colors.sand, fontSize: 12, fontWeight: '700',
+  },
+  warMemberRow: {
+    flexDirection: 'row', alignItems: 'center', paddingVertical: 2, gap: 4,
+  },
+  warMemberRank: { fontSize: 11, width: 22 },
+  warMemberName: { color: '#fff', fontSize: 11, flex: 1 },
+  warMemberStat: { color: colors.textMuted, fontSize: 10, width: 45, textAlign: 'right' },
+  warMemberScore: { color: colors.sand, fontSize: 11, fontWeight: '700', width: 50, textAlign: 'right' },
+  warExpandHint: { color: colors.textMuted, fontSize: 10, textAlign: 'center', marginTop: 6 },
 });

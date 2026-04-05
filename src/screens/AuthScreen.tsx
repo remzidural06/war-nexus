@@ -190,7 +190,7 @@ const s = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center', padding: 32,
   },
   logoBox: { alignItems: 'center', marginBottom: 20, marginTop: -40 },
-  logo: { width: 440, height: 320 },
+  logo: { width: 340, height: 250 },
   tagline: {
     color: '#C4A455',
     fontSize: 13,

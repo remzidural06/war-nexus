@@ -32,8 +32,9 @@ const _db = getFirestore(app);
 
 /** Wrap a Firestore DocumentSnapshot to match RN Firebase API */
 function wrapDocSnap(snap: any) {
+  const _exists = snap.exists();
   return {
-    exists: snap.exists(),
+    exists: () => _exists,
     id: snap.id,
     data: () => snap.data() ?? null,
     ref: snap.ref,

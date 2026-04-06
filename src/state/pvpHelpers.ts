@@ -113,16 +113,11 @@ export function calcDefenderPower(
   unitMap: Record<string, { tier: number }>,
   warPower: number,
 ): number {
-  const tierPower: Record<number, number> = { 1: 10, 2: 30, 3: 60, 4: 100 };
-  const bp = buildings.reduce((s, b) => s + (b.level ?? 1) * 100, 0);
-  const up = buildings.reduce((s, b) => {
-    for (const [uId, cnt] of Object.entries(b.trainedUnits ?? {})) {
-      const def = unitMap[uId];
-      s += (cnt as number) * (tierPower[def?.tier ?? 1] ?? 10);
-    }
-    return s;
+  const bp = buildings.reduce((s, b) => {
+    const l = b.level ?? 1;
+    return s + l * (l + 1) / 2 * 100;
   }, 0);
-  return bp + up + warPower;
+  return bp + Math.min(warPower, bp);
 }
 
 /** Apply unit losses to birlikler after combat */

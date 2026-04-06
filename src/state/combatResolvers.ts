@@ -12,6 +12,39 @@ import type {
   MarchUnit,
 } from './types';
 
+// ── Sefer maliyeti: birim tier'ına göre lojistik harcama ─────────────
+const MARCH_COST_PER_TIER: Record<number, { cash: number; oil: number; ore: number }> = {
+  1: { cash: 5, oil: 3, ore: 2 },
+  2: { cash: 15, oil: 10, ore: 5 },
+  3: { cash: 30, oil: 20, ore: 10 },
+  4: { cash: 50, oil: 35, ore: 20 },
+};
+
+export function calcMarchCost(
+  marchUnits: { unitId: string; count: number }[],
+  unitMap: Record<string, { tier: number }>,
+): { cash: number; oil: number; ore: number } {
+  let cash = 0, oil = 0, ore = 0;
+  for (const u of marchUnits) {
+    const tier = unitMap[u.unitId]?.tier ?? 1;
+    const cost = MARCH_COST_PER_TIER[tier] ?? MARCH_COST_PER_TIER[1];
+    cash += u.count * cost.cash;
+    oil += u.count * cost.oil;
+    ore += u.count * cost.ore;
+  }
+  return { cash, oil, ore };
+}
+
+// ── Sefer süresi: birim sayısına göre 3dk–5dk arası (180–300 saniye) ──
+const MIN_TRAVEL = 180; // 3 dakika
+const MAX_TRAVEL = 300; // 5 dakika
+const UNIT_CAP = 500;   // 500+ birimde max süre
+
+export function calcTravelSeconds(unitCount: number): number {
+  const ratio = Math.min(unitCount, UNIT_CAP) / UNIT_CAP;
+  return Math.round(MIN_TRAVEL + ratio * (MAX_TRAVEL - MIN_TRAVEL));
+}
+
 // ── March Resolution (PvE) ───────────────────────────────────
 
 export interface MarchResolutionResult {
@@ -90,7 +123,7 @@ export function resolveMarchResult(
       .map(du => ({ unitId: du.unitId, count: Math.max(1, Math.round(du.count * scale)) }))
       .filter(du => du.count > 0);
     const unitCount = attackUnits.reduce((s, u) => s + u.count, 0);
-    const totalSeconds = 600 + Math.round(rng() * 900);
+    const totalSeconds = calcTravelSeconds(unitCount);
     counterAttack = {
       attackerName: target.player,
       attackUnits,

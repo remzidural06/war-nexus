@@ -172,6 +172,7 @@ export interface March {
   secondsRemaining: number;
   attackPower: number;
   marchUnits?: MarchUnit[];
+  marchCost?: { cash: number; oil: number; ore: number };
   savedAt?: number;
   isWarAttack?: boolean;
 }
@@ -278,6 +279,8 @@ export interface PersistedGameState {
   pvpCooldowns?: Record<string, number>;
   revengeTargets?: Record<string, number>;
   shieldUntil?: number;
+  wins?: number;
+  losses?: number;
 }
 
 // ─── Context Values ───────────────────────────────────────────

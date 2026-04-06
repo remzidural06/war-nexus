@@ -258,45 +258,40 @@ describe('calcDefenderPower', () => {
     inf1: { tier: 1 },
   };
 
-  it('calculates building power + unit power + warPower', () => {
+  it('calculates building power + capped warPower (units excluded)', () => {
     const buildings = [
-      { level: 5, trainedUnits: { tank1: 2 } as Record<string, number> }, // bp=500, up=2*60=120
-      { level: 3, trainedUnits: { inf1: 10 } as Record<string, number> },  // bp=300, up=10*10=100
+      { level: 5, trainedUnits: { tank1: 2 } as Record<string, number> }, // bp = 5*6/2*100 = 1500
+      { level: 3, trainedUnits: { inf1: 10 } as Record<string, number> },  // bp = 3*4/2*100 = 600
     ];
-    // bp = 500 + 300 = 800, up = 120 + 100 = 220, warPower = 50
-    expect(calcDefenderPower(buildings, unitMap, 50)).toBe(1070);
+    // bp = 1500 + 600 = 2100, warPower = 50 (capped to min(50,2100)=50)
+    expect(calcDefenderPower(buildings, unitMap, 50)).toBe(2150);
   });
 
   it('defaults building level to 1', () => {
     const buildings = [{ trainedUnits: {} }]; // no level → 1
-    // bp = 100, up = 0, warPower = 0
+    // bp = 1*2/2*100 = 100, warPower = 0
     expect(calcDefenderPower(buildings, unitMap, 0)).toBe(100);
   });
 
   it('handles empty buildings', () => {
-    expect(calcDefenderPower([], unitMap, 200)).toBe(200);
+    // bp = 0, warPower = 200 but capped to min(200,0) = 0
+    expect(calcDefenderPower([], unitMap, 200)).toBe(0);
   });
 
-  it('defaults unknown unit tiers to tier 1 (10 power)', () => {
+  it('units do not affect power', () => {
     const buildings = [
       { level: 1, trainedUnits: { unknownUnit: 5 } },
     ];
-    // bp = 100, up = 5 * 10 = 50, warPower = 0
-    expect(calcDefenderPower(buildings, unitMap, 0)).toBe(150);
+    // bp = 100, warPower = 0
+    expect(calcDefenderPower(buildings, unitMap, 0)).toBe(100);
   });
 
-  it('uses correct tier power values', () => {
-    const fullUnitMap: Record<string, { tier: number }> = {
-      t1: { tier: 1 },
-      t2: { tier: 2 },
-      t3: { tier: 3 },
-      t4: { tier: 4 },
-    };
+  it('warPower is capped to basePower', () => {
     const buildings = [
-      { level: 0, trainedUnits: { t1: 1, t2: 1, t3: 1, t4: 1 } },
+      { level: 2, trainedUnits: { t1: 1, t2: 1, t3: 1, t4: 1 } },
     ];
-    // bp = 0*100 = 0, up = 10+30+60+100 = 200, warPower = 0
-    expect(calcDefenderPower(buildings, fullUnitMap, 0)).toBe(200);
+    // bp = 2*3/2*100 = 300, warPower = 5000 capped to min(5000,300) = 300
+    expect(calcDefenderPower(buildings, unitMap, 5000)).toBe(600);
   });
 });
 

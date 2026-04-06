@@ -72,16 +72,10 @@ async function sendPushNotification(targetUid, title, body, category) {
 function calcPower(state) {
   const buildings = state?.buildings ?? [];
   const buildingPower = buildings.reduce((s, b) => { const l = b.level ?? 1; return s + l * (l + 1) / 2 * 100; }, 0);
-  const unitPower = buildings.reduce((s, b) => {
-    for (const [, count] of Object.entries(b.trainedUnits ?? {})) {
-      s += (count ?? 0) * 10; // Basitleştirilmiş — tier bilgisi olmadan
-    }
-    return s;
-  }, 0);
   const researchPower = (state?.researchStates ?? [])
     .filter(r => r.completed)
     .reduce((s) => s + 50, 0);
-  const basePower = buildingPower + unitPower + researchPower;
+  const basePower = buildingPower + researchPower;
   const cappedWarPower = Math.min(state?.warPower ?? 0, basePower);
   return basePower + cappedWarPower;
 }
@@ -832,7 +826,7 @@ exports.simulateBots = onSchedule(
 
             const newTrained = { ...b.trainedUnits };
             const toTrain = Math.min(
-              Math.floor(3 + Math.random() * 3),
+              Math.floor(10 + Math.random() * 6),
               unitCap - currentCount
             );
             for (let i = 0; i < toTrain; i++) {
@@ -862,15 +856,9 @@ exports.simulateBots = onSchedule(
 
           // 5. playerPower hesapla
           const buildingPower = buildings.reduce((s, b) => s + b.level * (b.level + 1) / 2 * 100, 0);
-          const unitPower = buildings.reduce((s, b) => {
-            for (const count of Object.values(b.trainedUnits ?? {})) {
-              s += (count ?? 0) * 10;
-            }
-            return s;
-          }, 0);
           const researchPower = (state.researchStates ?? [])
             .filter(r => r.completed).reduce((s) => s + 50, 0);
-          const basePower = buildingPower + unitPower + researchPower;
+          const basePower = buildingPower + researchPower;
           const cappedWarPower = Math.min(warPower, basePower);
           const playerPower = basePower + cappedWarPower;
 
@@ -918,21 +906,15 @@ exports.recalcAllPower = onRequest(
         const uid = doc.id;
         const buildings = state.buildings ?? [];
 
-        // Yeni kademeli formül
+        // Yeni kademeli formül (birim dahil değil)
         const buildingPower = buildings.reduce((s, b) => {
           const l = b.level ?? 1;
           return s + l * (l + 1) / 2 * 100;
         }, 0);
-        const unitPower = buildings.reduce((s, b) => {
-          for (const [unitId, count] of Object.entries(b.trainedUnits ?? {})) {
-            s += (count ?? 0) * (POWER_TIER[1] ?? 10); // basit tier
-          }
-          return s;
-        }, 0);
         const researchPower = (state.researchStates ?? [])
           .filter(r => r.completed)
           .reduce((s) => s + 50, 0);
-        const basePower = buildingPower + unitPower + researchPower;
+        const basePower = buildingPower + researchPower;
         const warPower = state.warPower ?? 0;
         const cappedWarPower = Math.min(warPower, basePower);
         const playerPower = basePower + cappedWarPower;
@@ -1277,8 +1259,6 @@ exports.botAttack = onRequest(
       const botData = botSnap.data();
       const targetData = targetSnap.data();
       const now = Date.now();
-      const travel = travelSeconds ?? 180; // 3 dakika
-
       // Bot'un birimlerini oku (savunma birimleri saldırıya katılmaz)
       const AIR_DEF = new Set(['stinger','iglaS','hisarA','hisarO','ironDome','patriotPac3','siper','s500','thaad']);
       const botBaseSnap = await db.collection("playerBases").doc(botUid).get();
@@ -1295,6 +1275,9 @@ exports.botAttack = onRequest(
           }
         }
       }
+
+      // Sefer süresi: birim sayısına göre 3-5 dk
+      const travel = Math.round(180 + Math.min(totalUnits, 500) / 500 * 120);
 
       // 1. March oluştur (banner için)
       const marchRef = db.collection("marches").doc();
@@ -1566,14 +1549,10 @@ exports.deductDefenderLosses = onRequest(
       if (changed) {
         await db.collection("playerBases").doc(defenderUid).set({ buildings: updatedBuildings }, { merge: true });
 
-        // playerPower güncelle
+        // playerPower güncelle (birim dahil değil)
         const buildingPower = updatedBuildings.reduce((s, b) => { const l = b.level ?? 1; return s + l * (l + 1) / 2 * 100; }, 0);
-        const unitPower = updatedBuildings.reduce((s, b) => {
-          for (const count of Object.values(b.trainedUnits ?? {})) { s += (count ?? 0) * 10; }
-          return s;
-        }, 0);
         const researchPower = (state.researchStates ?? []).filter(r => r.completed).reduce((s) => s + 50, 0);
-        const basePower = buildingPower + unitPower + researchPower;
+        const basePower = buildingPower + researchPower;
         const warPower = state.warPower ?? 0;
         const playerPower = basePower + Math.min(warPower, basePower);
         await db.collection("players").doc(defenderUid).set({ playerPower }, { merge: true });
@@ -1641,9 +1620,8 @@ async function resolveWarForAlliance(allianceDoc) {
         await db.collection("playerBases").doc(memberUid).set({ resources: updatedResources, warPower: newWarPower }, { merge: true });
         const buildings = state.buildings ?? [];
         const buildingPower = buildings.reduce((s, b) => { const l = b.level ?? 1; return s + l * (l + 1) / 2 * 100; }, 0);
-        const unitPower = buildings.reduce((s, b) => { for (const count of Object.values(b.trainedUnits ?? {})) { s += (count ?? 0) * 10; } return s; }, 0);
         const researchPower = (state.researchStates ?? []).filter(r => r.completed).reduce((s) => s + 50, 0);
-        const basePower = buildingPower + unitPower + researchPower;
+        const basePower = buildingPower + researchPower;
         const playerPower = basePower + Math.min(newWarPower, basePower);
         await db.collection("players").doc(memberUid).set({ playerPower, warPower: newWarPower }, { merge: true });
       } catch (err) { console.warn(`[ResolveWar] Reward error for ${memberUid}:`, err.message); }
@@ -1888,8 +1866,6 @@ async function executePendingBotAttacks() {
 
       const botData = botSnap.data();
       const targetData = targetSnap.data();
-      const travel = 180; // 3 dakika
-
       // Bot birimlerini oku (savunma birimleri saldırıya katılmaz)
       const AIR_DEF = new Set(['stinger','iglaS','hisarA','hisarO','ironDome','patriotPac3','siper','s500','thaad']);
       const botBaseSnap = await db.collection("playerBases").doc(attack.botUid).get();
@@ -1927,6 +1903,9 @@ async function executePendingBotAttacks() {
       const totalDefUnits = defUnits.reduce((s, u) => s + u.count, 0);
 
       if (totalUnits === 0) { attack.executed = true; continue; }
+
+      // Sefer süresi: birim sayısına göre 3-5 dk
+      const travel = Math.round(180 + Math.min(totalUnits, 500) / 500 * 120);
 
       // March oluştur (banner için)
       const marchRef = db.collection("marches").doc();

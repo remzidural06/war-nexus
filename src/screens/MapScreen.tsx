@@ -7,6 +7,7 @@ import { BattleResultModal } from '../components/BattleResultModal';
 import { colors } from '../theme/colors';
 import { formatNumber, formatDuration } from '../utils/formatters';
 import { UNIT_MAP } from '../data/units';
+import { calcMarchCost } from '../state/combatResolvers';
 import { t } from '../i18n';
 import type { BattleReport, MapTarget, MarchUnit } from '../state/types';
 
@@ -62,6 +63,7 @@ export function MapScreen() {
     getTotalTrainedUnits,
     attackTarget,
     birlikler,
+    canAfford,
   } = useDesertGame();
 
   const [reportTarget, setReportTarget] = useState<BattleReport | null>(null);
@@ -104,6 +106,17 @@ export function MapScreen() {
     }
     return power;
   }, [selectedBirlikler]);
+
+  const marchCost = useMemo(() => {
+    const units = selectedBirlikler.flatMap(bl =>
+      bl.slots.map(s => ({ unitId: s.unitId, count: s.count })),
+    );
+    return calcMarchCost(units, UNIT_MAP);
+  }, [selectedBirlikler]);
+
+  const canAffordMarch = useMemo(() => {
+    return canAfford(marchCost.cash, marchCost.oil, marchCost.ore);
+  }, [marchCost, canAfford]);
 
   const openAttackPanel = useCallback((target: MapTarget) => {
     setSelectedTarget(target);
@@ -183,7 +196,7 @@ export function MapScreen() {
 
                 <View style={styles.targetStats}>
                   <Text style={styles.targetStat}>🛡️ {target.defenseRating}</Text>
-                  <Text style={styles.targetStat}>⏱️ {formatDuration(target.travelSeconds)}</Text>
+                  <Text style={styles.targetStat}>⏱️ 3-5dk</Text>
                   {totalUnits > 0 && (
                     <Text style={[styles.winChance, { color: winChanceColor(pct) }]}>
                       {t('map.winChance', { pct: String(pct) })}
@@ -228,7 +241,7 @@ export function MapScreen() {
                 <View style={styles.attackTargetInfo}>
                   <Text style={styles.attackTargetName}>{selectedTarget.name}</Text>
                   <Text style={styles.attackTargetSub}>
-                    {selectedTarget.player} · 🛡️ {selectedTarget.defenseRating} · ⏱️ {formatDuration(selectedTarget.travelSeconds)}
+                    {selectedTarget.player} · 🛡️ {selectedTarget.defenseRating} · ⏱️ 3-5dk
                   </Text>
                 </View>
 
@@ -307,20 +320,21 @@ export function MapScreen() {
                         <Text style={styles.summaryPower}>⚔️ {birlikPower}</Text>
                       </View>
                       {birlikTotal > 0 && (
-                        <View style={styles.summaryRow}>
-                          <Text style={styles.summaryLabel}>Kazanma Şansı</Text>
-                          <Text style={[styles.summaryChance, { color: winChanceColor(winChance(birlikPower, selectedTarget.defenseRating)) }]}>
-                            %{winChance(birlikPower, selectedTarget.defenseRating)}
-                          </Text>
-                        </View>
+                        <>
+                          <View style={[styles.summaryRow, { marginTop: 4 }]}>
+                            <Text style={[styles.summaryLabel, !canAffordMarch && { color: colors.danger }]}>
+                              Sefer Maliyeti: 💵{formatNumber(marchCost.cash)} 🛢️{formatNumber(marchCost.oil)} ⛏️{formatNumber(marchCost.ore)}
+                            </Text>
+                          </View>
+                        </>
                       )}
                     </View>
 
                     {/* Saldır Butonu */}
                     <ActionButton
-                      label={activeMarch ? 'Sefer Devam Ediyor...' : birlikTotal < 1 ? 'Birlik Seç' : `⚔️ SALDIR (${birlikTotal} birim)`}
+                      label={activeMarch ? 'Sefer Devam Ediyor...' : birlikTotal < 1 ? 'Birlik Seç' : !canAffordMarch ? 'Yetersiz Kaynak' : `⚔️ SALDIR (${birlikTotal} birim)`}
                       onPress={handleAttack}
-                      disabled={!!activeMarch || birlikTotal < 1}
+                      disabled={!!activeMarch || birlikTotal < 1 || !canAffordMarch}
                     />
                   </>
                 )}

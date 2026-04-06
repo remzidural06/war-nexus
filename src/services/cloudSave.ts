@@ -33,21 +33,13 @@ export async function loadFromCloud(uid: string): Promise<PersistedGameState | n
 }
 
 /** playerPower olmayan oyuncuların gücünü playerBases'den hesapla ve players'a yaz */
-const POWER_TIER: Record<number, number> = { 1: 10, 2: 30, 3: 60, 4: 100 };
 function calcPower(state: any): number {
   const buildings = state?.buildings ?? [];
   const buildingPower = buildings.reduce((s: number, b: any) => { const l = b.level ?? 1; return s + l * (l + 1) / 2 * 100; }, 0);
-  const unitPower = buildings.reduce((s: number, b: any) => {
-    for (const [unitId, count] of Object.entries(b.trainedUnits ?? {})) {
-      const def = UNIT_MAP[unitId];
-      s += (count as number) * (POWER_TIER[def?.tier ?? 1] ?? 10);
-    }
-    return s;
-  }, 0);
   const researchPower = (state?.researchStates ?? [])
     .filter((r: any) => r.completed)
     .reduce((s: number) => s + 50, 0);
-  const basePower = buildingPower + unitPower + researchPower;
+  const basePower = buildingPower + researchPower;
   const cappedWarPower = Math.min(state?.warPower ?? 0, basePower);
   return basePower + cappedWarPower;
 }

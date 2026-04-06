@@ -11,6 +11,7 @@ import { useDesertGame } from '../state/DesertGameContext';
 import { t } from '../i18n';
 import { BUILDING_DEFINITIONS } from '../data/buildings';
 import { UNIT_MAP, getUnitLabel } from '../data/units';
+import { db } from '../services/firebase';
 import type { BuildingId, BattleReport } from '../state/types';
 import { BattleResultModal } from '../components/BattleResultModal';
 import { DraggableHotspot } from '../components/DraggableHotspot';
@@ -37,6 +38,7 @@ type PanelTab = 'overview' | 'units' | 'research' | 'harekat' | 'market';
 
 export function BaseScreen() {
   const {
+    uid,
     buildings,
     getUpgradeCost,
     getUpgradeTime,
@@ -62,6 +64,15 @@ export function BaseScreen() {
     speedUpWithGold,
     calcGoldCost,
   } = useDesertGame();
+
+  // ── Admin kontrolu ──────────────────────────────────────────
+  const [isAdmin, setIsAdmin] = useState(false);
+  React.useEffect(() => {
+    if (!uid) return;
+    db.players().doc(uid).get().then(doc => {
+      setIsAdmin(doc.exists() && doc.data()?.isAdmin === true);
+    }).catch(() => {});
+  }, [uid]);
 
   // ── Oyun paneli state ───────────────────────────────────────
   const [selectedId, setSelectedId] = useState<BuildingId | null>(null);
@@ -143,16 +154,18 @@ export function BaseScreen() {
 
   return (
     <View style={styles.root}>
-      {/* ── Editör toggle butonu ────────────────────────────── */}
-      <Pressable
-        style={[styles.editToggle, editMode && styles.editToggleActive]}
-        onPress={() => {
-          toggleEditMode();
-          if (selectedId) closePanel();
-        }}
-      >
-        <Text style={styles.editToggleText}>{editMode ? '✓ Editör' : t('base.editorInactive')}</Text>
-      </Pressable>
+      {/* ── Editör toggle butonu (sadece admin) ─────────────── */}
+      {isAdmin && (
+        <Pressable
+          style={[styles.editToggle, editMode && styles.editToggleActive]}
+          onPress={() => {
+            toggleEditMode();
+            if (selectedId) closePanel();
+          }}
+        >
+          <Text style={styles.editToggleText}>{editMode ? '✓ Editör' : t('base.editorInactive')}</Text>
+        </Pressable>
+      )}
 
       {/* ── Terrain canvas ──────────────────────────────────── */}
       <ScrollView

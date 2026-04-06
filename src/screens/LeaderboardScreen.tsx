@@ -11,6 +11,7 @@ import { formatNumber } from '../utils/formatters';
 import { useDesertGame } from '../state/DesertGameContext';
 import { db } from '../services/firebase';
 import { UNIT_MAP, getUnitLabel } from '../data/units';
+import { calcMarchCost } from '../state/combatResolvers';
 import { UnitImage } from '../components/UnitImage';
 import type { MarchUnit } from '../state/types';
 
@@ -27,18 +28,6 @@ type Entry = {
   isMe: boolean;
 };
 
-function winChance(attackPower: number, defenseRating: number): number {
-  if (attackPower <= 0) return 0;
-  const ratio = attackPower / (attackPower + defenseRating);
-  return Math.round(ratio * 100);
-}
-
-function winChanceColor(pct: number): string {
-  if (pct >= 70) return colors.success;
-  if (pct >= 40) return colors.medium;
-  return colors.danger;
-}
-
 export function LeaderboardScreen({ onOpenDM }: { onOpenDM?: (otherUid: string, otherName: string) => void } = {}) {
   const {
     uid,
@@ -49,6 +38,7 @@ export function LeaderboardScreen({ onOpenDM }: { onOpenDM?: (otherUid: string, 
     revengeTargets,
     alliance,
     shieldUntil,
+    canAfford,
   } = useDesertGame();
 
   const [tab, setTab] = useState<'players' | 'alliances'>('players');
@@ -174,6 +164,17 @@ export function LeaderboardScreen({ onOpenDM }: { onOpenDM?: (otherUid: string, 
     }
     return power;
   }, [selectedBirlikler]);
+
+  const marchCost = useMemo(() => {
+    const units = selectedBirlikler.flatMap(bl =>
+      bl.slots.map(s => ({ unitId: s.unitId, count: s.count })),
+    );
+    return calcMarchCost(units, UNIT_MAP);
+  }, [selectedBirlikler]);
+
+  const canAffordMarch = useMemo(() => {
+    return canAfford(marchCost.cash, marchCost.oil, marchCost.ore);
+  }, [marchCost, canAfford]);
 
   const openPlayer = (p: Entry) => {
     setSelected(p);
@@ -503,19 +504,20 @@ export function LeaderboardScreen({ onOpenDM }: { onOpenDM?: (otherUid: string, 
                         <Text style={s.summaryPower}>⚔️ {birlikPower}</Text>
                       </View>
                       {birlikTotal > 0 && (
-                        <View style={s.summaryRow}>
-                          <Text style={s.summaryLabel}>{t('leaderboard.winChance')}</Text>
-                          <Text style={[s.summaryChance, { color: winChanceColor(winChance(birlikPower, selected.warPower)) }]}>
-                            %{winChance(birlikPower, selected.warPower)}
-                          </Text>
-                        </View>
+                        <>
+                          <View style={[s.summaryRow, { marginTop: 4 }]}>
+                            <Text style={[s.summaryLabel, !canAffordMarch && { color: colors.danger }]}>
+                              Sefer: 💵{formatNumber(marchCost.cash)} 🛢️{formatNumber(marchCost.oil)} ⛏️{formatNumber(marchCost.ore)}
+                            </Text>
+                          </View>
+                        </>
                       )}
                     </View>
 
                     <View style={s.attackActions}>
                       <ActionButton
-                        label={Date.now() < shieldUntil ? t('shop.shieldAttackBlockedTitle') : cooldownLeft > 0 ? t('leaderboard.cooldownShort', { hours: Math.floor(cooldownLeft / 3600), minutes: Math.floor((cooldownLeft % 3600) / 60) }) : activeMarch ? t('leaderboard.marchInProgress') : birlikTotal < 1 ? t('leaderboard.selectSquadBtn') : t('leaderboard.attackWithUnits', { count: birlikTotal })}
-                        disabled={!!activeMarch || birlikTotal < 1 || cooldownLeft > 0 || Date.now() < shieldUntil}
+                        label={Date.now() < shieldUntil ? t('shop.shieldAttackBlockedTitle') : cooldownLeft > 0 ? t('leaderboard.cooldownShort', { hours: Math.floor(cooldownLeft / 3600), minutes: Math.floor((cooldownLeft % 3600) / 60) }) : activeMarch ? t('leaderboard.marchInProgress') : birlikTotal < 1 ? t('leaderboard.selectSquadBtn') : !canAffordMarch ? 'Yetersiz Kaynak' : t('leaderboard.attackWithUnits', { count: birlikTotal })}
+                        disabled={!!activeMarch || birlikTotal < 1 || cooldownLeft > 0 || Date.now() < shieldUntil || !canAffordMarch}
                         onPress={handleAttack}
                       />
                       <ActionButton label={t('leaderboard.back')} onPress={() => setPhase('info')} variant="secondary" />

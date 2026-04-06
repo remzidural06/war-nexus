@@ -16,7 +16,7 @@ import {
   calcDefenderPower,
   PVP_COOLDOWN_MS,
 } from './pvpHelpers';
-import { resolveMarchResult, resolveIncomingResult } from './combatResolvers';
+import { resolveMarchResult, resolveIncomingResult, calcTravelSeconds, calcMarchCost } from './combatResolvers';
 import { t } from '../i18n';
 import type {
   Resource,
@@ -79,14 +79,24 @@ export function useCombat(
   // Save functions
   scheduleSave: () => void,
   _saveNow: () => void,
+  // Wins/Losses persistent counters
+  winsRef: React.MutableRefObject<number>,
+  lossesRef: React.MutableRefObject<number>,
+  setWins: React.Dispatch<React.SetStateAction<number>>,
+  setLosses: React.Dispatch<React.SetStateAction<number>>,
 ) {
-  // ── Helper: add battle report + update ref ────────────────────
+  // ── Helper: add battle report + update ref + increment wins/losses ──
   const addBattleReport = useCallback((report: BattleReport) => {
     setBattleReports(prev => {
       const next = [report, ...prev].slice(0, 20);
       battleReportsRef.current = next;
       return next;
     });
+    if (report.won) {
+      setWins(prev => { const n = prev + 1; winsRef.current = n; return n; });
+    } else {
+      setLosses(prev => { const n = prev + 1; lossesRef.current = n; return n; });
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -144,26 +154,52 @@ export function useCombat(
     if (!canAttack(targetId, committedUnits)) return;
     const target = MAP_TARGETS.find(t => t.id === targetId);
     if (!target) return;
+    // Sefer maliyeti kontrolü ve kesintisi
+    const cost = marchUnits ? calcMarchCost(marchUnits, UNIT_MAP) : { cash: 0, oil: 0, ore: 0 };
+    if (marchUnits && !canAfford(cost.cash, cost.oil, cost.ore)) {
+      setToastMsg(t('attack.insufficientResources'));
+      return;
+    }
+    if (marchUnits) {
+      setResources(prev => prev.map(r => {
+        if (r.key === 'cash') return { ...r, amount: r.amount - cost.cash };
+        if (r.key === 'oil') return { ...r, amount: r.amount - cost.oil };
+        if (r.key === 'ore') return { ...r, amount: r.amount - cost.ore };
+        return r;
+      }));
+    }
     const power = getTotalAttackPower(committedUnits);
+    const travelSec = calcTravelSeconds(committedUnits);
     const march: March = {
       id: `march_${Date.now()}`,
       targetId,
       targetName,
       type: 'attack',
       committedUnits,
-      totalSeconds: target.travelSeconds,
-      secondsRemaining: target.travelSeconds,
+      totalSeconds: travelSec,
+      secondsRemaining: travelSec,
       attackPower: power,
       marchUnits,
+      marchCost: cost,
     };
     setActiveMarch(march);
     scheduleSave();
-  }, [canAttack, getTotalAttackPower, setActiveMarch, scheduleSave]);
+  }, [canAttack, canAfford, getTotalAttackPower, setActiveMarch, setResources, setToastMsg, scheduleSave]);
 
   // ── cancelMarch ───────────────────────────────────────────────
   const cancelMarch = useCallback(async () => {
     const march = marchRef.current;
     if (!march || march.type === 'return') return;
+    // Sefer maliyetini iade et
+    if (march.marchCost) {
+      const c = march.marchCost;
+      setResources(prev => prev.map(r => {
+        if (r.key === 'cash') return { ...r, amount: Math.min(r.capacity, r.amount + c.cash) };
+        if (r.key === 'oil') return { ...r, amount: Math.min(r.capacity, r.amount + c.oil) };
+        if (r.key === 'ore') return { ...r, amount: Math.min(r.capacity, r.amount + c.ore) };
+        return r;
+      }));
+    }
     // Firestore'daki march'i iptal olarak isaretle
     const fsId = firestoreMarchIdRef.current || march.id;
     setActiveMarch(null);
@@ -174,7 +210,7 @@ export function useCombat(
     } catch (err: any) {
       console.warn('[PvP] Iptal Firestore guncellenemedi:', err?.message);
     }
-  }, [marchRef, firestoreMarchIdRef, setActiveMarch, scheduleSave]);
+  }, [marchRef, firestoreMarchIdRef, setActiveMarch, setResources, scheduleSave]);
 
   // ── resolveMarch (CPU PvE) ────────────────────────────────────
   const resolveMarch = useCallback((march: March) => {
@@ -245,8 +281,8 @@ export function useCombat(
         const brs = battleReportsRef.current;
         syncPlayerProfile(uid, {
           warPower, hqLevel: hqLv, playerPower: playerPowerRef.current,
-          wins: brs.filter(r => r.won).length,
-          losses: brs.filter(r => !r.won).length,
+          wins: winsRef.current,
+          losses: lossesRef.current,
         });
       }, 1000);
     }
@@ -543,11 +579,25 @@ export function useCombat(
       return;
     }
 
+    // Sefer maliyeti kontrolü ve kesintisi
+    const marchCost = calcMarchCost(filteredMarchUnits, UNIT_MAP);
+    if (!canAfford(marchCost.cash, marchCost.oil, marchCost.ore)) {
+      setToastMsg(t('attack.insufficientResources'));
+      return;
+    }
+    setResources(prev => prev.map(r => {
+      if (r.key === 'cash') return { ...r, amount: r.amount - marchCost.cash };
+      if (r.key === 'oil') return { ...r, amount: r.amount - marchCost.oil };
+      if (r.key === 'ore') return { ...r, amount: r.amount - marchCost.ore };
+      return r;
+    }));
+
     // Guc hesabi: dogrudan marchUnits'ten (birlik bazli)
     const branchBonus = buildResearchBranchBonus(researchRef.current, RESEARCH_MAP);
     const attackPower = calcMarchAttackPower(filteredMarchUnits, UNIT_MAP, branchBonus);
 
-    const travelSeconds = 180; // 3 dakika sabit sefer suresi
+    const totalUnitCount = filteredMarchUnits.reduce((s, u) => s + u.count, 0);
+    const travelSeconds = calcTravelSeconds(totalUnitCount);
 
     // Firestore'a march yaz — id'yi al, sonra lokal state set et
     let attackerName = `Komutan_${uid.slice(0, 6)}`;
@@ -585,11 +635,12 @@ export function useCombat(
       secondsRemaining: travelSeconds,
       attackPower,
       marchUnits: filteredMarchUnits,
+      marchCost,
       isWarAttack,
     };
     setActiveMarch(march);
     scheduleSave();
-  }, [uid, marchRef, firestoreMarchIdRef, allianceRef, researchRef, getPvPCooldown, setToastMsg, setActiveMarch, scheduleSave]);
+  }, [uid, marchRef, firestoreMarchIdRef, allianceRef, researchRef, getPvPCooldown, canAfford, setResources, setToastMsg, setActiveMarch, scheduleSave]);
 
   // ── buyShield ─────────────────────────────────────────────────
   const buyShield = useCallback((durationMs: number, goldCost: number): boolean => {

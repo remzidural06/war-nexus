@@ -35,11 +35,10 @@ export function ProfileScreen() {
   const {
     displayName, uid, playerPower, buildings, battleReports,
     researchStates, getTotalTrainedUnits, missions, alliance,
+    wins, losses,
   } = useDesertGame();
 
   const hqLevel = buildings.find(b => b.id === 'hq')?.level ?? 1;
-  const wins = battleReports.filter(r => r.won).length;
-  const losses = battleReports.filter(r => !r.won).length;
   const totalUnits = getTotalTrainedUnits();
   const researchDone = researchStates.filter(r => r.completed).length;
   const missionsDone = missions.filter(m => m.claimed).length;

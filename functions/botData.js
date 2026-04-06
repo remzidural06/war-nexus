@@ -331,17 +331,10 @@ function getBotProfiles() {
     const resources = makeResources(p.hq);
     const researchStates = makeResearchStates(p.hq);
 
-    // Power hesapla
-    const POWER_TIER = { 1: 10, 2: 30, 3: 60, 4: 100 };
+    // Power hesapla (birim dahil değil)
     const buildingPower = buildings.reduce((s, b) => s + b.level * (b.level + 1) / 2 * 100, 0);
-    const unitPower = buildings.reduce((s, b) => {
-      for (const count of Object.values(b.trainedUnits ?? {})) {
-        s += (count ?? 0) * 10; // Basit tahmin
-      }
-      return s;
-    }, 0);
     const researchPower = researchStates.filter(r => r.completed).reduce((s) => s + 50, 0);
-    const playerPower = buildingPower + unitPower + researchPower;
+    const playerPower = buildingPower + researchPower;
 
     return {
       uid: `bot_${p.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,

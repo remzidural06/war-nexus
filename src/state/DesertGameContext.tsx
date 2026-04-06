@@ -127,6 +127,8 @@ interface DesertGameContextValue {
   targets: MapTarget[];
   activeMarch: March | null;
   battleReports: BattleReport[];
+  wins: number;
+  losses: number;
   incomingAttack: IncomingAttack | null;
   birlikler: Birlik[];
   addBirlik: (birlik: Birlik) => void;
@@ -197,6 +199,8 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
   const [birlikler, setBirlikler] = useState<Birlik[]>([]);
   const [shieldUntil, setShieldUntil] = useState(0);
   const [warPower, setWarPower] = useState(0);
+  const [wins, setWins] = useState(0);
+  const [losses, setLosses] = useState(0);
   const [lastBattleReport, setLastBattleReport] = useState<BattleReport | null>(null);
   const [pvpTargets, setPvpTargets] = useState<PvPTarget[]>([]);
   const [pvpLoading, setPvpLoading] = useState(false);
@@ -380,6 +384,14 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
             if (saved.pvpCooldowns) setPvpCooldowns(saved.pvpCooldowns);
             if (saved.revengeTargets) setRevengeTargets(saved.revengeTargets);
             if (saved.shieldUntil && saved.shieldUntil > Date.now()) setShieldUntil(saved.shieldUntil);
+            // Wins/Losses: persistent sayaçları yükle (yoksa battleReports'tan türet)
+            const restoredBrs = saved.battleReports ?? [];
+            const restoredWins = saved.wins ?? restoredBrs.filter((r: any) => r.won).length;
+            const restoredLosses = saved.losses ?? restoredBrs.filter((r: any) => !r.won).length;
+            setWins(restoredWins);
+            setLosses(restoredLosses);
+            winsRef.current = restoredWins;
+            lossesRef.current = restoredLosses;
             // Görevleri merge et + mevcut durumla senkronize et
             const savedMissions = saved.missions ?? [];
             const merged = INITIAL_MISSIONS.map(ini => {
@@ -502,19 +514,12 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
         setTimeout(() => {
           const blds = buildingsRef.current;
           const bp = blds.reduce((s: number, b: any) => { const l = b.level ?? 1; return s + l * (l + 1) / 2 * 100; }, 0);
-          const up = blds.reduce((s: number, b: any) => {
-            for (const [uId, cnt] of Object.entries(b.trainedUnits ?? {})) {
-              const def = UNIT_MAP[uId];
-              s += (cnt as number) * ({ 1: 10, 2: 30, 3: 60, 4: 100 }[def?.tier ?? 1] ?? 10);
-            }
-            return s;
-          }, 0);
           const rp = researchRef.current.filter((r: any) => r.completed).reduce((s: number, r: any) => {
             const node = RESEARCH_MAP[r.nodeId];
             return s + (node?.tier ?? 1) * 50;
           }, 0);
           const hqLv = blds.find((b: any) => b.id === 'hq')?.level ?? 1;
-          const pw = bp + up + rp;
+          const pw = bp + rp;
           syncPlayerProfile(uid, { playerPower: pw, hqLevel: hqLv });
         }, 2000);
         migratePlayerPower();
@@ -543,6 +548,8 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
         pvpCooldowns: pvpCooldownsRef.current,
         revengeTargets: revengeTargetsRef.current,
         shieldUntil: shieldUntilRef.current,
+        wins: winsRef.current,
+        losses: lossesRef.current,
       };
       // Yerel kayıt (offline cache)
       AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ ...payload, uid }));
@@ -551,21 +558,13 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
         const _user = getCurrentUser();
         saveToCloud(uid, payload, _user?.displayName ?? undefined);
         const hqLv = buildingsRef.current.find(b => b.id === 'hq')?.level ?? 1;
-        // playerPower doğrudan hesapla (closure'da mevcut değil)
-        const blds = buildingsRef.current;
-        const _bp = blds.reduce((s, b) => s + b.level * (b.level + 1) / 2 * 100, 0);
-        const _up = blds.reduce((s, b) => {
-          for (const [uId, cnt] of Object.entries(b.trainedUnits ?? {})) {
-            const def = UNIT_MAP[uId];
-            s += (cnt as number) * ({ 1: 10, 2: 30, 3: 60, 4: 100 }[def?.tier ?? 1] ?? 10);
-          }
-          return s;
-        }, 0);
+        // playerPower: bina + araştırma + warPower (birim dahil değil)
+        const _bp = buildingsRef.current.reduce((s, b) => s + b.level * (b.level + 1) / 2 * 100, 0);
         const _rp = researchRef.current.filter(r => r.completed).reduce((s, r) => {
           const node = RESEARCH_MAP[r.nodeId];
           return s + (node?.tier ?? 1) * 50;
         }, 0);
-        const _basePower = _bp + _up + _rp;
+        const _basePower = _bp + _rp;
         const pw = _basePower + Math.min(warPower, _basePower);
         syncPlayerProfile(uid, { warPower, hqLevel: hqLv, playerPower: pw });
       }
@@ -592,6 +591,8 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       pvpCooldowns,
       revengeTargets,
       shieldUntil: shieldUntilRef.current,
+      wins: winsRef.current,
+      losses: lossesRef.current,
     };
     const json = JSON.stringify(payload);
     // Web'de localStorage senkron — beforeunload'da kesin kaydedilir
@@ -772,6 +773,10 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
   useEffect(() => { marchRef.current = activeMarch; }, [activeMarch]);
   useEffect(() => { birliklerRef.current = birlikler; }, [birlikler]);
   useEffect(() => { battleReportsRef.current = battleReports; }, [battleReports]);
+  const winsRef = useRef(wins);
+  useEffect(() => { winsRef.current = wins; }, [wins]);
+  const lossesRef = useRef(losses);
+  useEffect(() => { lossesRef.current = losses; }, [losses]);
   const pvpCooldownsRef = useRef(pvpCooldowns);
   useEffect(() => { pvpCooldownsRef.current = pvpCooldowns; }, [pvpCooldowns]);
   const revengeTargetsRef = useRef(revengeTargets);
@@ -1004,6 +1009,8 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     getTotalTrainedUnits,
     // Save functions
     scheduleSave, saveNow,
+    // Wins/Losses persistent counters
+    winsRef, lossesRef, setWins, setLosses,
   );
   resolveMarchRef.current = resolveMarch;
   resolveIncomingAttackRef.current = resolveIncomingAttack;
@@ -1018,28 +1025,26 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       const timer = setTimeout(() => {
         hasSyncedRef.current = true;
         const hqLv = buildingsRef.current.find(b => b.id === 'hq')?.level ?? 1;
-        const brs = battleReportsRef.current;
         let dn: string | undefined;
         try { const u = getCurrentUser(); dn = u?.displayName ?? undefined; } catch {}
         syncPlayerProfile(uid, {
           displayName: dn, warPower, hqLevel: hqLv, playerPower,
-          wins: brs.filter(r => r.won).length,
-          losses: brs.filter(r => !r.won).length,
+          wins: winsRef.current,
+          losses: lossesRef.current,
         });
       }, 2000);
       return () => clearTimeout(timer);
     }
     // Sonraki değişikliklerde hemen sync
     const hqLv = buildingsRef.current.find(b => b.id === 'hq')?.level ?? 1;
-    const brs = battleReportsRef.current;
     let dn2: string | undefined;
     try { const u = getCurrentUser(); dn2 = u?.displayName ?? undefined; } catch {}
     syncPlayerProfile(uid, {
       displayName: dn2, warPower, hqLevel: hqLv, playerPower,
-      wins: brs.filter(r => r.won).length,
-      losses: brs.filter(r => !r.won).length,
+      wins: winsRef.current,
+      losses: lossesRef.current,
     });
-  }, [playerPower, uid, loaded, battleReports, warPower]);
+  }, [playerPower, uid, loaded, wins, losses, warPower]);
 
   // ── PvP callbacks (extracted to useCombat) ──────────────────
 
@@ -1416,8 +1421,8 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
           // Kaybeden tarafın playerPower'ını da güncelle (oyunda olmasa bile sıralamada güncel görünsün)
           const defUid = activeMarch?.targetId;
           if (defUid && won) {
-            // Savunan kaybetti: birim kayıplarını düş ve yeni power hesapla
-            const newDefPower = Math.max(0, defPlayerPower - result.totalDefenderDestroyed * 10 - transferPower);
+            // Savunan kaybetti: warPower kaybını yansıt (birim kayıpları power'ı etkilemez)
+            const newDefPower = Math.max(0, defPlayerPower - transferPower);
             syncPlayerProfile(defUid, { playerPower: newDefPower });
           } else if (defUid && !won) {
             // Savunan kazandı: warPower artışını yansıt
@@ -1476,6 +1481,8 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     ),
     activeMarch,
     battleReports,
+    wins,
+    losses,
     incomingAttack,
     birlikler,
     addBirlik,
@@ -1521,7 +1528,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     buildings, getBuilding, canUpgradeBuilding, upgradeBuilding, getUpgradeCost, getUpgradeTime,
     researchStates, isResearched, canStartResearch, startResearch, getAvailableResearch, getUnlockedUnitsForBuilding,
     getTrainedCount, getTotalTrainedUnits, getUnitCap, getBuildingUnitCount, canStartTraining, startTraining, getTrainingCost, getMaxTrainable, adjustTrainedUnits,
-    activeMarch, battleReports, incomingAttack, birlikler, addBirlik, removeBirlik, shieldUntil, buyShield, buyWarPower,
+    activeMarch, battleReports, wins, losses, incomingAttack, birlikler, addBirlik, removeBirlik, shieldUntil, buyShield, buyWarPower,
     playerPower, lastBattleReport, clearLastBattleReport, getTotalAttackPower, canAttack, attackTarget, cancelMarch,
     pvpTargets, pvpLoading, refreshPvPTargets, attackPvPTarget, getPvPCooldown, revengeTargets, scheduleSave,
     allianceContribution, canDonate, donate, canRequestHelp, requestHelp,

@@ -1210,6 +1210,21 @@ exports.inspectPlayer = onRequest(
   }
 );
 
+// ── Push notification endpoint (admin kullanımı) ─────────────
+exports.sendPushNotificationEndpoint = onRequest(
+  { region: "us-central1" },
+  async (req, res) => {
+    const { targetUid, title, body, category } = req.body ?? {};
+    if (!targetUid || !title) return res.status(400).json({ error: "targetUid ve title gerekli" });
+    try {
+      await sendPushNotification(targetUid, title, body ?? '', category ?? 'missions');
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
 // ── Debug: aktif savaşları göster ────────────────────────────
 exports.debugWars = onRequest(
   { region: "us-central1" },

@@ -1519,12 +1519,10 @@ export const UNIT_MAP: Record<string, UnitDefinition> = Object.fromEntries(
 );
 
 /** Dile gore birim ismi dondur */
+import { getLocale } from '../i18n';
 export function getUnitLabel(unit: UnitDefinition | undefined, fallback = ''): string {
   if (!unit) return fallback;
-  try {
-    const { getLocale } = require('../i18n');
-    return getLocale() === 'en' ? (unit.labelEn ?? unit.label) : unit.label;
-  } catch { return unit.label; }
+  return getLocale() === 'en' ? (unit.labelEn ?? unit.label) : unit.label;
 }
 
 export function getUnitsForBuilding(

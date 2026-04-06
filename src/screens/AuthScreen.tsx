@@ -1,18 +1,37 @@
-import React, { useState } from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors } from '../theme/colors';
-import { signInWithEmail, signUpWithEmail, signInWithGoogle } from '../services/authService';
+import { signInWithEmail, signUpWithEmail, signInWithGoogle, sendPasswordReset } from '../services/authService';
 import { t, setLocale, getLocale, LOCALES, type Locale } from '../i18n';
+
+const REMEMBER_KEY = 'war-nexus-remember';
 
 export function AuthScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [lang, setLang] = useState<Locale>(getLocale());
+
+  // Beni Hatırla: kayıtlı email/şifreyi yükle
+  useEffect(() => {
+    AsyncStorage.getItem(REMEMBER_KEY).then(val => {
+      if (val) {
+        try {
+          const { email: e, password: p } = JSON.parse(val);
+          if (e) setEmail(e);
+          if (p) setPassword(p);
+          setRememberMe(true);
+        } catch {}
+      }
+    });
+  }, []);
 
   const handleEmail = async () => {
     if (mode === 'register' && !username.trim()) {
@@ -33,11 +52,18 @@ export function AuthScreen() {
     }
     setLoading(true);
     setError(null);
+    setSuccessMsg(null);
     try {
       if (mode === 'register') {
         await signUpWithEmail(email.trim(), password, username.trim());
       } else {
         await signInWithEmail(email.trim(), password);
+      }
+      // Beni Hatırla: başarılı girişte kaydet veya sil
+      if (rememberMe) {
+        AsyncStorage.setItem(REMEMBER_KEY, JSON.stringify({ email: email.trim(), password }));
+      } else {
+        AsyncStorage.removeItem(REMEMBER_KEY);
       }
     } catch (err: any) {
       const code = err?.code;
@@ -49,6 +75,26 @@ export function AuthScreen() {
       else setError(err?.message ?? t('auth.errorGeneric'));
       setLoading(false);
     }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      setError(t('auth.errorEmailRequired'));
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    setSuccessMsg(null);
+    try {
+      await sendPasswordReset(email.trim());
+      setSuccessMsg(t('auth.resetSent'));
+    } catch (err: any) {
+      const code = err?.code;
+      if (code === 'auth/user-not-found') setError(t('auth.errorUserNotFound'));
+      else if (code === 'auth/invalid-email') setError(t('auth.errorInvalidEmail'));
+      else setError(err?.message ?? t('auth.errorGeneric'));
+    }
+    setLoading(false);
   };
 
   const handleGoogle = async () => {
@@ -126,6 +172,21 @@ export function AuthScreen() {
           />
         )}
 
+        {/* Beni Hatırla + Şifremi Unuttum */}
+        {mode === 'login' && (
+          <View style={s.rememberRow}>
+            <Pressable style={s.rememberBtn} onPress={() => setRememberMe(!rememberMe)}>
+              <View style={[s.checkbox, rememberMe && s.checkboxActive]}>
+                {rememberMe && <Text style={s.checkmark}>✓</Text>}
+              </View>
+              <Text style={s.rememberText}>{t('auth.rememberMe')}</Text>
+            </Pressable>
+            <Pressable onPress={handleForgotPassword}>
+              <Text style={s.forgotText}>{t('auth.forgotPassword')}</Text>
+            </Pressable>
+          </View>
+        )}
+
         <Pressable
           style={[s.btn, s.emailBtn]}
           onPress={handleEmail}
@@ -141,6 +202,7 @@ export function AuthScreen() {
         </Pressable>
 
         {error && <Text style={s.errorText}>{error}</Text>}
+        {successMsg && <Text style={s.successText}>{successMsg}</Text>}
 
         {/* Divider + Google */}
         <View style={s.divider}>
@@ -222,6 +284,21 @@ const s = StyleSheet.create({
   googleBtnText: { color: '#444', fontSize: 15, fontWeight: '600' },
   btnText: { color: '#fff', fontSize: 16, fontWeight: '700', letterSpacing: 1 },
   errorText: { color: colors.danger, fontSize: 12, textAlign: 'center' },
+  successText: { color: colors.success, fontSize: 12, textAlign: 'center' },
+  rememberRow: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    marginVertical: 2,
+  },
+  rememberBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  checkbox: {
+    width: 18, height: 18, borderRadius: 3,
+    borderWidth: 1.5, borderColor: colors.textMuted,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  checkboxActive: { backgroundColor: colors.sand, borderColor: colors.sand },
+  checkmark: { color: '#000', fontSize: 12, fontWeight: '900', marginTop: -1 },
+  rememberText: { color: colors.textSecondary, fontSize: 12 },
+  forgotText: { color: colors.sand, fontSize: 12, fontWeight: '600' },
   divider: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 4 },
   dividerLine: { flex: 1, height: 1, backgroundColor: colors.panelBorder },
   dividerText: { color: colors.textMuted, fontSize: 12 },

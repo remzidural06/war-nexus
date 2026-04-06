@@ -18,13 +18,14 @@ import { CF_BASE as CF } from '../services/firebase';
 const CF2 = 'https://{NAME}-azlw7h3x7q-uc.a.run.app';
 function cfUrl(name: string) { return CF2.replace('{NAME}', name.toLowerCase()); }
 
-type Tab = 'players' | 'alliance' | 'bots' | 'wars' | 'server' | 'chat';
+type Tab = 'players' | 'alliance' | 'bots' | 'wars' | 'server' | 'chat' | 'tickets';
 
 const TABS: { key: Tab; label: string; icon: string }[] = [
   { key: 'players', label: 'Oyuncular', icon: '👤' },
   { key: 'alliance', label: 'İttifak', icon: '🏰' },
   { key: 'bots', label: 'Botlar', icon: '🤖' },
   { key: 'wars', label: 'Savaş', icon: '⚔️' },
+  { key: 'tickets', label: 'Ticketlar', icon: '📩' },
   { key: 'server', label: 'Sunucu', icon: '🖥️' },
   { key: 'chat', label: 'Sohbet', icon: '💬' },
 ];
@@ -42,7 +43,7 @@ interface PlayerInfo {
 }
 
 export function AdminScreen() {
-  const [tab, setTab] = useState<Tab>('players');
+  const [tab, setTab] = useState<Tab | null>(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('');
   const [log, setLog] = useState('');
@@ -62,6 +63,76 @@ export function AdminScreen() {
 
   // Chat
   const [sysMsg, setSysMsg] = useState('');
+
+  // Tickets
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [ticketReply, setTicketReply] = useState('');
+  const [selTicket, setSelTicket] = useState<any>(null);
+
+  async function loadTickets() {
+    setLoading(true);
+    try {
+      const snap = await db.tickets().orderBy('createdAt', 'desc').limit(50).get();
+      setTickets(snap.docs.map(d => {
+        const data = d.data();
+        const date = new Date(data.createdAt);
+        return {
+          id: d.id, ...data,
+          dateStr: `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`,
+        };
+      }));
+    } catch (e: any) { showStatus('Hata: ' + e.message); }
+    setLoading(false);
+  }
+
+  async function replyTicket(ticketId: string, reply: string) {
+    try {
+      const ticketSnap = await db.tickets().doc(ticketId).get();
+      const ticketData = ticketSnap.data();
+      await db.tickets().doc(ticketId).update({
+        adminReply: reply,
+        status: 'answered',
+        repliedAt: Date.now(),
+        readByUser: false,
+      });
+      // Push notification gönder
+      if (ticketData?.uid) {
+        try {
+          await fetch(`${CF}/sendPushNotificationEndpoint`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              targetUid: ticketData.uid,
+              title: '📩 Destek talebiniz cevaplandı',
+              body: reply.slice(0, 100),
+              category: 'missions',
+            }),
+          });
+        } catch {}
+      }
+      showStatus('✓ Cevap gönderildi');
+      setTicketReply('');
+      setSelTicket(null);
+      loadTickets();
+    } catch (e: any) { showStatus('Hata: ' + e.message); }
+  }
+
+  async function closeTicket(ticketId: string) {
+    try {
+      await db.tickets().doc(ticketId).update({ status: 'closed' });
+      showStatus('✓ Ticket kapatıldı');
+      loadTickets();
+    } catch (e: any) { showStatus('Hata: ' + e.message); }
+  }
+
+  async function deleteTicket(ticketId: string) {
+    try {
+      await db.tickets().doc(ticketId).delete();
+      showStatus('✓ Ticket silindi');
+      setTickets(prev => prev.filter(t => t.id !== ticketId));
+      if (selTicket?.id === ticketId) setSelTicket(null);
+    } catch (e: any) { showStatus('Hata: ' + e.message); }
+  }
 
   const showStatus = (s: string) => { setStatus(s); setTimeout(() => setStatus(''), 5000); };
   const addLog = (s: string) => setLog(prev => `[${new Date().toLocaleTimeString('tr-TR')}] ${s}\n${prev}`.slice(0, 3000));
@@ -252,17 +323,28 @@ export function AdminScreen() {
     <ScrollView style={s.container} contentContainerStyle={s.content}>
       <Text style={s.title}>⚙️ Admin Paneli</Text>
 
-      {/* Tab Bar */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
-        {TABS.map(t => (
-          <Pressable key={t.key} onPress={() => setTab(t.key)} style={[s.tab, tab === t.key && s.tabActive]}>
-            <Text style={[s.tabText, tab === t.key && s.tabTextActive]}>{t.icon} {t.label}</Text>
-          </Pressable>
-        ))}
-      </ScrollView>
-
       {/* Status */}
       {status ? <View style={s.statusBar}><Text style={s.statusText}>{status}</Text></View> : null}
+
+      {/* Ana Menü — tab seçilmemişse alt alta liste göster */}
+      {tab === null as any && (
+        <View style={{ gap: 8 }}>
+          {TABS.map(t => (
+            <Pressable key={t.key} onPress={() => setTab(t.key)} style={s.menuItem}>
+              <Text style={s.menuIcon}>{t.icon}</Text>
+              <Text style={s.menuLabel}>{t.label}</Text>
+              <Text style={s.menuArrow}>›</Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
+
+      {/* Geri butonu — tab seçiliyse */}
+      {tab !== null && (
+        <Pressable onPress={() => setTab(null as any)} style={s.backBtn}>
+          <Text style={s.backBtnText}>← Geri</Text>
+        </Pressable>
+      )}
 
       {/* ══════════ OYUNCULAR ══════════ */}
       {tab === 'players' && (
@@ -490,6 +572,63 @@ export function AdminScreen() {
         </View>
       )}
 
+      {/* ══════════ TICKETLAR ══════════ */}
+      {tab === 'tickets' && (
+        <View>
+          {renderBtn('Ticketları Yükle', loadTickets)}
+          {tickets.length > 0 && (
+            <View style={{ marginTop: 10 }}>
+              <Text style={s.section}>📩 Ticketlar ({tickets.length})</Text>
+              {tickets.map(tk => (
+                <Pressable key={tk.id} style={[s.card, selTicket?.id === tk.id && s.cardActive]} onPress={() => { setSelTicket(selTicket?.id === tk.id ? null : tk); setTicketReply(''); }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <Text style={s.cardTitle}>{tk.displayName}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                      <Text style={{ color: tk.status === 'open' ? colors.sand : tk.status === 'answered' ? '#4CAF50' : colors.textMuted, fontSize: 10, fontWeight: '700' }}>
+                        {tk.status === 'open' ? 'Bekliyor' : tk.status === 'answered' ? 'Cevaplandı' : 'Kapatıldı'}
+                      </Text>
+                      <Pressable onPress={() => deleteTicket(tk.id)}>
+                        <Text style={{ color: colors.danger, fontSize: 14 }}>🗑️</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                  <Text style={s.cardSub}>{tk.category} · {tk.dateStr}</Text>
+                  <Text style={{ color: colors.textPrimary, fontSize: 12, marginTop: 4 }}>{tk.message}</Text>
+                  {tk.adminReply && (
+                    <View style={{ backgroundColor: '#1a3c2a', borderRadius: 4, padding: 8, marginTop: 6 }}>
+                      <Text style={{ color: '#4CAF50', fontSize: 10, fontWeight: '700' }}>Admin Cevabı:</Text>
+                      <Text style={{ color: colors.textPrimary, fontSize: 11, marginTop: 2 }}>{tk.adminReply}</Text>
+                    </View>
+                  )}
+                  {tk.userReply && (
+                    <View style={{ backgroundColor: '#2a2a1a', borderRadius: 4, padding: 8, marginTop: 6, borderWidth: 1, borderColor: colors.sand }}>
+                      <Text style={{ color: colors.sand, fontSize: 10, fontWeight: '700' }}>Oyuncu Yanıtı:</Text>
+                      <Text style={{ color: colors.textPrimary, fontSize: 11, marginTop: 2 }}>{tk.userReply}</Text>
+                    </View>
+                  )}
+                  {selTicket?.id === tk.id && tk.status !== 'closed' && (
+                    <View style={{ marginTop: 8, gap: 6 }}>
+                      <TextInput
+                        style={[s.input, { height: 60, textAlignVertical: 'top' }]}
+                        placeholder="Cevap yaz..."
+                        placeholderTextColor={colors.textMuted}
+                        value={ticketReply}
+                        onChangeText={setTicketReply}
+                        multiline
+                      />
+                      <View style={{ flexDirection: 'row', gap: 6 }}>
+                        {renderBtn('Cevapla', () => replyTicket(tk.id, ticketReply), '#27ae60', !ticketReply.trim())}
+                        {renderBtn('Kapat', () => closeTicket(tk.id), '#e74c3c')}
+                      </View>
+                    </View>
+                  )}
+                </Pressable>
+              ))}
+            </View>
+          )}
+        </View>
+      )}
+
       {/* ══════════ SOHBET ══════════ */}
       {tab === 'chat' && (
         <View>
@@ -585,4 +724,14 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: colors.panelBorder, maxHeight: 200,
   },
   logText: { color: colors.textMuted, fontSize: 10, fontFamily: 'monospace' },
+  menuItem: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.panelBorder,
+    borderRadius: 8, padding: 16, gap: 12,
+  },
+  menuIcon: { fontSize: 22 },
+  menuLabel: { color: '#fff', fontSize: 16, fontWeight: '700', flex: 1 },
+  menuArrow: { color: colors.textMuted, fontSize: 22, fontWeight: '300' },
+  backBtn: { marginBottom: 12 },
+  backBtnText: { color: colors.sand, fontSize: 14, fontWeight: '700' },
 });

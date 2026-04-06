@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { colors } from '../../theme/colors';
 import { t } from '../../i18n';
 import { formatNumber } from '../../utils/formatters';
 import { styles } from '../../screens/AllianceScreen.styles';
+import { UNIT_MAP } from '../../data/units';
+import { calcMarchCost } from '../../state/combatResolvers';
 import type { AllianceWar, AllianceData, AllianceMemberData, Birlik } from '../../state/types';
 
 interface WarTabProps {
@@ -19,9 +21,10 @@ interface WarTabProps {
   activeMarch: any;
   attackPvPTarget: any;
   getPvPCooldown: (uid: string) => number;
+  canAfford: (cash: number, oil: number, ore: number) => boolean;
 }
 
-export function WarTab({ activeWar, myAllianceName, myRank, myAllianceId, warBattleLogs: _warBattleLogs, onDeclareWar, onGetEnemyMembers, getAllianceRankings, birlikler, activeMarch, attackPvPTarget, getPvPCooldown }: WarTabProps) {
+export function WarTab({ activeWar, myAllianceName, myRank, myAllianceId, warBattleLogs: _warBattleLogs, onDeclareWar, onGetEnemyMembers, getAllianceRankings, birlikler, activeMarch, attackPvPTarget, getPvPCooldown, canAfford }: WarTabProps) {
   const [targets, setTargets] = useState<AllianceData[]>([]);
   const [enemyMembers, setEnemyMembers] = useState<AllianceMemberData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -62,6 +65,17 @@ export function WarTab({ activeWar, myAllianceName, myRank, myAllianceId, warBat
 
   const selectedBirlikler = birlikler.filter(b => selectedBirlikIds.has(b.id));
   const birlikTotal = selectedBirlikler.reduce((sum, bl) => sum + bl.slots.reduce((a, s) => a + s.count, 0), 0);
+
+  const marchCost = useMemo(() => {
+    const units = selectedBirlikler.flatMap(bl =>
+      bl.slots.map(s => ({ unitId: s.unitId, count: s.count })),
+    );
+    return calcMarchCost(units, UNIT_MAP);
+  }, [selectedBirlikler]);
+
+  const canAffordMarch = useMemo(() => {
+    return canAfford(marchCost.cash, marchCost.oil, marchCost.ore);
+  }, [marchCost, canAfford]);
 
   function handleAttack() {
     if (!attackTarget || birlikTotal < 1) return;
@@ -198,12 +212,22 @@ export function WarTab({ activeWar, myAllianceName, myRank, myAllianceId, warBat
                         </Pressable>
                       );
                     })}
+                    {birlikTotal > 0 && (
+                      <View style={{ marginHorizontal: 12, marginTop: 10, backgroundColor: colors.surfaceAlt, borderRadius: 6, borderWidth: 1, borderColor: canAffordMarch ? colors.panelBorder : colors.danger, padding: 10 }}>
+                        <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: '600', marginBottom: 6, textAlign: 'center' }}>Sefer Maliyeti</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                          <Text style={{ color: canAffordMarch ? colors.textPrimary : colors.danger, fontSize: 13, fontWeight: '700' }}>💵 {formatNumber(marchCost.cash)}</Text>
+                          <Text style={{ color: canAffordMarch ? colors.textPrimary : colors.danger, fontSize: 13, fontWeight: '700' }}>🛢️ {formatNumber(marchCost.oil)}</Text>
+                          <Text style={{ color: canAffordMarch ? colors.textPrimary : colors.danger, fontSize: 13, fontWeight: '700' }}>⛏️ {formatNumber(marchCost.ore)}</Text>
+                        </View>
+                      </View>
+                    )}
                     <Pressable
-                      style={[styles.warDeclareBtn, birlikTotal < 1 && { opacity: 0.4 }]}
-                      disabled={birlikTotal < 1}
+                      style={[styles.warDeclareBtn, (birlikTotal < 1 || !canAffordMarch) && { opacity: 0.4 }]}
+                      disabled={birlikTotal < 1 || !canAffordMarch}
                       onPress={handleAttack}
                     >
-                      <Text style={styles.warDeclareBtnText}>{t('alliance.attackWithUnits', { count: String(birlikTotal) })}</Text>
+                      <Text style={styles.warDeclareBtnText}>{!canAffordMarch && birlikTotal > 0 ? 'Yetersiz Kaynak' : t('alliance.attackWithUnits', { count: String(birlikTotal) })}</Text>
                     </Pressable>
                   </>
                 )}

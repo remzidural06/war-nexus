@@ -2,7 +2,7 @@
  * War Nexus — Native entry point (Android / iOS)
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, StatusBar, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { AuthScreen } from './src/screens/AuthScreen';
 import { UsernameScreen } from './src/screens/UsernameScreen';
@@ -25,7 +25,10 @@ import { DirectMessageModal } from './src/components/DirectMessageModal';
 import { useDirectMessages } from './src/state/useDirectMessages';
 import { onAuthStateChanged, hasPlayerProfile } from './src/services/authService';
 import type { AuthUser } from './src/services/authService';
+import { AdminScreen } from './src/screens/AdminScreen';
 import { colors } from './src/theme/colors';
+
+const ADMIN_UID = 'fDXCXZYZr1PapwTjAlsM3RZoKRn1';
 
 function IncomingAttackOverlay() {
   const { incomingAttack, getTotalTrainedUnits } = useDesertGame();
@@ -51,6 +54,8 @@ function GameAppInner() {
   const [activeTab, setActiveTab] = useState<RootTab>('base');
   const [showGlobalChat, setShowGlobalChat] = useState(false);
   const [showDM, setShowDM] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
+  const isAdmin = uid === ADMIN_UID;
 
   const dm = useDirectMessages(uid ?? null, displayName ?? '');
   const dmOpenChatRef = useRef(dm.openChat);
@@ -78,6 +83,7 @@ function GameAppInner() {
     <>
       <TopBar
         onOpenProfile={() => setActiveTab(activeTab === 'profile' ? 'base' : 'profile')}
+        onOpenAdmin={isAdmin ? () => setShowAdmin(true) : undefined}
         onOpenHelp={() => setActiveTab(activeTab === 'help' ? 'base' : 'help')}
         onOpenGlobalChat={() => setShowGlobalChat(true)}
         onOpenDM={() => setShowDM(true)}
@@ -100,6 +106,14 @@ function GameAppInner() {
         onSendMessage={dm.sendMessage}
         onDeleteConversation={dm.deleteConversation}
       />
+      {showAdmin && (
+        <View style={StyleSheet.absoluteFill}>
+          <Pressable style={s.adminCloseX} onPress={() => setShowAdmin(false)}>
+            <Text style={s.adminCloseXText}>✕</Text>
+          </Pressable>
+          <AdminScreen />
+        </View>
+      )}
       <BottomTabs activeTab={activeTab} onChange={setActiveTab as any} />
     </>
   );
@@ -194,4 +208,16 @@ const s = StyleSheet.create({
   },
   splashLogo: { width: 340, height: 250 },
   splashSpinner: { marginTop: 24 },
+  adminClose: {
+    position: 'absolute', bottom: 40, alignSelf: 'center',
+    backgroundColor: colors.danger, paddingHorizontal: 24, paddingVertical: 12,
+    borderRadius: 8,
+  },
+  adminCloseText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+  adminCloseX: {
+    position: 'absolute', top: 12, right: 12, zIndex: 999,
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: 'rgba(0,0,0,0.7)', alignItems: 'center', justifyContent: 'center',
+  },
+  adminCloseXText: { color: '#fff', fontSize: 18, fontWeight: '700' },
 });

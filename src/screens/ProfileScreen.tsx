@@ -29,7 +29,16 @@ import { signOut, updateDisplayName, canChangeName, getCurrentUser } from '../se
 import { MilitaryPanel } from '../components/MilitaryPanel';
 import { formatNumber } from '../utils/formatters';
 import { ActionButton } from '../components/ActionButton';
-import { db } from '../services/firebase';
+import { db, firestore } from '../services/firebase';
+
+type TicketCategory = 'bug' | 'complaint' | 'suggestion' | 'request' | 'other';
+const TICKET_CATEGORIES: { key: TicketCategory; label: string }[] = [
+  { key: 'bug', label: 'Hata' },
+  { key: 'complaint', label: 'Şikayet' },
+  { key: 'suggestion', label: 'Öneri' },
+  { key: 'request', label: 'İstek' },
+  { key: 'other', label: 'Diğer' },
+];
 
 export function ProfileScreen() {
   const {
@@ -59,6 +68,105 @@ export function ProfileScreen() {
   const [lang, setLang] = useState(getLocale());
   const [email, setEmail] = useState<string | null>(null);
   const [_provider, _setProvider] = useState<string | null>(null);
+
+  // Destek & Geri Bildirim
+  const [showTicketForm, setShowTicketForm] = useState(false);
+  const [ticketCategory, setTicketCategory] = useState<TicketCategory>('bug');
+  const [ticketMessage, setTicketMessage] = useState('');
+  const [ticketSending, setTicketSending] = useState(false);
+  const [myTickets, setMyTickets] = useState<any[]>([]);
+  const [replyingTicketId, setReplyingTicketId] = useState<string | null>(null);
+  const [ticketReplyMsg, setTicketReplyMsg] = useState('');
+
+  const unreadTicketCount = myTickets.filter(tk => tk.status === 'answered' && tk.readByUser === false).length;
+
+  useEffect(() => {
+    if (!uid) return;
+    db.tickets().where('uid', '==', uid).limit(20).get().then(snap => {
+      const list: any[] = snap.docs.map(d => {
+        const data = d.data();
+        const date = new Date(data.createdAt);
+        const catObj = TICKET_CATEGORIES.find(c => c.key === data.category);
+        return {
+          id: d.id, ...data,
+          categoryLabel: catObj?.label ?? data.category,
+          dateStr: `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}`,
+        };
+      });
+      list.sort((a: any, b: any) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
+      setMyTickets(list);
+      // Okunmamış cevapları okundu olarak işaretle
+      for (const tk of list) {
+        if (tk.status === 'answered' && tk.readByUser === false) {
+          db.tickets().doc(tk.id).update({ readByUser: true }).catch(() => {});
+        }
+      }
+    }).catch(() => {});
+  }, [uid, ticketSending]);
+
+  const handleSendTicket = async () => {
+    if (!uid || !ticketMessage.trim()) return;
+    setTicketSending(true);
+    try {
+      await db.tickets().add({
+        uid,
+        displayName,
+        category: ticketCategory,
+        message: ticketMessage.trim(),
+        status: 'open',
+        createdAt: Date.now(),
+        adminReply: null,
+        repliedAt: null,
+      });
+      setTicketMessage('');
+      setShowTicketForm(false);
+      xAlert.alert(t('profile.ticketSentTitle'), t('profile.ticketSentMsg'));
+    } catch (err: any) {
+      xAlert.alert('Hata', err?.message ?? 'Gönderilemedi');
+    }
+    setTicketSending(false);
+  };
+
+  const handleDeleteTicket = async (ticketId: string) => {
+    xAlert.alert(
+      t('profile.deleteTicketTitle'),
+      t('profile.deleteTicketMsg'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('profile.deleteTicket'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await db.tickets().doc(ticketId).delete();
+              setMyTickets(prev => prev.filter(tk => tk.id !== ticketId));
+            } catch {}
+          },
+        },
+      ],
+    );
+  };
+
+  const handleReplyTicket = async (ticketId: string) => {
+    if (!ticketReplyMsg.trim()) return;
+    setTicketSending(true);
+    try {
+      await db.tickets().doc(ticketId).update({
+        userReply: ticketReplyMsg.trim(),
+        userRepliedAt: Date.now(),
+        status: 'open',
+      });
+      setTicketReplyMsg('');
+      setReplyingTicketId(null);
+      // Listeyi güncelle
+      setMyTickets(prev => prev.map(tk =>
+        tk.id === ticketId ? { ...tk, userReply: ticketReplyMsg.trim(), status: 'open' } : tk
+      ));
+    } catch (err: any) {
+      xAlert.alert('Hata', err?.message ?? 'Gönderilemedi');
+    }
+    setTicketSending(false);
+  };
 
   // Bildirim ayarları
   const NOTIF_STORAGE_KEY = 'war-nexus-notif-prefs';
@@ -430,6 +538,116 @@ export function ProfileScreen() {
         ))}
       </MilitaryPanel>
 
+      {/* ── Destek & Geri Bildirim ── */}
+      <MilitaryPanel title={`${t('profile.supportTitle')}${unreadTicketCount > 0 ? ` (${unreadTicketCount} yeni)` : ''}`}>
+        <Text style={s.supportDesc}>{t('profile.supportDesc')}</Text>
+        {!showTicketForm ? (
+          <>
+            <Pressable style={s.supportBtn} onPress={() => setShowTicketForm(true)}>
+              <Text style={s.supportBtnText}>{t('profile.newTicket')}</Text>
+            </Pressable>
+            {myTickets.length > 0 && (
+              <View style={{ marginTop: 10 }}>
+                <Text style={s.supportSubTitle}>{t('profile.myTickets')} ({myTickets.length})</Text>
+                {myTickets.map(tk => (
+                  <View key={tk.id} style={{ marginBottom: 10 }}>
+                    <View style={s.ticketRow}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={s.ticketCategory}>{tk.categoryLabel} — {tk.dateStr}</Text>
+                        <Text style={s.ticketMsg}>{tk.message}</Text>
+                      </View>
+                      <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                        <View style={[s.ticketStatus, { backgroundColor: tk.status === 'answered' ? '#1a3c2a' : tk.status === 'closed' ? colors.surfaceAlt : '#3c2a1a' }]}>
+                          <Text style={[s.ticketStatusText, { color: tk.status === 'answered' ? '#4CAF50' : tk.status === 'closed' ? colors.textMuted : colors.sand }]}>
+                            {tk.status === 'open' ? t('profile.ticketOpen') : tk.status === 'answered' ? t('profile.ticketAnswered') : t('profile.ticketClosed')}
+                          </Text>
+                        </View>
+                        <Pressable onPress={() => handleDeleteTicket(tk.id)}>
+                          <Text style={{ color: colors.danger, fontSize: 10 }}>{t('profile.deleteTicket')}</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                    {/* Admin cevabı */}
+                    {tk.adminReply && (
+                      <View style={s.ticketReply}>
+                        <Text style={s.ticketReplyLabel}>Admin:</Text>
+                        <Text style={s.ticketReplyText}>{tk.adminReply}</Text>
+                      </View>
+                    )}
+                    {/* Oyuncu yanıt yazma — admin cevapladıysa ve kapatılmamışsa */}
+                    {tk.status === 'answered' && (
+                      <View style={{ marginTop: 6 }}>
+                        {replyingTicketId === tk.id ? (
+                          <View style={{ gap: 6 }}>
+                            <TextInput
+                              style={[s.input, { height: 60, textAlignVertical: 'top' }]}
+                              placeholder={t('profile.replyPlaceholder')}
+                              placeholderTextColor={colors.textMuted}
+                              value={ticketReplyMsg}
+                              onChangeText={setTicketReplyMsg}
+                              multiline
+                              maxLength={500}
+                            />
+                            <View style={{ flexDirection: 'row', gap: 6 }}>
+                              <Pressable style={[s.supportBtn, { flex: 1, backgroundColor: colors.surfaceAlt, paddingVertical: 8 }]} onPress={() => setReplyingTicketId(null)}>
+                                <Text style={[s.supportBtnText, { color: colors.textSecondary, fontSize: 11 }]}>{t('common.cancel')}</Text>
+                              </Pressable>
+                              <Pressable
+                                style={[s.supportBtn, { flex: 1, paddingVertical: 8 }, !ticketReplyMsg.trim() && { opacity: 0.4 }]}
+                                disabled={!ticketReplyMsg.trim()}
+                                onPress={() => handleReplyTicket(tk.id)}
+                              >
+                                <Text style={[s.supportBtnText, { fontSize: 11 }]}>{t('profile.sendTicket')}</Text>
+                              </Pressable>
+                            </View>
+                          </View>
+                        ) : (
+                          <Pressable onPress={() => { setReplyingTicketId(tk.id); setTicketReplyMsg(''); }}>
+                            <Text style={{ color: colors.sand, fontSize: 11, fontWeight: '600' }}>{t('profile.replyToTicket')}</Text>
+                          </Pressable>
+                        )}
+                      </View>
+                    )}
+                  </View>
+                ))}
+              </View>
+            )}
+          </>
+        ) : (
+          <View style={{ gap: 8 }}>
+            <View style={s.categoryRow}>
+              {TICKET_CATEGORIES.map(cat => (
+                <Pressable key={cat.key} style={[s.categoryBtn, ticketCategory === cat.key && s.categoryBtnActive]} onPress={() => setTicketCategory(cat.key)}>
+                  <Text style={[s.categoryBtnText, ticketCategory === cat.key && s.categoryBtnTextActive]}>{cat.label}</Text>
+                </Pressable>
+              ))}
+            </View>
+            <TextInput
+              style={[s.input, { height: 100, textAlignVertical: 'top' }]}
+              placeholder={t('profile.ticketPlaceholder')}
+              placeholderTextColor={colors.textMuted}
+              value={ticketMessage}
+              onChangeText={setTicketMessage}
+              multiline
+              maxLength={500}
+            />
+            <Text style={{ color: colors.textMuted, fontSize: 10, textAlign: 'right' }}>{ticketMessage.length}/500</Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <Pressable style={[s.supportBtn, { flex: 1, backgroundColor: colors.surfaceAlt }]} onPress={() => { setShowTicketForm(false); setTicketMessage(''); }}>
+                <Text style={[s.supportBtnText, { color: colors.textSecondary }]}>{t('common.cancel')}</Text>
+              </Pressable>
+              <Pressable
+                style={[s.supportBtn, { flex: 1 }, (!ticketMessage.trim() || ticketSending) && { opacity: 0.4 }]}
+                disabled={!ticketMessage.trim() || ticketSending}
+                onPress={handleSendTicket}
+              >
+                <Text style={s.supportBtnText}>{ticketSending ? '...' : t('profile.sendTicket')}</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+      </MilitaryPanel>
+
       {/* ── Çıkış ── */}
       <Pressable style={s.logoutBtn} onPress={handleLogout}>
         <Text style={s.logoutText}>{t('profile.logout')}</Text>
@@ -474,14 +692,14 @@ const s = StyleSheet.create({
   infoLabel: { color: colors.textMuted, fontSize: 13 },
   infoValue: { color: colors.textPrimary, fontSize: 13, fontWeight: '600' },
   // Stats
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 8 },
   statBox: {
-    flex: 1, minWidth: '22%' as any, backgroundColor: colors.surfaceAlt,
-    borderRadius: 4, padding: 10, alignItems: 'center',
+    width: '24%', backgroundColor: colors.surfaceAlt,
+    borderRadius: 4, paddingVertical: 10, paddingHorizontal: 4, alignItems: 'center',
     borderWidth: 1, borderColor: colors.panelBorder,
   },
-  statValue: { color: colors.textPrimary, fontSize: 14, fontWeight: '700' },
-  statLabel: { color: colors.textMuted, fontSize: 9, marginTop: 3 },
+  statValue: { color: colors.textPrimary, fontSize: 13, fontWeight: '700', textAlign: 'center' },
+  statLabel: { color: colors.textMuted, fontSize: 9, marginTop: 3, textAlign: 'center' },
   // Battle Reports
   reportsBtn: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
@@ -585,4 +803,39 @@ const s = StyleSheet.create({
   warMemberStat: { color: colors.textMuted, fontSize: 10, width: 45, textAlign: 'right' },
   warMemberScore: { color: colors.sand, fontSize: 11, fontWeight: '700', width: 50, textAlign: 'right' },
   warExpandHint: { color: colors.textMuted, fontSize: 10, textAlign: 'center', marginTop: 6 },
+  // Support & Tickets
+  supportDesc: { color: colors.textSecondary, fontSize: 12, marginBottom: 10, lineHeight: 18 },
+  supportSubTitle: { color: colors.sand, fontSize: 12, fontWeight: '700', marginBottom: 6 },
+  supportBtn: {
+    backgroundColor: colors.military, borderRadius: 6,
+    paddingVertical: 12, alignItems: 'center',
+  },
+  supportBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  input: {
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.panelBorder,
+    borderRadius: 6, paddingHorizontal: 12, paddingVertical: 10,
+    color: colors.textPrimary, fontSize: 14,
+  },
+  categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  categoryBtn: {
+    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14,
+    borderWidth: 1, borderColor: colors.panelBorder, backgroundColor: colors.surfaceAlt,
+  },
+  categoryBtnActive: { backgroundColor: colors.military, borderColor: colors.sand },
+  categoryBtnText: { color: colors.textMuted, fontSize: 11, fontWeight: '600' },
+  categoryBtnTextActive: { color: '#fff' },
+  ticketRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: colors.panelBorder,
+  },
+  ticketCategory: { color: colors.textMuted, fontSize: 10 },
+  ticketMsg: { color: colors.textPrimary, fontSize: 12, marginTop: 2 },
+  ticketStatus: { borderRadius: 4, paddingHorizontal: 8, paddingVertical: 3 },
+  ticketStatusText: { fontSize: 10, fontWeight: '700' },
+  ticketReply: {
+    backgroundColor: '#1a3c2a', borderRadius: 6, padding: 10, marginTop: 6,
+    borderWidth: 1, borderColor: '#27ae60',
+  },
+  ticketReplyLabel: { color: '#27ae60', fontSize: 10, fontWeight: '700', marginBottom: 2 },
+  ticketReplyText: { color: colors.textPrimary, fontSize: 12 },
 });

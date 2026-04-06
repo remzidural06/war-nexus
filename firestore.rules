@@ -101,6 +101,14 @@ service cloud.firestore {
       }
     }
 
+    // Destek ticketları — oyuncu kendi ticketını yönetebilir, admin tümünü yönetebilir
+    match /tickets/{ticketId} {
+      allow read: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow delete: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
+    }
+
     // Ban listesi — sadece admin
     match /bannedUsers/{userId} {
       allow read: if isAuthenticated();

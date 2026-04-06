@@ -22,6 +22,7 @@ export const db = {
   globalChat: () => firestore().collection('globalChat'),
   directMessages: () => firestore().collection('directMessages'),
   dmMessages: (conversationId: string) => firestore().collection('directMessages').doc(conversationId).collection('messages'),
+  tickets: () => firestore().collection('tickets'),
 };
 
 /** Cloud Functions base URL */

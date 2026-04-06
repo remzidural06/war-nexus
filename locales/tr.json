@@ -28,7 +28,11 @@
     "errorUserNotFound": "Kullanıcı bulunamadı",
     "errorWeakPassword": "Şifre çok zayıf (min 6 karakter)",
     "errorGoogleFailed": "Google giriş başarısız",
-    "errorGeneric": "Bir hata oluştu"
+    "errorGeneric": "Bir hata oluştu",
+    "errorEmailRequired": "Lütfen email adresinizi girin",
+    "rememberMe": "Beni Hatırla",
+    "forgotPassword": "Şifremi Unuttum",
+    "resetSent": "Şifre sıfırlama bağlantısı email adresinize gönderildi"
   },
   "profile": {
     "stats": "İstatistikler",
@@ -70,7 +74,23 @@
     "notifMissions": "Görev Tamamlama",
     "battleReports": "Savaş Raporları",
     "noReports": "Henüz savaş raporu yok.",
-    "noLoss": "Kayıp yok"
+    "noLoss": "Kayıp yok",
+    "supportTitle": "Destek & Geri Bildirim",
+    "supportDesc": "Şikayet, öneri veya isteklerinizi buradan bize iletebilirsiniz.",
+    "newTicket": "Yeni Bildirim Oluştur",
+    "myTickets": "Bildirimlerim",
+    "ticketPlaceholder": "Mesajınızı yazın...",
+    "sendTicket": "Gönder",
+    "ticketSentTitle": "Gönderildi",
+    "ticketSentMsg": "Bildiriminiz başarıyla gönderildi. En kısa sürede değerlendireceğiz.",
+    "ticketOpen": "Bekliyor",
+    "ticketAnswered": "Cevaplandı",
+    "ticketClosed": "Kapatıldı",
+    "deleteTicket": "Sil",
+    "deleteTicketTitle": "Bildirimi Sil",
+    "deleteTicketMsg": "Bu bildirimi silmek istediğinize emin misiniz?",
+    "replyToTicket": "Yanıt Yaz",
+    "replyPlaceholder": "Yanıtınızı yazın..."
   },
   "username": {
     "title": "Kullanıcı Adını Seç",

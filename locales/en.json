@@ -28,7 +28,11 @@
     "errorUserNotFound": "User not found",
     "errorWeakPassword": "Password too weak (min 6 characters)",
     "errorGoogleFailed": "Google sign-in failed",
-    "errorGeneric": "An error occurred"
+    "errorGeneric": "An error occurred",
+    "errorEmailRequired": "Please enter your email address",
+    "rememberMe": "Remember Me",
+    "forgotPassword": "Forgot Password",
+    "resetSent": "Password reset link has been sent to your email"
   },
   "profile": {
     "stats": "Statistics",
@@ -70,7 +74,23 @@
     "notifMissions": "Mission Completion",
     "battleReports": "Battle Reports",
     "noReports": "No battle reports yet.",
-    "noLoss": "No losses"
+    "noLoss": "No losses",
+    "supportTitle": "Support & Feedback",
+    "supportDesc": "Submit your complaints, suggestions or requests here.",
+    "newTicket": "Create New Ticket",
+    "myTickets": "My Tickets",
+    "ticketPlaceholder": "Write your message...",
+    "sendTicket": "Send",
+    "ticketSentTitle": "Sent",
+    "ticketSentMsg": "Your ticket has been submitted. We will review it as soon as possible.",
+    "ticketOpen": "Pending",
+    "ticketAnswered": "Answered",
+    "ticketClosed": "Closed",
+    "deleteTicket": "Delete",
+    "deleteTicketTitle": "Delete Ticket",
+    "deleteTicketMsg": "Are you sure you want to delete this ticket?",
+    "replyToTicket": "Reply",
+    "replyPlaceholder": "Write your reply..."
   },
   "username": {
     "title": "Choose Your Username",

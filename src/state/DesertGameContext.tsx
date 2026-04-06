@@ -7,6 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { BUILDING_DEFINITIONS, ALL_BUILDING_IDS } from '../data/buildings';
@@ -247,8 +248,12 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
         } catch {}
         const cloudSaved = await loadFromCloud(uid);
         if (cloudSaved) {
-          // En güncel olanı kullan (lastSavedAt karşılaştırması)
-          if (localSaved && (localSaved.lastSavedAt ?? 0) >= (cloudSaved.lastSavedAt ?? 0)) {
+          // Güvenli karşılaştırma: toplam bina seviyesini kontrol et — geriye düşüş engelle
+          const totalLevel = (s: PersistedGameState | null) =>
+            (s?.buildings ?? []).reduce((sum, b) => sum + (b.level ?? 1), 0);
+          const localLevel = totalLevel(localSaved);
+          const cloudLevel = totalLevel(cloudSaved);
+          if (localSaved && (localSaved.lastSavedAt ?? 0) >= (cloudSaved.lastSavedAt ?? 0) && localLevel >= cloudLevel) {
             saved = localSaved;
           } else {
             saved = cloudSaved;
@@ -743,6 +748,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
       };
     }
     // Android/iOS: arka plana alındığında kaydet, ön plana dönünce catch-up
+    if (Platform.OS === 'web') return;
     const { AppState } = require('react-native') as any;
     const sub = AppState.addEventListener('change', (state: string) => {
       if (state === 'background' || state === 'inactive') {

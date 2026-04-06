@@ -1,7 +1,9 @@
 /**
  * Auth servisi — giriş, çıkış, kullanıcı durumu.
  */
+import { Platform } from 'react-native';
 import { auth, firestore, db } from './firebase';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import type { FirebaseAuthTypes } from './firebase';
 const WEB_CLIENT_ID = '669522610182-lavj7r2sn8cmp3bpebfqki5ecdgp424m.apps.googleusercontent.com';
 
@@ -17,7 +19,6 @@ export async function signInAnonymous(): Promise<AuthUser> {
 
 /** Google ile giriş (v16 Credential Manager API) */
 export async function signInWithGoogle(): Promise<AuthUser> {
-  const { GoogleSignin } = require('@react-native-google-signin/google-signin');
   GoogleSignin.configure({
     webClientId: WEB_CLIENT_ID,
     offlineAccess: false,
@@ -122,16 +123,20 @@ export async function canChangeName(uid: string): Promise<{ allowed: boolean; re
   }
 }
 
+/** Şifre sıfırlama e-postası gönder */
+export async function sendPasswordReset(email: string): Promise<void> {
+  await auth().sendPasswordResetEmail(email);
+}
+
 /** Çıkış */
 export async function signOut(): Promise<void> {
   // Local storage temizle — yeni kullanıcıya eski veri geçmesin
-  try {
-    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-    await AsyncStorage.removeItem('war-nexus/v1');
-  } catch {}
   try { (globalThis as any).localStorage?.removeItem('war-nexus/v1'); } catch {}
   try {
-    const { GoogleSignin } = require('@react-native-google-signin/google-signin');
+    const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+    await AsyncStorage.removeItem('war-nexus/v1');
+  } catch {}
+  try {
     await GoogleSignin.revokeAccess();
     await GoogleSignin.signOut();
   } catch {}

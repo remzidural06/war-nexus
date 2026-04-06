@@ -474,6 +474,14 @@ export async function declareWar(
   if (myAlliance.activeWar) throw new Error('Zaten aktif bir savaşınız var');
   if (enemyAlliance.activeWar) throw new Error('Karşı ittifak zaten savaşta');
 
+  // 24 saat cooldown kontrolü
+  const WAR_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+  const lastEnded = (myAlliance as any).lastWarEndedAt ?? 0;
+  if (lastEnded > 0 && Date.now() - lastEnded < WAR_COOLDOWN_MS) {
+    const hoursLeft = Math.ceil((lastEnded + WAR_COOLDOWN_MS - Date.now()) / (60 * 60 * 1000));
+    throw new Error(`Savaş cooldown'u aktif — ${hoursLeft} saat sonra yeni savaş ilan edebilirsiniz`);
+  }
+
   // Savaş ilan maliyeti: kasadan 50K×3
   const WAR_COST = 20000;
   const t = myAlliance.treasury ?? { cash: 0, oil: 0, ore: 0 };
@@ -685,6 +693,7 @@ export async function resolveWar(allianceId: string): Promise<{ won: boolean; re
   try {
     await db.alliances().doc(allianceId).set({
       activeWar: null,
+      lastWarEndedAt: Date.now(),
       warHistory: firestore.FieldValue.arrayUnion(historyEntry),
     } as any, { merge: true });
   } catch (err) { console.warn('[resolveWar]', err); }

@@ -66,13 +66,8 @@ export function BaseScreen() {
   } = useDesertGame();
 
   // ── Admin kontrolu ──────────────────────────────────────────
-  const [isAdmin, setIsAdmin] = useState(false);
-  React.useEffect(() => {
-    if (!uid) return;
-    db.players().doc(uid).get().then(doc => {
-      setIsAdmin(doc.exists() && doc.data()?.isAdmin === true);
-    }).catch(() => {});
-  }, [uid]);
+  const ADMIN_UID = 'fDXCXZYZr1PapwTjAlsM3RZoKRn1';
+  const isAdmin = uid === ADMIN_UID;
 
   // ── Oyun paneli state ───────────────────────────────────────
   const [selectedId, setSelectedId] = useState<BuildingId | null>(null);
@@ -154,19 +149,6 @@ export function BaseScreen() {
 
   return (
     <View style={styles.root}>
-      {/* ── Editör toggle butonu (sadece admin) ─────────────── */}
-      {isAdmin && (
-        <Pressable
-          style={[styles.editToggle, editMode && styles.editToggleActive]}
-          onPress={() => {
-            toggleEditMode();
-            if (selectedId) closePanel();
-          }}
-        >
-          <Text style={styles.editToggleText}>{editMode ? '✓ Editör' : t('base.editorInactive')}</Text>
-        </Pressable>
-      )}
-
       {/* ── Terrain canvas ──────────────────────────────────── */}
       <ScrollView
         style={styles.canvasScroll}

@@ -5,7 +5,7 @@ import { t } from '../i18n';
 export type RootTab = 'base' | 'map' | 'alliance' | 'settings' | 'leaderboard' | 'shop' | 'help' | 'profile';
 
 const TAB_KEYS: { key: RootTab; i18n: string; icon: string }[] = [
-  { key: 'base', i18n: 'nav.base', icon: '🏰' },
+  { key: 'base', i18n: 'nav.base', icon: '🏛️' },
   { key: 'map', i18n: 'nav.map', icon: '🗺️' },
   { key: 'alliance', i18n: 'nav.alliance', icon: '⚔️' },
   { key: 'settings', i18n: 'nav.missions', icon: '📋' },

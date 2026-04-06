@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ActivityIndicator, Image, View, StatusBar, StyleSheet } from 'react-native';
+import { ActivityIndicator, Image, Pressable, Text, View, StatusBar, StyleSheet } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { BaseScreen } from '../screens/BaseScreen';
 import { MapScreen } from '../screens/MapScreen';
@@ -13,6 +13,9 @@ import { ShopScreen } from '../screens/ShopScreen';
 import { AuthScreen } from '../screens/AuthScreen';
 import { UsernameScreen } from '../screens/UsernameScreen';
 import { TopBar } from '../components/TopBar';
+import { AdminScreen } from '../screens/AdminScreen';
+
+const ADMIN_UID = 'fDXCXZYZr1PapwTjAlsM3RZoKRn1';
 import { BottomTabs, type RootTab } from '../components/BottomTabs';
 import { DesertGameProvider, useDesertGame } from '../state/DesertGameContext';
 import { IncomingAttackBanner } from '../components/IncomingAttackBanner';
@@ -51,6 +54,8 @@ function GameAppInner() {
   const [activeTab, setActiveTab] = useState<RootTab>('base');
   const [showGlobalChat, setShowGlobalChat] = useState(false);
   const [showDM, setShowDM] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
+  const isAdmin = uid === ADMIN_UID;
 
   const dm = useDirectMessages(uid ?? null, displayName ?? '');
   const dmOpenChatRef = useRef(dm.openChat);
@@ -78,6 +83,7 @@ function GameAppInner() {
     <>
       <TopBar
         onOpenProfile={() => setActiveTab(activeTab === 'profile' ? 'base' : 'profile')}
+        onOpenAdmin={isAdmin ? () => setShowAdmin(true) : undefined}
         onOpenHelp={() => setActiveTab(activeTab === 'help' ? 'base' : 'help')}
         onOpenGlobalChat={() => setShowGlobalChat(true)}
         onOpenDM={() => setShowDM(true)}
@@ -100,6 +106,14 @@ function GameAppInner() {
         onSendMessage={dm.sendMessage}
         onDeleteConversation={dm.deleteConversation}
       />
+      {showAdmin && (
+        <View style={StyleSheet.absoluteFill}>
+          <Pressable onPress={() => setShowAdmin(false)} style={{ position: 'absolute', top: 12, right: 12, zIndex: 999, width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(0,0,0,0.7)', alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
+          </Pressable>
+          <AdminScreen />
+        </View>
+      )}
       <BottomTabs activeTab={activeTab} onChange={setActiveTab as any} />
     </>
   );

@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "669522610182-1h7ubtbi654744ipsffqdoof0fegh3ho.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.warnexus",
+            "certificate_hash": "ff7ff288ad71844c17c05ea046dd9eec84a1cfe2"
+          }
+        },
+        {
+          "client_id": "669522610182-3835ph0vi3jfu688nqsdc1amuhlvvtm5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.warnexus",
+            "certificate_hash": "9560eccb7cb36390f22f1b074700ad54b2c67f40"
+          }
+        },
+        {
           "client_id": "669522610182-8nki1776gdvb8dalpkrfap7o143f1kq0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -45,6 +61,13 @@
             {
               "client_id": "669522610182-lavj7r2sn8cmp3bpebfqki5ecdgp424m.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "669522610182-cu07es7eiu1a97qprve8mr02kkdfjto6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.remzidural.warnexus"
+              }
             }
           ]
         }

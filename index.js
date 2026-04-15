@@ -2,11 +2,19 @@
  * @format
  */
 
-import { LogBox, AppRegistry } from 'react-native';
+import { LogBox, AppRegistry, Platform } from 'react-native';
 import App from './App';
 import { name as appName } from './app.json';
 
 LogBox.ignoreAllLogs(true);
+
+// Background push notification handler
+if (Platform.OS !== 'web') {
+  try {
+    const messaging = require('@react-native-firebase/messaging').default;
+    messaging().setBackgroundMessageHandler(async () => {});
+  } catch {}
+}
 
 // Global error handler — hatayı logla
 var _eu = globalThis.ErrorUtils;

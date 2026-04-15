@@ -11,6 +11,7 @@ react {
     // Bundle zaten npx react-native bundle ile oluşturuldu, Gradle'ın tekrar yapmasını engelle
     bundleAssetName = "index.android.bundle"
     entryFile = file("../../index.js")
+    cliFile = file("../../node_modules/react-native/cli.js")
     /* Folders */
     //   The root of your project, i.e. where "package.json" lives. Default is '../..'
     // root = file("../../")
@@ -87,8 +88,9 @@ android {
         applicationId "com.warnexus"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 31
+        versionName "1.5.1"
+        missingDimensionStrategy 'store', 'play'
     }
     signingConfigs {
         debug {
@@ -97,24 +99,40 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            if (project.hasProperty('WARNEXUS_RELEASE_STORE_FILE')) {
+                storeFile file(WARNEXUS_RELEASE_STORE_FILE)
+                storePassword WARNEXUS_RELEASE_STORE_PASSWORD
+                keyAlias WARNEXUS_RELEASE_KEY_ALIAS
+                keyPassword WARNEXUS_RELEASE_KEY_PASSWORD
+            }
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
 }
 
+// JS bundle zaten npx react-native bundle ile oluşturuldu — Gradle task'ını atla
+tasks.configureEach { task ->
+    if (task.name.contains("createBundle") && task.name.contains("JsAndAssets")) {
+        task.enabled = false
+    }
+}
+
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+
+    // Google Play Billing Library
+    implementation("com.android.billingclient:billing:7.1.1")
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

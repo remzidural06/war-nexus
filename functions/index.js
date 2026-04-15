@@ -1225,6 +1225,316 @@ exports.sendPushNotificationEndpoint = onRequest(
   }
 );
 
+// ── App başlangıç verisi (Firestore SDK bypass) ─────────────
+exports.getPlayerStartup = onRequest(
+  { region: "us-central1" },
+  async (req, res) => {
+    const { uid } = req.body ?? req.query ?? {};
+    if (!uid) return res.status(400).json({ error: "uid gerekli" });
+    try {
+      // 1) Oyuncunun allianceId'sini al
+      const playerSnap = await db.collection("players").doc(uid).get();
+      if (!playerSnap.exists) return res.json({ allianceId: null });
+      const playerData = playerSnap.data();
+      const allianceId = playerData?.allianceId ?? null;
+      if (!allianceId) return res.json({ allianceId: null });
+
+      // 2) İttifak verisini al
+      const allianceSnap = await db.collection("alliances").doc(allianceId).get();
+      const allianceData = allianceSnap.exists ? allianceSnap.data() : null;
+
+      // 3) Üyeleri al
+      const membersSnap = await db.collection("alliances").doc(allianceId).collection("members").get();
+      const members = membersSnap.docs.map(d => d.data());
+
+      // 4) Chat mesajlarını al (son 30)
+      const chatSnap = await db.collection("alliances").doc(allianceId).collection("messages")
+        .orderBy("timestamp", "desc").limit(30).get();
+      const messages = chatSnap.docs.map(d => ({ id: d.id, ...d.data() })).reverse();
+
+      res.json({ allianceId, allianceData, members, messages });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+// ── War Score ekle (CF üzerinden) ───────────────────────────
+exports.addWarScore = onRequest(
+  { region: "us-central1" },
+  async (req, res) => {
+    const { allianceId, enemyAllianceId, score, attackerName, defenderName, won } = req.body ?? {};
+    if (!allianceId || !enemyAllianceId) return res.status(400).json({ error: "allianceId ve enemyAllianceId gerekli" });
+    const attackLog = { attackerName: attackerName ?? "", defenderName: defenderName ?? "", won: !!won, score: score ?? 0, timestamp: Date.now() };
+    try {
+      // Bizim skoru artır
+      const mySnap = await db.collection("alliances").doc(allianceId).get();
+      if (mySnap.exists) {
+        const data = mySnap.data();
+        if (data?.activeWar) {
+          const newScore = (data.activeWar.ourScore ?? 0) + (score ?? 0);
+          await db.collection("alliances").doc(allianceId).set({
+            activeWar: { ...data.activeWar, ourScore: newScore, lastAttack: attackLog }
+          }, { merge: true });
+        }
+      }
+      // Düşmanın theirScore'unu artır
+      const enemySnap = await db.collection("alliances").doc(enemyAllianceId).get();
+      if (enemySnap.exists) {
+        const eData = enemySnap.data();
+        if (eData?.activeWar) {
+          const newTheirScore = (eData.activeWar.theirScore ?? 0) + (score ?? 0);
+          await db.collection("alliances").doc(enemyAllianceId).set({
+            activeWar: { ...eData.activeWar, theirScore: newTheirScore, lastAttack: { ...attackLog, attackerName: defenderName, defenderName: attackerName, won: !won } }
+          }, { merge: true });
+        }
+      }
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+// ── FCM token kaydet ────────────────────────────────────────
+exports.saveFCMToken = onRequest(
+  { region: "us-central1" },
+  async (req, res) => {
+    const { uid, token } = req.body ?? {};
+    if (!uid || !token) return res.status(400).json({ error: "uid ve token gerekli" });
+    try {
+      await db.collection("players").doc(uid).set({ fcmToken: token }, { merge: true });
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+// ── Düşman ittifak üyelerini getir ──────────────────────────
+exports.getEnemyMembers = onRequest(
+  { region: "us-central1" },
+  async (req, res) => {
+    const { allianceId, allianceTag } = req.body ?? {};
+    if (!allianceId && !allianceTag) return res.status(400).json({ error: "allianceId veya allianceTag gerekli" });
+    const toMember = (d) => {
+      const p = d.data();
+      return { uid: d.id, displayName: p.displayName ?? "Komutan", rank: p.rank ?? "member", power: p.playerPower ?? p.power ?? p.warPower ?? 0, contribution: p.contribution ?? 0 };
+    };
+    try {
+      let best = [];
+      let source = "none";
+      // 1) members subcollection
+      if (allianceId) {
+        const snap = await db.collection("alliances").doc(allianceId).collection("members").get();
+        if (snap.docs.length > best.length) { best = snap.docs.map(d => d.data()); source = "members"; }
+      }
+      // 2) players allianceId ile
+      if (allianceId) {
+        const snap = await db.collection("players").where("allianceId", "==", allianceId).get();
+        if (snap.docs.length > best.length) { best = snap.docs.map(toMember); source = "players_id"; }
+      }
+      // 3) players allianceTag ile
+      if (allianceTag) {
+        const snap = await db.collection("players").where("allianceTag", "==", allianceTag).get();
+        if (snap.docs.length > best.length) { best = snap.docs.map(toMember); source = "players_tag"; }
+      }
+      best.sort((a, b) => (b.power ?? 0) - (a.power ?? 0));
+      res.json({ members: best, source });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+// ── Savaşı zorla bitir ───────────────────────────────────────
+// ── Süresi dolmuş PvP march'ları sunucu tarafında çöz ────────
+exports.resolveExpiredMarches = onSchedule(
+  { schedule: "every 1 minutes", region: "us-central1", timeoutSeconds: 60 },
+  async () => {
+    const now = Date.now();
+    // arrivesAt geçmişte olan ve status='marching' olan march'ları bul
+    const snap = await db.collection("marches")
+      .where("status", "==", "marching")
+      .where("arrivesAt", "<=", now)
+      .limit(20)
+      .get();
+
+    if (snap.empty) return;
+
+    for (const marchDoc of snap.docs) {
+      const m = marchDoc.data();
+      try {
+        // Savunanın verisini oku
+        const defSnap = await db.collection("playerBases").doc(m.defenderUid).get();
+        const defBase = defSnap.exists ? defSnap.data() : null;
+
+        // Savunanın birimlerini topla
+        const defUnits = [];
+        if (defBase?.buildings) {
+          for (const b of defBase.buildings) {
+            const tu = b.trainedUnits ?? {};
+            for (const [unitId, count] of Object.entries(tu)) {
+              if (count > 0) defUnits.push({ unitId, count });
+            }
+          }
+        }
+
+        // Savaşı çöz
+        const result = resolveServerCombat(m.marchUnits ?? [], defUnits);
+        const won = result.won;
+
+        // Kaynak transferi (%20)
+        const defRes = defBase?.resources ?? [];
+        const defCash = (defRes.find(r => r.key === 'cash')?.amount ?? 0);
+        const defOil = (defRes.find(r => r.key === 'oil')?.amount ?? 0);
+        const defOre = (defRes.find(r => r.key === 'ore')?.amount ?? 0);
+        const lootRate = 0.2;
+        const lootCash = won ? Math.floor(defCash * lootRate) : -Math.floor(defCash * lootRate * 0.5);
+        const lootOil = won ? Math.floor(defOil * lootRate) : -Math.floor(defOil * lootRate * 0.5);
+        const lootOre = won ? Math.floor(defOre * lootRate) : -Math.floor(defOre * lootRate * 0.5);
+
+        // March'ı resolved olarak işaretle
+        await marchDoc.ref.update({
+          status: "resolved",
+          resolvedAt: now,
+          won,
+          attackPowerResult: result.totalAttackPower,
+          defensePowerResult: result.totalDefensePower,
+          attackerResults: result.attackerResults,
+          defenderResults: result.defenderResults,
+          lootCash, lootOil, lootOre,
+        });
+
+        // Savaş raporu Firestore'a yaz (saldıran açınca görsün)
+        await db.collection("battleReports").add({
+          attackerUid: m.attackerUid,
+          defenderUid: m.defenderUid,
+          attackerName: m.attackerName,
+          defenderName: m.defenderName,
+          won,
+          attackPower: result.totalAttackPower,
+          defensePower: result.totalDefensePower,
+          lootCash, lootOil, lootOre,
+          attackerResults: result.attackerResults,
+          defenderResults: result.defenderResults,
+          timestamp: now,
+          resolvedBy: "server",
+        });
+
+        // İttifak savaşı skoru — march'ta isWarAttack varsa
+        if (m.isWarAttack) {
+          const atkSnap = await db.collection("players").doc(m.attackerUid).get();
+          const atkData = atkSnap.exists ? atkSnap.data() : {};
+          const atkAllianceId = atkData?.allianceId;
+          if (atkAllianceId) {
+            const allianceSnap = await db.collection("alliances").doc(atkAllianceId).get();
+            if (allianceSnap.exists) {
+              const allianceData = allianceSnap.data();
+              const aw = allianceData?.activeWar;
+              if (aw) {
+                const warScore = won ? 10 : 0;
+                const newOurScore = (aw.ourScore ?? 0) + warScore;
+                const attackLog = { attackerName: m.attackerName, defenderName: m.defenderName, won, score: warScore, timestamp: now };
+                await db.collection("alliances").doc(atkAllianceId).set({
+                  activeWar: { ...aw, ourScore: newOurScore, lastAttack: attackLog }
+                }, { merge: true });
+                // Düşman theirScore
+                if (aw.enemyAllianceId) {
+                  const enemySnap = await db.collection("alliances").doc(aw.enemyAllianceId).get();
+                  if (enemySnap.exists && enemySnap.data()?.activeWar) {
+                    const eWar = enemySnap.data().activeWar;
+                    await db.collection("alliances").doc(aw.enemyAllianceId).set({
+                      activeWar: { ...eWar, theirScore: (eWar.theirScore ?? 0) + warScore }
+                    }, { merge: true });
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // Savunanın kayıplarını düş
+        if (defBase?.buildings && result.defenderResults?.length > 0) {
+          const defLossMap = {};
+          for (const dr of result.defenderResults) {
+            if (dr.destroyed > 0) defLossMap[dr.unitId] = (defLossMap[dr.unitId] ?? 0) + dr.destroyed;
+          }
+          if (Object.keys(defLossMap).length > 0) {
+            const updatedBuildings = defBase.buildings.map(b => {
+              const tu = { ...(b.trainedUnits ?? {}) };
+              let changed = false;
+              for (const [unitId, loss] of Object.entries(defLossMap)) {
+                if (tu[unitId] && tu[unitId] > 0) {
+                  const remove = Math.min(tu[unitId], loss);
+                  tu[unitId] -= remove;
+                  defLossMap[unitId] -= remove;
+                  if (tu[unitId] <= 0) delete tu[unitId];
+                  changed = true;
+                }
+              }
+              return changed ? { ...b, trainedUnits: tu } : b;
+            });
+            await db.collection("playerBases").doc(m.defenderUid).set({ buildings: updatedBuildings }, { merge: true });
+          }
+        }
+
+        // Push bildirim gönder
+        await sendPushNotification(m.attackerUid, won ? "⚔️ Zafer!" : "⚔️ Yenilgi!", `${m.defenderName} savaşı ${won ? "kazandın" : "kaybettin"}!`, "battleResults");
+        await sendPushNotification(m.defenderUid, won ? "🛡️ Saldırı!" : "🛡️ Savunma Başarılı!", `${m.attackerName} seni ${won ? "yendi" : "yenemedi"}!`, "battleResults");
+
+        console.log(`[ResolveMarches] ${m.attackerName} vs ${m.defenderName}: ${won ? "WIN" : "LOSE"}`);
+      } catch (err) {
+        console.warn(`[ResolveMarches] Error resolving ${marchDoc.id}:`, err.message);
+        // Hata olsa bile march'ı resolved yap — sonsuz loop olmasın
+        await marchDoc.ref.update({ status: "resolved", resolvedAt: now, error: err.message }).catch(() => {});
+      }
+    }
+  }
+);
+
+// ── Manuel tetikleme endpoint'i ─────────────────────────────
+exports.resolveExpiredMarchesManual = onRequest(
+  { region: "us-central1" },
+  async (req, res) => {
+    const now = Date.now();
+    const snap = await db.collection("marches").where("status", "==", "marching").where("arrivesAt", "<=", now).limit(20).get();
+    res.json({ found: snap.docs.length, message: `${snap.docs.length} expired march found. Use scheduled function.` });
+  }
+);
+
+exports.forceEndWar = onRequest(
+  { region: "us-central1" },
+  async (req, res) => {
+    const { allianceId } = req.body ?? req.query ?? {};
+    const snap = await db.collection("alliances").get();
+    let ended = 0;
+    for (const doc of snap.docs) {
+      const d = doc.data();
+      if (!d.activeWar) continue;
+      if (allianceId && doc.id !== allianceId) continue;
+      // endsAt'i geçmişe çek
+      await doc.ref.set({ activeWar: { ...d.activeWar, endsAt: Date.now() - 1000 } }, { merge: true });
+      ended++;
+    }
+    // Şimdi resolve et
+    const resolveResult = await (async () => {
+      const allSnap = await db.collection("alliances").get();
+      let resolved = 0;
+      for (const doc of allSnap.docs) {
+        const d = doc.data();
+        if (!d.activeWar) continue;
+        if (d.activeWar.endsAt > Date.now()) continue;
+        const won = (d.activeWar.ourScore ?? 0) >= (d.activeWar.theirScore ?? 0);
+        await doc.ref.set({ activeWar: null, lastWarEnded: Date.now() }, { merge: true });
+        resolved++;
+      }
+      return resolved;
+    })();
+    res.json({ ended, resolved: resolveResult });
+  }
+);
+
 // ── Debug: aktif savaşları göster ────────────────────────────
 exports.debugWars = onRequest(
   { region: "us-central1" },
@@ -2419,5 +2729,71 @@ exports.simulateBotChat = onRequest(
   async (req, res) => {
     const result = await runBotChat();
     res.json({ success: true, ...result });
+  }
+);
+
+// ── In-App Purchase Doğrulama ───────────────────────────────
+const GOLD_AMOUNTS = {
+  gold_100: 100, gold_500: 500, gold_2000: 2000,
+  gold_5000: 5000, gold_10000: 10000, gold_25000: 25000,
+};
+
+exports.validatePurchase = onRequest(
+  { region: "us-central1", timeoutSeconds: 30 },
+  async (req, res) => {
+    try {
+      const { uid, productId, receipt, platform } = req.body ?? {};
+      if (!uid || !productId || !receipt) {
+        return res.status(400).json({ valid: false, error: "uid, productId, receipt gerekli" });
+      }
+
+      const goldAmount = GOLD_AMOUNTS[productId];
+      if (!goldAmount) {
+        return res.status(400).json({ valid: false, error: "Geçersiz ürün ID" });
+      }
+
+      // Duplicate kontrolü — aynı receipt daha önce işlenmiş mi?
+      const receiptHash = require("crypto").createHash("sha256").update(receipt.slice(0, 500)).digest("hex");
+      const dupSnap = await db.collection("purchases").where("receiptHash", "==", receiptHash).limit(1).get();
+      if (!dupSnap.empty) {
+        return res.json({ valid: false, error: "Bu satın alma zaten işlendi" });
+      }
+
+      // Google Play receipt doğrulaması
+      // NOT: Tam doğrulama için Google Play Developer API gerekir (service account)
+      // Şimdilik basit kontrol: receipt var + productId doğru = geçerli
+      // Production'da googleapis ile doğrulama eklenecek
+
+      // Satın almayı kaydet
+      await db.collection("purchases").add({
+        uid,
+        productId,
+        goldAmount,
+        platform,
+        receiptHash,
+        timestamp: Date.now(),
+        verified: true,
+      });
+
+      // Altını oyuncunun hesabına ekle (server-side güvenlik)
+      const baseSnap = await db.collection("playerBases").doc(uid).get();
+      if (baseSnap.exists) {
+        const state = baseSnap.data();
+        const resources = state.resources ?? [];
+        const updatedResources = resources.map(r => {
+          if (r.key === 'gold') return { ...r, amount: (r.amount ?? 0) + goldAmount };
+          return r;
+        });
+        await db.collection("playerBases").doc(uid).set({ resources: updatedResources }, { merge: true });
+      }
+
+      // Log
+      console.log(`[IAP] ${uid} purchased ${productId} (${goldAmount} gold) via ${platform}`);
+
+      res.json({ valid: true, goldAmount });
+    } catch (err) {
+      console.error("[ValidatePurchase]", err);
+      res.status(500).json({ valid: false, error: err.message });
+    }
   }
 );

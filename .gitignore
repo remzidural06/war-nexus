@@ -94,3 +94,6 @@ tmp_*
 # Gradle user config
 .gradle-user/
 .gradle-user-2/
+
+# Firebase cache
+.firebase/

@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Platform } from 'react-native';
+import { ActivityIndicator, Platform, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { BUILDING_DEFINITIONS, ALL_BUILDING_IDS } from '../data/buildings';
@@ -259,10 +259,20 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
             saved = cloudSaved;
           }
         } else {
-          // Firestore'da veri yok — lokal cache'i de temizle (silinen/yeni kullanıcı)
-          await AsyncStorage.removeItem(STORAGE_KEY);
-          try { (globalThis as any).localStorage?.removeItem(STORAGE_KEY); } catch {}
-          saved = null;
+          // Firestore timeout veya veri yok — AsyncStorage'dan oku (VERİ KAYBI ENGELİ)
+          const asyncRaw = await AsyncStorage.getItem(STORAGE_KEY);
+          if (asyncRaw) {
+            try {
+              const parsed = JSON.parse(asyncRaw);
+              if (!parsed.uid || parsed.uid === uid) saved = parsed;
+            } catch {}
+          }
+          if (!saved && localSaved) saved = localSaved;
+          // Hiçbir yerden veri gelmedi → save'i blokla (cloud verisi korunsun)
+          if (!saved) {
+            saveBlockedRef.current = true;
+            console.warn('[Provider] Cloud timeout, no local data — save BLOCKED');
+          }
         }
       } else {
         // uid yoksa (offline) AsyncStorage'dan yükle
@@ -378,7 +388,9 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
                 setActiveMarch(null);
               }
             } else {
-              setActiveMarch(null);
+              // Süre dolmuş — 0 ile set et, savaş çözüm mantığı çalışsın
+              const expiredMarch = saved.march!;
+              setActiveMarch({ ...expiredMarch, secondsRemaining: 0 });
             }
             const restoredReports = saved.battleReports ?? [];
             setBattleReports(restoredReports);
@@ -464,7 +476,9 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
         return next;
       }));
 
-      // pendingGold kontrolü — admin tarafından eklenen altını al
+      setLoaded(true);
+
+      // pendingGold kontrolü — admin tarafından eklenen altını al (oyun açık, arka planda)
       if (uid) {
         try {
           const pgSnap = await db.playerBases().doc(uid).get();
@@ -513,10 +527,10 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
         } catch (e) { console.warn('[pendingResources]', e); }
       }
 
-      setLoaded(true);
-      // 2 saniye sonra güncel playerPower'ı Firestore'a yaz
-      if (uid) {
+      // 2 saniye sonra güncel playerPower'ı Firestore'a yaz (save blocked ise atla)
+      if (uid && !saveBlockedRef.current) {
         setTimeout(() => {
+          if (saveBlockedRef.current) return;
           const blds = buildingsRef.current;
           const bp = blds.reduce((s: number, b: any) => { const l = b.level ?? 1; return s + l * (l + 1) / 2 * 100; }, 0);
           const rp = researchRef.current.filter((r: any) => r.completed).reduce((s: number, r: any) => {
@@ -533,6 +547,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
   }, [uid]);
 
   const scheduleSave = useCallback(() => {
+    if (saveBlockedRef.current) return; // veri kaybı koruması
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       const marchToSave = marchRef.current
@@ -578,6 +593,7 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
 
   // ── Web: sayfa kapanırken anında kaydet ────────────────────
   const saveNow = useCallback(() => {
+    if (saveBlockedRef.current) return; // veri kaybı koruması
     const marchToSave = marchRef.current
       ? { ...marchRef.current, savedAt: Date.now() }
       : null;
@@ -1543,7 +1559,13 @@ export function DesertGameProvider({ children, uid }: { children: React.ReactNod
     uid, toastMsg, alliance,
   ]);
 
-  if (!loaded) return null;
+  if (!loaded) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#0D0D0A', justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#C8A96E" />
+      </View>
+    );
+  }
 
   return (
     <DesertGameContext.Provider value={value}>

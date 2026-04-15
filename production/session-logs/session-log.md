@@ -356,3 +356,3425 @@ f1bbb5a refactor: extract useBaseEditorState hook from BaseScreen
 5. develop → main merge
 ---
 
+## Archived Session State: 20260408_123255
+<!-- STATUS -->
+Epic: Battle Systems + Auth + Ticket System
+Feature: Full session complete — pushed to GitHub
+Task: iOS kurulumu bekliyor (Mac'te devam edilecek)
+<!-- /STATUS -->
+
+# War Nexus — Session State (2026-04-06)
+
+## Durum: Oturum Tamamlandı — GitHub Güncel
+
+## Aktif Branch: develop (commit 9e87cd5 — pushed ✓)
+
+## Tamamlanan İşler — Commit 1 (e86e539)
+
+### Persistent Wins/Losses
+- [x] PersistedGameState'e wins/losses alanları
+- [x] addBattleReport her çağrıda sayaç artırıyor
+- [x] Tüm savaş türleri (PvE, PvP, İttifak)
+- [x] Geriye uyumlu migration
+
+### playerPower Formülü
+- [x] Birim katkısı kaldırıldı (powerCalc, DesertGameContext, cloudSave, pvpHelpers)
+- [x] Cloud Functions + botData güncellendi
+- [x] Formül: binaPower + araştırmaPower + warPower(cap'li)
+
+### Sefer Maliyeti
+- [x] calcMarchCost() tier bazlı (T1:5/3/2 → T4:50/35/20)
+- [x] PvE + PvP + İttifak savaşı maliyet kontrolü + kesinti
+- [x] MapScreen, LeaderboardScreen, AllianceWarPanel maliyet gösterimi
+- [x] Sefer iptali kaynak iadesi (marchCost March nesnesinde)
+
+### Sefer Süreleri
+- [x] calcTravelSeconds birim sayısına göre 3-5 dk
+- [x] Tüm saldırı türleri + Cloud Functions güncellendi
+
+### UI
+- [x] Kazanma şansı sadece harita kartlarında (özet panellerden kaldırıldı)
+
+## Tamamlanan İşler — Commit 2 (9e87cd5)
+
+### Auth Ekranı
+- [x] Beni Hatırla (AsyncStorage)
+- [x] Şifremi Unuttum (Firebase sendPasswordResetEmail)
+- [x] Lokalizasyon TR + EN
+
+### Ticket Sistemi
+- [x] Firestore tickets koleksiyonu + rules + indexes
+- [x] Profil: Destek & Geri Bildirim (Hata/Şikayet/Öneri/İstek/Diğer)
+- [x] Oyuncu: ticket gönder, geçmişi gör, yanıt yaz, sil
+- [x] Admin: ticket listele, cevapla, kapat, sil
+- [x] Push notification on admin reply
+- [x] Okunmamış badge (N yeni)
+- [x] Admin panelde oyuncu yanıtı gösterimi
+
+### Admin Panel
+- [x] UID hardcode (fDXCXZYZr1PapwTjAlsM3RZoKRn1)
+- [x] App.tsx + web/index.tsx: ⚙️ çark ikonu TopBar'da
+- [x] Alt alta menü layout + ← Geri navigasyonu
+- [x] Sağ üst ✕ kapatma butonu
+- [x] Düzenle butonu BaseScreen'den kaldırıldı
+
+### İttifak Savaşı
+- [x] 24 saat cooldown (lastWarEndedAt + declareWar kontrolü)
+
+### Altyapı
+- [x] State koruma: localStorage bina seviyesi < Firestore → Firestore kullan
+- [x] Web: tüm runtime require() → static import (Google sign-in düzeltildi)
+- [x] Üs ikonu 🏛️
+- [x] Firestore rules + indexes deploy edildi
+
+## Değişen Dosyalar (19 dosya)
+- App.tsx, src/web/index.tsx (admin panel, imports)
+- src/state/types.ts, DesertGameContext.tsx, useCombat.ts, combatResolvers.ts
+- src/state/powerCalc.ts, pvpHelpers.ts
+- src/services/authService.ts, cloudSave.ts, firebase.ts, allianceService.ts
+- src/screens/ProfileScreen.tsx, BaseScreen.tsx, AdminScreen.tsx, AuthScreen.tsx
+- src/screens/MapScreen.tsx, LeaderboardScreen.tsx, AllianceScreen.tsx
+- src/components/BottomTabs.tsx, panels/AllianceWarPanel.tsx
+- src/data/units.ts
+- functions/index.js, functions/botData.js
+- locales/tr.json, en.json
+- firestore.rules, firestore.indexes.json, index.html
+
+## Sonraki Adımlar
+1. iOS kurulumu (Mac'te git pull origin develop → npm install → pod install)
+2. Cloud Functions deploy (firebase deploy --only functions)
+3. IAP (DUNS bekleniyor)
+---
+
+## Session End: 20260408_123255
+### Uncommitted Changes
+production/session-state/active.md
+---
+
+## Session End: 20260408_123403
+### Uncommitted Changes
+production/session-logs/session-log.md
+production/session-state/active.md
+---
+
+## Session End: 20260408_123659
+### Uncommitted Changes
+production/session-logs/session-log.md
+production/session-state/active.md
+---
+
+## Session End: 20260408_123758
+### Uncommitted Changes
+production/session-logs/session-log.md
+production/session-state/active.md
+---
+
+## Session End: 20260408_123914
+### Uncommitted Changes
+production/session-logs/session-log.md
+production/session-state/active.md
+---
+
+## Session End: 20260408_124654
+### Uncommitted Changes
+production/session-logs/session-log.md
+production/session-state/active.md
+---
+
+## Session End: 20260409_124906
+### Uncommitted Changes
+production/session-logs/session-log.md
+production/session-state/active.md
+---
+
+## Session End: 20260409_130309
+### Uncommitted Changes
+production/session-logs/session-log.md
+production/session-state/active.md
+---
+
+## Session End: 20260409_130616
+### Uncommitted Changes
+production/session-logs/session-log.md
+production/session-state/active.md
+---
+
+## Session End: 20260409_131839
+### Uncommitted Changes
+production/session-logs/session-log.md
+production/session-state/active.md
+---
+
+## Session End: 20260409_132938
+### Uncommitted Changes
+android/app/src/main/res/raw/keep.xml
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260409_133341
+### Uncommitted Changes
+android/app/src/main/res/raw/keep.xml
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260409_151308
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260409_151840
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260409_151916
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260409_151939
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260409_152109
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260409_152353
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260409_152622
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260409_152824
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260409_211355
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_222816
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_222907
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_222930
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_223048
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_223120
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_223315
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_223345
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_223627
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_223826
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_223910
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_223932
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_223959
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_224057
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_224130
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_224138
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_224314
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_224458
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_224658
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_224824
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_230449
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_230527
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_230600
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_230637
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_231405
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_231750
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_231854
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_232448
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_233020
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_233203
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_233256
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_233628
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_234730
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_234847
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_235023
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_235056
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_235152
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_235221
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_235309
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_235342
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_235423
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_235516
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_235552
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_235629
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_235741
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260410_235949
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_000226
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_000257
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_000321
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_000444
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_000543
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_000736
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_000854
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_000913
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_001000
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_001558
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_004337
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_105057
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_105320
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_105450
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_105542
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_105613
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_105734
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_105801
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_105952
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_110036
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_110135
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_110221
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_110319
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_110518
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_110649
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_110741
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_110821
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_110856
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_110929
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_111214
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_111252
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_111423
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_111647
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_113326
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_113417
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_113958
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_114047
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_114109
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_114145
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_114213
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_114304
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_114400
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_114443
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_114524
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_114616
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_115038
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_115307
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_115902
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_115945
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_120032
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_120121
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_120243
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_120433
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_120515
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_121003
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_121043
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_121110
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_121150
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_121229
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_121255
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_121333
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_122502
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_123203
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_123825
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_123855
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_123952
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_124025
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_124108
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_124203
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_124329
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_124358
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_124448
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_124538
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_124658
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_124836
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_124943
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_125155
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_130210
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_131009
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_133057
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_134534
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_141143
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_141512
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_141716
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_142328
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_143843
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/authService.ts
+src/services/cloudSave.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_143900
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/authService.ts
+src/services/cloudSave.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_144236
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/authService.ts
+src/services/cloudSave.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_152440
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/components/panels/AllianceWarPanel.tsx
+src/screens/ShopScreen.tsx
+src/services/allianceService.ts
+src/services/authService.ts
+src/services/cloudSave.ts
+src/state/DesertGameContext.tsx
+src/state/useAllianceState.ts
+---
+
+## Session End: 20260411_154235
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/components/panels/AllianceWarPanel.tsx
+src/screens/LeaderboardScreen.tsx
+src/screens/ShopScreen.tsx
+src/services/allianceService.ts
+src/services/authService.ts
+src/services/cloudSave.ts
+src/services/pvpService.ts
+src/state/DesertGameContext.tsx
+src/state/useAllianceState.ts
+---
+
+## Session End: 20260411_160310
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/components/panels/AllianceWarPanel.tsx
+src/screens/LeaderboardScreen.tsx
+src/screens/ShopScreen.tsx
+src/services/allianceService.ts
+src/services/authService.ts
+src/services/cloudSave.ts
+src/services/pushNotifications.ts
+src/services/pvpService.ts
+src/state/DesertGameContext.tsx
+src/state/useAllianceState.ts
+---
+
+## Session End: 20260411_162217
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/components/panels/AllianceWarPanel.tsx
+src/screens/LeaderboardScreen.tsx
+src/screens/ShopScreen.tsx
+src/services/allianceService.ts
+src/services/authService.ts
+src/services/cloudSave.ts
+src/services/pushNotifications.ts
+src/services/pvpService.ts
+src/state/DesertGameContext.tsx
+src/state/useAllianceState.ts
+---
+
+## Session End: 20260411_162322
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/components/panels/AllianceWarPanel.tsx
+src/screens/LeaderboardScreen.tsx
+src/screens/ShopScreen.tsx
+src/services/allianceService.ts
+src/services/authService.ts
+src/services/cloudSave.ts
+src/services/pushNotifications.ts
+src/services/pvpService.ts
+src/state/DesertGameContext.tsx
+src/state/useAllianceState.ts
+---
+
+## Session End: 20260411_163937
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/components/panels/AllianceWarPanel.tsx
+src/screens/LeaderboardScreen.tsx
+src/screens/ShopScreen.tsx
+src/services/allianceService.ts
+src/services/authService.ts
+src/services/cloudSave.ts
+src/services/pushNotifications.ts
+src/services/pvpService.ts
+src/state/DesertGameContext.tsx
+src/state/useAllianceState.ts
+src/state/useCombat.ts
+---
+
+## Session End: 20260411_164548
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/components/panels/AllianceWarPanel.tsx
+src/screens/LeaderboardScreen.tsx
+src/screens/ShopScreen.tsx
+src/services/allianceService.ts
+src/services/authService.ts
+src/services/cloudSave.ts
+src/services/pushNotifications.ts
+src/services/pvpService.ts
+src/state/DesertGameContext.tsx
+src/state/useAllianceState.ts
+src/state/useCombat.ts
+---
+
+## Session End: 20260411_165219
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_165758
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_171343
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/cloudSave.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_171519
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/cloudSave.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_173131
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/cloudSave.ts
+src/state/DesertGameContext.tsx
+src/state/useAllianceState.ts
+---
+
+## Session End: 20260411_173701
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/cloudSave.ts
+src/state/DesertGameContext.tsx
+src/state/useAllianceState.ts
+---
+
+## Session End: 20260411_173737
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/cloudSave.ts
+src/state/DesertGameContext.tsx
+src/state/useAllianceState.ts
+---
+
+## Session End: 20260411_180238
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_180910
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_181059
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_182005
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_182955
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_183835
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_183937
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_190556
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_191242
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+---
+
+## Session End: 20260411_191404
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_191519
+### Uncommitted Changes
+.vscode/settings.json
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_191624
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_194027
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_201244
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+firestore.indexes.json
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/pushNotifications.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_204713
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+firestore.indexes.json
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/pushNotifications.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_204949
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+firestore.indexes.json
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/pushNotifications.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_205628
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+firestore.indexes.json
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/pushNotifications.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_205717
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+firestore.indexes.json
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/pushNotifications.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_205823
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+firestore.indexes.json
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/pushNotifications.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_205847
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+firestore.indexes.json
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/pushNotifications.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_205916
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+firestore.indexes.json
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/pushNotifications.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_210034
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+firestore.indexes.json
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/pushNotifications.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_210154
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+firestore.indexes.json
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/pushNotifications.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_211950
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+firestore.indexes.json
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/pushNotifications.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260411_222836
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+firestore.indexes.json
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/pushNotifications.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260412_005531
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+firestore.indexes.json
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/pushNotifications.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260412_010306
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+firestore.indexes.json
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/cloudSave.ts
+src/services/pushNotifications.ts
+src/state/DesertGameContext.tsx
+---
+
+## Session End: 20260415_221240
+### Uncommitted Changes
+.vscode/settings.json
+App.tsx
+android/app/build.gradle
+android/app/google-services.json
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/com/warnexus/MainApplication.kt
+android/app/src/main/res/raw/keep.xml
+android/gradle.properties
+firestore.indexes.json
+functions/index.js
+index.js
+locales/en.json
+locales/tr.json
+package-lock.json
+package.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+production/session-state/active.md
+src/screens/ShopScreen.tsx
+src/services/pushNotifications.ts
+src/state/DesertGameContext.tsx
+---
+

@@ -1,14 +1,15 @@
 /**
  * ShopScreen — Mağaza ekranı
- * Altın ile kaynak/hızlandırma/kalkan satın alma + altın paketleri
+ * Altın ile kaynak/hızlandırma/kalkan satın alma + altın paketleri (gerçek ödeme)
  */
-import React, { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MilitaryPanel } from '../components/MilitaryPanel';
 import { colors } from '../theme/colors';
 import { formatNumber } from '../utils/formatters';
 import { useDesertGame } from '../state/DesertGameContext';
 import { t } from '../i18n';
+import { initIAP, getProducts, purchaseGold, setupPurchaseListener, GOLD_PRODUCT_IDS, type GoldProductId } from '../services/purchaseService';
 
 // ─── Mağaza Verileri ─────────────────────────────────────────
 
@@ -38,13 +39,13 @@ const VIP_PACKS = [
   { id: 'vip_emperor', i18nLabel: 'shop.vipEmperor', i18nDesc: 'shop.vipEmperorDesc', goldCost: 5000, rewards: { cash: 1000000, oil: 1000000, ore: 1000000, power: 50000, shield: 24 * 60 * 60 * 1000 } },
 ];
 
-const GOLD_PACKS = [
-  { id: 'gold_100', i18n: 'shop.gold100', amount: 100, price: '₺9.99', popular: false },
-  { id: 'gold_500', i18n: 'shop.gold500', amount: 500, price: '₺34.99', popular: false },
-  { id: 'gold_2000', i18n: 'shop.gold2000', amount: 2000, price: '₺119.99', popular: true },
-  { id: 'gold_5000', i18n: 'shop.gold5000', amount: 5000, price: '₺269.99', popular: false },
-  { id: 'gold_10000', i18n: 'shop.gold10000', amount: 10000, price: '₺499.99', popular: false },
-  { id: 'gold_25000', i18n: 'shop.gold25000', amount: 25000, price: '₺999.99', popular: false },
+const GOLD_PACKS_DEFAULT = [
+  { id: 'gold_100' as GoldProductId, i18n: 'shop.gold100', amount: 100, fallbackPrice: '₺9.99', popular: false },
+  { id: 'gold_500' as GoldProductId, i18n: 'shop.gold500', amount: 500, fallbackPrice: '₺34.99', popular: false },
+  { id: 'gold_2000' as GoldProductId, i18n: 'shop.gold2000', amount: 2000, fallbackPrice: '₺119.99', popular: true },
+  { id: 'gold_5000' as GoldProductId, i18n: 'shop.gold5000', amount: 5000, fallbackPrice: '₺269.99', popular: false },
+  { id: 'gold_10000' as GoldProductId, i18n: 'shop.gold10000', amount: 10000, fallbackPrice: '₺499.99', popular: false },
+  { id: 'gold_25000' as GoldProductId, i18n: 'shop.gold25000', amount: 25000, fallbackPrice: '₺999.99', popular: false },
 ];
 
 // ─── Bileşen ─────────────────────────────────────────────────
@@ -52,8 +53,63 @@ const GOLD_PACKS = [
 type ShopTab = 'resources' | 'boosts' | 'vip' | 'gold';
 
 export function ShopScreen() {
-  const { gold, canAffordGold, deductGold, addResource, buyShield, buyWarPower } = useDesertGame();
+  const { gold, canAffordGold, deductGold, addResource, buyShield, buyWarPower, uid, addGold } = useDesertGame();
   const [tab, setTab] = useState<ShopTab>('resources');
+  const [iapReady, setIapReady] = useState(false);
+  const [purchasing, setPurchasing] = useState(false);
+  const [storePrices, setStorePrices] = useState<Record<string, string>>({});
+
+  // IAP başlat + ürün fiyatlarını çek
+  useEffect(() => {
+    let cleanup: (() => void) | undefined;
+    (async () => {
+      const ok = await initIAP();
+      setIapReady(ok);
+      if (ok) {
+        const products = await getProducts();
+        const prices: Record<string, string> = {};
+        for (const p of products) {
+          prices[p.productId] = p.localizedPrice;
+        }
+        setStorePrices(prices);
+      }
+    })();
+
+    // Satın alma listener
+    if (uid) {
+      cleanup = setupPurchaseListener(
+        uid,
+        (amount, productId) => {
+          addGold(amount);
+          setPurchasing(false);
+          Alert.alert(t('shop.purchaseSuccessTitle'), t('shop.purchaseSuccessMsg', { amount: String(amount) }));
+        },
+        (error) => {
+          setPurchasing(false);
+          if (error !== 'cancelled') {
+            Alert.alert(t('shop.purchaseErrorTitle'), t('shop.purchaseErrorMsg'));
+          }
+        },
+      );
+    }
+
+    return () => cleanup?.();
+  }, [uid]);
+
+  async function handleBuyGold(pack: typeof GOLD_PACKS_DEFAULT[0]) {
+    if (!iapReady) {
+      Alert.alert(t('shop.storeUnavailableTitle'), t('shop.storeUnavailableMsg'));
+      return;
+    }
+    setPurchasing(true);
+    const result = await purchaseGold(pack.id);
+    if (!result.success) {
+      setPurchasing(false);
+      if (result.error !== 'cancelled') {
+        Alert.alert(t('shop.purchaseErrorTitle'), t('shop.purchaseErrorMsg'));
+      }
+    }
+  }
 
   function buyResource(pack: typeof RESOURCE_PACKS[0]) {
     if (!canAffordGold(pack.goldCost)) {
@@ -98,9 +154,6 @@ export function ShopScreen() {
     Alert.alert(t('shop.vipPurchasedTitle'), t('shop.vipPurchasedMsg', { label: t(pack.i18nLabel) }));
   }
 
-  function buyGold(_pack: typeof GOLD_PACKS[0]) {
-    Alert.alert(t('shop.comingSoonTitle'), t('shop.comingSoonMsg'));
-  }
 
   return (
     <View style={s.root}>
@@ -175,23 +228,38 @@ export function ShopScreen() {
           </MilitaryPanel>
         )}
 
-        {/* Altın Paketleri */}
+        {/* Altın Paketleri — Gerçek Ödeme */}
         {tab === 'gold' && (
           <MilitaryPanel title={t('shop.sectionGold')} accent>
-            {GOLD_PACKS.map(pack => (
-              <Pressable key={pack.id} style={[s.goldCard, pack.popular && s.goldCardPopular]} onPress={() => buyGold(pack)}>
-                {pack.popular && <Text style={s.popularBadge}>{t('shop.popular')}</Text>}
-                <View style={s.goldCardRow}>
-                  <View>
-                    <Text style={s.goldAmount}>🪙 {formatNumber(pack.amount)}</Text>
-                    <Text style={s.goldLabel}>{t(pack.i18n)}</Text>
+            {purchasing && (
+              <View style={s.purchasingOverlay}>
+                <ActivityIndicator color={colors.sand} size="large" />
+                <Text style={s.purchasingText}>{t('shop.processing')}</Text>
+              </View>
+            )}
+            {GOLD_PACKS_DEFAULT.map(pack => {
+              const realPrice = storePrices[pack.id];
+              const displayPrice = realPrice ?? pack.fallbackPrice;
+              return (
+                <Pressable
+                  key={pack.id}
+                  style={[s.goldCard, pack.popular && s.goldCardPopular, purchasing && { opacity: 0.5 }]}
+                  onPress={() => handleBuyGold(pack)}
+                  disabled={purchasing}
+                >
+                  {pack.popular && <Text style={s.popularBadge}>{t('shop.popular')}</Text>}
+                  <View style={s.goldCardRow}>
+                    <View>
+                      <Text style={s.goldAmount}>🪙 {formatNumber(pack.amount)}</Text>
+                      <Text style={s.goldLabel}>{t(pack.i18n)}</Text>
+                    </View>
+                    <View style={s.goldPriceBtn}>
+                      <Text style={s.goldPriceBtnText}>{displayPrice}</Text>
+                    </View>
                   </View>
-                  <View style={s.goldPriceBtn}>
-                    <Text style={s.goldPriceBtnText}>{pack.price}</Text>
-                  </View>
-                </View>
-              </Pressable>
-            ))}
+                </Pressable>
+              );
+            })}
             <Text style={s.goldNote}>{t('shop.goldNote')}</Text>
           </MilitaryPanel>
         )}
@@ -233,4 +301,6 @@ const s = StyleSheet.create({
   goldPriceBtn: { backgroundColor: colors.success, width: 100, height: 40, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   goldPriceBtnText: { color: '#fff', fontSize: 14, fontWeight: '800' },
   goldNote: { color: colors.textMuted, fontSize: 11, textAlign: 'center', marginTop: 12, marginBottom: 8 },
+  purchasingOverlay: { alignItems: 'center', paddingVertical: 20, gap: 10 },
+  purchasingText: { color: colors.sand, fontSize: 14, fontWeight: '700' },
 });

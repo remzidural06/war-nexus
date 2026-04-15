@@ -24,6 +24,7 @@ import { GlobalChatModal } from './src/components/GlobalChatModal';
 import { DirectMessageModal } from './src/components/DirectMessageModal';
 import { useDirectMessages } from './src/state/useDirectMessages';
 import { onAuthStateChanged, hasPlayerProfile } from './src/services/authService';
+import { registerFCMToken } from './src/services/pushNotifications';
 import type { AuthUser } from './src/services/authService';
 import { AdminScreen } from './src/screens/AdminScreen';
 import { colors } from './src/theme/colors';
@@ -159,6 +160,7 @@ export default function App() {
       } else {
         setNeedsUsername(false);
       }
+      if (u) registerFCMToken(u.uid).catch(() => {});
       setInitializing(false);
     });
     const timeout = setTimeout(() => setInitializing(false), 5000);

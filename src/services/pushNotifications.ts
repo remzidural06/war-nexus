@@ -28,14 +28,24 @@ export async function registerFCMToken(uid: string): Promise<void> {
     const token = await messaging().getToken();
     if (!token) return;
 
-    // Firestore'a kaydet
-    await db.players().doc(uid).set({ fcmToken: token }, { merge: true });
+    // Cloud Function üzerinden kaydet (Firestore write takılmasını bypass eder)
+    const CF_BASE = 'https://us-central1-war-nexus-dae64.cloudfunctions.net';
+    fetch(`${CF_BASE}/saveFCMToken`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uid, token }),
+    }).catch(() => {
+      // Fallback: doğrudan Firestore
+      db.players().doc(uid).set({ fcmToken: token }, { merge: true }).catch(() => {});
+    });
 
     // Token yenilendiğinde güncelle
-    messaging().onTokenRefresh(async (newToken: string) => {
-      try {
-        await db.players().doc(uid).set({ fcmToken: newToken }, { merge: true });
-      } catch {}
+    messaging().onTokenRefresh((newToken: string) => {
+      fetch(`${CF_BASE}/saveFCMToken`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid, token: newToken }),
+      }).catch(() => {});
     });
   } catch (err: any) {
     console.warn('[FCM] Registration error:', err?.message);
